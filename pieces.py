@@ -120,3 +120,179 @@ class Knight:
                     possible_moves.append(move)
 
         return possible_moves
+
+class Bishop:
+    def __init__(self, position, color):
+        self._position = position
+        self._type = PieceType.BISHOP
+        self._color = color
+
+    def get_position(self):
+        return self._position
+
+    def get_type(self):
+        return self._type
+
+    def get_color(self):
+        return self._color
+
+    def set_position(self):
+        return self._position
+
+    def get_moves(self, board):
+        possible_moves = []
+
+        directions = [
+            [1, 1], # SE
+            [1, -1], # SW
+            [-1, 1], # NE
+            [-1, -1] # NW
+        ]
+
+        for direction in directions:
+            current_move = [self._position[0], self._position[1]]
+            while in_range(current_move):
+                if current_move != self._position:
+                    if board[current_move[0]][current_move[1]].get_color() == self._color:
+                        break
+                    elif board[current_move[0]][current_move[1]].get_type() == PieceType.EMPTY:
+                        possible_moves.append(current_move)
+                    else:
+                        possible_moves.append(current_move)
+                        break
+
+                current_move = [current_move[0] + direction[0], current_move[1] + direction[1]]
+
+        return possible_moves
+
+class Rook:
+    def __init__(self, position, color):
+        self._position = position
+        self._type = PieceType.ROOK
+        self._color = color
+
+    def get_position(self):
+        return self._position
+
+    def get_type(self):
+        return self._type
+
+    def get_color(self):
+        return self._color
+
+    def set_position(self):
+        return self._position
+
+    def get_moves(self, board):
+        possible_moves = []
+
+        directions = [
+            [-1, 0], # N
+            [1, 0], # S
+            [0, 1], # E
+            [0, -1] # W
+        ]
+
+        for direction in directions:
+            current_move = [self._position[0], self._position[1]]
+            while in_range(current_move):
+                if current_move != self._position:
+                    if board[current_move[0]][current_move[1]].get_color() == self._color:
+                        break
+                    elif board[current_move[0]][current_move[1]].get_type() == PieceType.EMPTY:
+                        possible_moves.append(current_move)
+                    else:
+                        possible_moves.append(current_move)
+                        break
+
+                current_move = [current_move[0] + direction[0], current_move[1] + direction[1]]
+
+        return possible_moves
+
+class Queen:
+    def __init__(self, position, color):
+        self._position = position
+        self._type = PieceType.QUEEN
+        self._color = color
+
+    def get_position(self):
+        return self._position
+
+    def get_type(self):
+        return self._type
+
+    def get_color(self):
+        return self._color
+
+    def set_position(self):
+        return self._position
+
+    def get_moves(self, board):
+        possible_moves = []
+
+        directions = [
+            [-1, 0], # N
+            [1, 0], # S
+            [0, 1], # E
+            [0, -1], # W
+            [1, 1], # SE
+            [1, -1], # SW
+            [-1, 1], # NE
+            [-1, -1] # NW
+        ]
+
+        for direction in directions:
+            current_move = [self._position[0], self._position[1]]
+            while in_range(current_move):
+                if current_move != self._position:
+                    if board[current_move[0]][current_move[1]].get_color() == self._color:
+                        break
+                    elif board[current_move[0]][current_move[1]].get_type() == PieceType.EMPTY:
+                        possible_moves.append(current_move)
+                    else:
+                        possible_moves.append(current_move)
+                        break
+
+                current_move = [current_move[0] + direction[0], current_move[1] + direction[1]]
+
+        return possible_moves
+
+class King:
+    def __init__(self, position, color):
+        self._position = position
+        self._type = PieceType.KING
+        self._color = color
+
+    def get_position(self):
+        return self._position
+
+    def get_type(self):
+        return self._type
+
+    def get_color(self):
+        return self._color
+
+    def set_position(self):
+        return self._position
+
+    def get_moves(self, board):
+        possible_moves = []
+
+        directions = [
+            [-1, 0],  # N
+            [1, 0],  # S
+            [0, 1],  # E
+            [0, -1],  # W
+            [1, 1],  # SE
+            [1, -1],  # SW
+            [-1, 1],  # NE
+            [-1, -1]  # NW
+        ]
+
+        for direction in directions:
+            current_move = [self._position[0] + direction[0], self._position[1] + direction[1]]
+            if current_move != self._position:
+                if board[current_move[0]][current_move[1]].get_color() != self._color:
+                    possible_moves.append(current_move)
+
+        return possible_moves
