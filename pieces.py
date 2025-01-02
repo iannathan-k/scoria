@@ -1,5 +1,11 @@
 from enum import Enum
 
+def in_range(position):
+    if 0 <= position[0] <= 7 and 0 <= position[1] <= 7:
+        return True
+    else:
+        return False
+
 class PieceType(Enum):
     EMPTY = 0
     PAWN = 1
@@ -56,23 +62,23 @@ class Pawn:
             [self._position[0] + self._direction, self._position[1] - 1] # capture left
         ]
 
-        if board[moves[0][0]][moves[0][1]].get_type() == PieceType.EMPTY:
-            possible_moves.append(moves[0])
+        if in_range(moves[0]):
+            if board[moves[0][0]][moves[0][1]].get_type() == PieceType.EMPTY:
+                possible_moves.append(moves[0])
 
-        if board[moves[1][0]][moves[1][1]].get_type() == PieceType.EMPTY:
-            if possible_moves:
-                possible_moves.append(moves[1])
+        if in_range(moves[1]):
+            if board[moves[1][0]][moves[1][1]].get_type() == PieceType.EMPTY:
+                if possible_moves and (self._position[0] == 6 or self._position[0] == 1):
+                    possible_moves.append(moves[1])
 
-        if board[moves[2][0]][moves[2][1]].get_type() != PieceType.EMPTY:
-            if board[moves[2][0]][moves[2][1]].get_color() != self._color:
-                possible_moves.append(moves[2])
+        if in_range(moves[2]):
+            if board[moves[2][0]][moves[2][1]].get_type() != PieceType.EMPTY:
+                if board[moves[2][0]][moves[2][1]].get_color() != self._color:
+                    possible_moves.append(moves[2])
 
-        if board[moves[3][0]][moves[3][1]].get_type() != PieceType.EMPTY:
-            if board[moves[3][0]][moves[3][1]].get_color() != self._color:
-                possible_moves.append(moves[3])
-
-        for i in range(len(possible_moves)):
-            if 0 > possible_moves[i][0] > 7 or 0 > possible_moves[i][1] > 7:
-                possible_moves.pop(i)
+        if in_range(moves[3]):
+            if board[moves[3][0]][moves[3][1]].get_type() != PieceType.EMPTY:
+                if board[moves[3][0]][moves[3][1]].get_color() != self._color:
+                    possible_moves.append(moves[3])
 
         return possible_moves
