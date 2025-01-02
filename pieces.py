@@ -82,3 +82,41 @@ class Pawn:
                     possible_moves.append(moves[3])
 
         return possible_moves
+
+class Knight:
+    def __init__(self, position, color):
+        self._position = position
+        self._type = PieceType.KNIGHT
+        self._color = color
+
+    def get_position(self):
+        return self._position
+
+    def get_type(self):
+        return self._type
+
+    def get_color(self):
+        return self._color
+
+    def set_position(self):
+        return self._position
+
+    def get_moves(self, board):
+        possible_moves = []
+        moves = [
+            [self._position[0] + 2, self._position[1] + 1],
+            [self._position[0] + 2, self._position[1] - 1],
+            [self._position[0] - 2, self._position[1] + 1],
+            [self._position[0] - 2, self._position[1] - 1],
+            [self._position[0] + 1, self._position[1] - 2],
+            [self._position[0] - 1, self._position[1] - 2],
+            [self._position[0] + 1, self._position[1] + 2],
+            [self._position[0] - 1, self._position[1] + 2],
+        ]
+
+        for move in moves:
+            if in_range(move):
+                if board[move[0]][move[1]].get_color() != self._color:
+                    possible_moves.append(move)
+
+        return possible_moves

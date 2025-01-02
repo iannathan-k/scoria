@@ -24,5 +24,3 @@ def print_board(game_board):
             game_line += " | "
         print(game_line)
         print("+---+---+---+---+---+---+---+---+")
-
-print_board(board)
