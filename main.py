@@ -1,4 +1,7 @@
 from pieces import *
+from evaluation import *
+from scoria import *
+from math import inf
 
 board = [[Empty() for i in range(8)] for j in range(8)]
 
@@ -65,16 +68,42 @@ def move_piece(origin_pos, target_pos):
     board[origin_pos[0]][origin_pos[1]] = Empty()
     board[target_pos[0]][target_pos[1]].set_position(target_pos)
 
-fen = input()
-set_up(fen)
-print_board(board)
 
-while True:
-    o1 = int(input())
-    o2 = int(input())
-    origin = [o1, o2]
-    t1 = int(input())
-    t2 = int(input())
-    target = [t1, t2]
-    move_piece(origin, target)
+
+def __main__():
+    depth = int(input("Recursion Depth?: "))
+    turn = True
+
+    fen = input("fen?: ")
+    set_up(fen)
     print_board(board)
+
+    while True:
+        if not turn:
+            origin1 = int(input("Player piece row: "))
+            origin2 = int(input("Player piece column: "))
+            target1 = int(input("Player move row: "))
+            target2 = int(input("Player move column: "))
+            move_piece([origin1, origin2], [target1, target2])
+            print_board(board)
+            turn = not turn
+
+        else:
+            coulee_move = minimax(board, depth, -inf, inf, turn)
+            move_piece(coulee_move[1][0], coulee_move[1][1])
+            print("Evaluation,", coulee_move[0])
+            print_board(board)
+            turn = not turn
+
+        if determine_winner(board, turn) == PieceColor.WHITE:
+            print("WHITE WON")
+            break
+        if determine_winner(board, turn) == PieceColor.BLACK:
+            print("BLACK WON")
+            break
+        if determine_winner(board, turn) == PieceType.EMPTY:
+            print("STALEMATE")
+            break
+
+if __name__ == __main__():
+    __main__()

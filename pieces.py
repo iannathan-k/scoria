@@ -7,6 +7,23 @@ def in_range(position):
     else:
         return False
 
+def king_in_check(board, color):
+    king_pos = []
+    opponent_moves = []
+    for row in board:
+        for square in row:
+            if square.get_type() == PieceType.EMPTY:
+                continue
+            if square.get_type() == PieceType.KING and square.get_color() == color:
+                king_pos = square.get_position()
+            if square.get_color() != color:
+                opponent_moves += square.get_moves(board, True)
+
+    if king_pos in opponent_moves:
+        return True
+    else:
+        return False
+
 def king_check(board, origin_pos, target_pos, color):
     new_board = deepcopy(board)
     piece = new_board[origin_pos[0]][origin_pos[1]]
@@ -14,21 +31,7 @@ def king_check(board, origin_pos, target_pos, color):
     new_board[origin_pos[0]][origin_pos[1]] = Empty()
     piece.set_position(target_pos)
 
-    king_pos = []
-    opponent_moves = []
-    for row in new_board:
-        for square in row:
-            if square.get_type() == PieceType.EMPTY:
-                continue
-            if square.get_type() == PieceType.KING and square.get_color() == color:
-                king_pos = square.get_position()
-            if square.get_color() != color:
-                opponent_moves += square.get_moves(new_board, True)
-
-    if king_pos in opponent_moves:
-        return True
-    else:
-        return False
+    return king_in_check(new_board, color)
 
 class PieceType(Enum):
     EMPTY = 0
@@ -61,6 +64,7 @@ class Pawn:
         self._type = PieceType.PAWN
         self._color = color
         self._direction = direction # +1 downward, -1 upward
+        self._points = 1
 
     def get_position(self):
         return self._position
@@ -73,6 +77,9 @@ class Pawn:
 
     def get_direction(self):
         return self._direction
+
+    def get_points(self):
+        return self._points
 
     def set_position(self, position):
         self._position = position
@@ -112,6 +119,7 @@ class Knight:
         self._position = position
         self._type = PieceType.KNIGHT
         self._color = color
+        self._points = 3
 
     def get_position(self):
         return self._position
@@ -121,6 +129,9 @@ class Knight:
 
     def get_color(self):
         return self._color
+
+    def get_points(self):
+        return self._points
 
     def set_position(self, position):
         self._position = position
@@ -139,7 +150,7 @@ class Knight:
         ]
 
         for move in moves:
-            if in_range(move) and (recursive or not king_check(board, self._position, moves[0], self._color)):
+            if in_range(move) and (recursive or not king_check(board, self._position, move, self._color)):
                 if board[move[0]][move[1]].get_color() != self._color:
                     possible_moves.append(move)
 
@@ -150,6 +161,7 @@ class Bishop:
         self._position = position
         self._type = PieceType.BISHOP
         self._color = color
+        self._points = 3
 
     def get_position(self):
         return self._position
@@ -159,6 +171,9 @@ class Bishop:
 
     def get_color(self):
         return self._color
+
+    def get_points(self):
+        return self._points
 
     def set_position(self, position):
         self._position = position
@@ -195,6 +210,7 @@ class Rook:
         self._position = position
         self._type = PieceType.ROOK
         self._color = color
+        self._points = 5
 
     def get_position(self):
         return self._position
@@ -204,6 +220,9 @@ class Rook:
 
     def get_color(self):
         return self._color
+
+    def get_points(self):
+        return self._points
 
     def set_position(self, position):
         self._position = position
@@ -240,6 +259,7 @@ class Queen:
         self._position = position
         self._type = PieceType.QUEEN
         self._color = color
+        self._points = 9
 
     def get_position(self):
         return self._position
@@ -249,6 +269,9 @@ class Queen:
 
     def get_color(self):
         return self._color
+
+    def get_points(self):
+        return self._points
 
     def set_position(self, position):
         self._position = position
@@ -289,6 +312,7 @@ class King:
         self._position = position
         self._type = PieceType.KING
         self._color = color
+        self._points = 10
 
     def get_position(self):
         return self._position
@@ -298,6 +322,9 @@ class King:
 
     def get_color(self):
         return self._color
+
+    def get_points(self):
+        return self._points
 
     def set_position(self, position):
         self._position = position
