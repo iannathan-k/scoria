@@ -135,6 +135,13 @@ def king_in_check(board, color):
                     if board[move[0]][move[1]].get_color() == PieceColor.BLACK:
                         return True
 
+    # King Capture
+    for direction in directionsB + directionsR:
+        current_move = [king_pos[0] + direction[0], king_pos[1] + direction[1]]
+        if in_range(current_move):
+            if board[current_move[0]][current_move[1]].get_type() == PieceType.KING:
+                return True
+
     return False
 
 

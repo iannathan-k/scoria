@@ -6,14 +6,24 @@ from math import inf
 board = [[Empty() for i in range(8)] for j in range(8)]
 
 def print_board(game_board):
-    piece_chars = {
-        PieceType.PAWN : "P",
-        PieceType.KNIGHT : "N",
-        PieceType.BISHOP : "B",
-        PieceType.ROOK : "R",
-        PieceType.QUEEN : "Q",
-        PieceType.KING : "K",
+    piece_chars_white = {
+        PieceType.PAWN : "♟",
+        PieceType.KNIGHT : "♞",
+        PieceType.BISHOP : "♝",
+        PieceType.ROOK : "♜",
+        PieceType.QUEEN : "♛",
+        PieceType.KING : "♚",
         PieceType.EMPTY : " "
+    }
+
+    piece_chars_black = {
+        PieceType.PAWN: "♙",
+        PieceType.KNIGHT: "♘",
+        PieceType.BISHOP: "♗",
+        PieceType.ROOK: "♖",
+        PieceType.QUEEN: "♕",
+        PieceType.KING: "♔",
+        PieceType.EMPTY: " "
     }
 
     print("+---+---+---+---+---+---+---+---+")
@@ -21,9 +31,9 @@ def print_board(game_board):
         game_line = "| "
         for piece in line:
             if piece.get_color() == PieceColor.BLACK:
-                game_line += piece_chars[piece.get_type()].lower()
+                game_line += piece_chars_black[piece.get_type()]
             else:
-                game_line += piece_chars[piece.get_type()]
+                game_line += piece_chars_white[piece.get_type()]
             game_line += " | "
         print(game_line)
         print("+---+---+---+---+---+---+---+---+")
@@ -78,25 +88,25 @@ def __main__():
 
     while True:
         if not turn:
-            origin1 = int(input("Player piece row: "))
-            origin2 = int(input("Player piece column: "))
-            target1 = int(input("Player move row: "))
-            target2 = int(input("Player move column: "))
-            move_piece([origin1, origin2], [target1, target2])
-
-            if [origin1, origin2] == get_king_pos(board, turn):
-                set_king_pos([target1, target2], turn)
-
-            print_board(board)
-            turn = not turn
-
-            # coulee_move = minimax(board, depth, -inf, inf, turn)
-            # move_piece(coulee_move[1][0], coulee_move[1][1])
+            # origin1 = int(input("Player piece row: "))
+            # origin2 = int(input("Player piece column: "))
+            # target1 = int(input("Player move row: "))
+            # target2 = int(input("Player move column: "))
+            # move_piece([origin1, origin2], [target1, target2])
+            #
+            # if [origin1, origin2] == get_king_pos(board, turn):
+            #     set_king_pos([target1, target2], turn)
             #
             # print_board(board)
-            # print("Evaluation,", coulee_move[0])
-            # print(get_hit_count())
             # turn = not turn
+
+            coulee_move = minimax(board, depth, -inf, inf, turn)
+            move_piece(coulee_move[1][0], coulee_move[1][1])
+
+            print_board(board)
+            print("Evaluation,", coulee_move[0])
+            print(get_hit_count())
+            turn = not turn
 
         else:
             coulee_move = minimax(board, depth, -inf, inf, turn)
@@ -114,7 +124,6 @@ def __main__():
             break
         if determine_winner(board, turn) == PieceColor.BLACK:
             print("BLACK WON")
-            print(board[6][4].get_moves(board))
             break
         if determine_winner(board, turn) == PieceType.EMPTY:
             print("STALEMATE")

@@ -56,10 +56,10 @@ def evaluate_board(board, turn):
     for i in range(64):
         piece = board[i // 8][i % 8]
         if piece.get_color() == PieceColor.WHITE:
-            white_advantage += piece.get_points()
+            white_advantage += piece.get_points() * 2
             white_advantage += len(piece.get_moves(board))
         elif piece.get_color() == PieceColor.BLACK:
-            black_advantage += piece.get_points()
+            black_advantage += piece.get_points() * 2
             black_advantage += len(piece.get_moves(board))
 
     return white_advantage - black_advantage
