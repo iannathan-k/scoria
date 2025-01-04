@@ -4,29 +4,6 @@ black_king_pos = [0, 4]
 white_king_pos = [7, 4]
 hit_count = 0
 
-def print_board(game_board):
-    piece_chars = {
-        PieceType.PAWN : "P",
-        PieceType.KNIGHT : "N",
-        PieceType.BISHOP : "B",
-        PieceType.ROOK : "R",
-        PieceType.QUEEN : "Q",
-        PieceType.KING : "K",
-        PieceType.EMPTY : " "
-    }
-
-    print("+---+---+---+---+---+---+---+---+")
-    for line in game_board:
-        game_line = "| "
-        for piece in line:
-            if piece.get_color() == PieceColor.BLACK:
-                game_line += piece_chars[piece.get_type()].lower()
-            else:
-                game_line += piece_chars[piece.get_type()]
-            game_line += " | "
-        print(game_line)
-        print("+---+---+---+---+---+---+---+---+")
-
 def get_king_pos(board, side):
 
     for i in range(64):

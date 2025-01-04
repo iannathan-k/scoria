@@ -84,7 +84,7 @@ def __main__():
             target2 = int(input("Player move column: "))
             move_piece([origin1, origin2], [target1, target2])
 
-            if [origin1, origin2] == get_king_pos(turn):
+            if [origin1, origin2] == get_king_pos(board, turn):
                 set_king_pos([target1, target2], turn)
 
             print_board(board)
