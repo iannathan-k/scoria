@@ -66,6 +66,8 @@ def king_in_check(board, color):
                             return True
                         elif board[current_move[0]][current_move[1]].get_type() == PieceType.QUEEN:
                             return True
+                        else:
+                            break
 
             current_move = [current_move[0] + direction[0], current_move[1] + direction[1]]
 
@@ -82,6 +84,8 @@ def king_in_check(board, color):
                             return True
                         elif board[current_move[0]][current_move[1]].get_type() == PieceType.QUEEN:
                             return True
+                        else:
+                            break
 
             current_move = [current_move[0] + direction[0], current_move[1] + direction[1]]
 
@@ -132,13 +136,17 @@ def king_in_check(board, color):
 
 
 def king_check(board, origin_pos, target_pos, color):
-    new_board = deepcopy(board)
-    piece = new_board[origin_pos[0]][origin_pos[1]]
-    new_board[target_pos[0]][target_pos[1]] = piece
-    new_board[origin_pos[0]][origin_pos[1]] = Empty()
-    piece.set_position(target_pos)
+    piece = board[origin_pos[0]][origin_pos[1]]
+    captured_piece = board[target_pos[0]][target_pos[1]]
+    board[target_pos[0]][target_pos[1]] = piece
+    board[origin_pos[0]][origin_pos[1]] = Empty()
 
-    return king_in_check(new_board, color)
+    result = king_in_check(board, color)
+
+    board[origin_pos[0]][origin_pos[1]] = piece
+    board[target_pos[0]][target_pos[1]] = captured_piece
+
+    return result
 
 class PieceType(Enum):
     EMPTY = 0
@@ -191,7 +199,7 @@ class Pawn:
     def set_position(self, position):
         self._position = position
 
-    def get_moves(self, board, recursive = False):
+    def get_moves(self, board):
         possible_moves = []
         moves = [
             [self._position[0] + self._direction, self._position[1]], # advance 1
@@ -200,21 +208,21 @@ class Pawn:
             [self._position[0] + self._direction, self._position[1] - 1] # capture left
         ]
 
-        if in_range(moves[0]) and (recursive or not king_check(board, self._position, moves[0], self._color)):
+        if in_range(moves[0]) and not king_check(board, self._position, moves[0], self._color):
             if board[moves[0][0]][moves[0][1]].get_type() == PieceType.EMPTY:
                 possible_moves.append(moves[0])
 
-        if in_range(moves[1]) and (recursive or not king_check(board, self._position, moves[1], self._color)):
+        if in_range(moves[1]) and not king_check(board, self._position, moves[1], self._color):
             if board[moves[1][0]][moves[1][1]].get_type() == PieceType.EMPTY:
                 if possible_moves and (self._position[0] == 6 or self._position[0] == 1):
                     possible_moves.append(moves[1])
 
-        if in_range(moves[2]) and (recursive or not king_check(board, self._position, moves[2], self._color)):
+        if in_range(moves[2]) and not king_check(board, self._position, moves[2], self._color):
             if board[moves[2][0]][moves[2][1]].get_type() != PieceType.EMPTY:
                 if board[moves[2][0]][moves[2][1]].get_color() != self._color:
                     possible_moves.append(moves[2])
 
-        if in_range(moves[3]) and (recursive or not king_check(board, self._position, moves[3], self._color)):
+        if in_range(moves[3]) and not king_check(board, self._position, moves[3], self._color):
             if board[moves[3][0]][moves[3][1]].get_type() != PieceType.EMPTY:
                 if board[moves[3][0]][moves[3][1]].get_color() != self._color:
                     possible_moves.append(moves[3])
@@ -243,7 +251,7 @@ class Knight:
     def set_position(self, position):
         self._position = position
 
-    def get_moves(self, board, recursive = False):
+    def get_moves(self, board):
         possible_moves = []
         moves = [
             [self._position[0] + 2, self._position[1] + 1],
@@ -257,7 +265,7 @@ class Knight:
         ]
 
         for move in moves:
-            if in_range(move) and (recursive or not king_check(board, self._position, move, self._color)):
+            if in_range(move) and not king_check(board, self._position, move, self._color):
                 if board[move[0]][move[1]].get_color() != self._color:
                     possible_moves.append(move)
 
@@ -285,7 +293,7 @@ class Bishop:
     def set_position(self, position):
         self._position = position
 
-    def get_moves(self, board, recursive = False):
+    def get_moves(self, board):
         possible_moves = []
 
         directions = [
@@ -298,7 +306,7 @@ class Bishop:
         for direction in directions:
             current_move = [self._position[0], self._position[1]]
             while in_range(current_move):
-                if recursive or not king_check(board, self._position, current_move, self._color):
+                if not king_check(board, self._position, current_move, self._color):
                     if current_move != self._position:
                         if board[current_move[0]][current_move[1]].get_color() == self._color:
                             break
@@ -334,7 +342,7 @@ class Rook:
     def set_position(self, position):
         self._position = position
 
-    def get_moves(self, board, recursive = False):
+    def get_moves(self, board):
         possible_moves = []
 
         directions = [
@@ -347,7 +355,7 @@ class Rook:
         for direction in directions:
             current_move = [self._position[0], self._position[1]]
             while in_range(current_move):
-                if recursive or not king_check(board, self._position, current_move, self._color):
+                if not king_check(board, self._position, current_move, self._color):
                     if current_move != self._position:
                         if board[current_move[0]][current_move[1]].get_color() == self._color:
                             break
@@ -383,7 +391,7 @@ class Queen:
     def set_position(self, position):
         self._position = position
 
-    def get_moves(self, board, recursive = False):
+    def get_moves(self, board):
         possible_moves = []
 
         directions = [
@@ -400,7 +408,7 @@ class Queen:
         for direction in directions:
             current_move = [self._position[0], self._position[1]]
             while in_range(current_move):
-                if recursive or not king_check(board, self._position, current_move, self._color):
+                if not king_check(board, self._position, current_move, self._color):
                     if current_move != self._position:
                         if board[current_move[0]][current_move[1]].get_color() == self._color:
                             break
@@ -436,7 +444,7 @@ class King:
     def set_position(self, position):
         self._position = position
 
-    def get_moves(self, board, recursive = False):
+    def get_moves(self, board):
         possible_moves = []
 
         directions = [
@@ -453,7 +461,7 @@ class King:
         for direction in directions:
             current_move = [self._position[0] + direction[0], self._position[1] + direction[1]]
             if in_range(current_move):
-                if recursive or not king_check(board, self._position, current_move, self._color):
+                if not king_check(board, self._position, current_move, self._color):
                     if board[current_move[0]][current_move[1]].get_color() != self._color:
                         possible_moves.append(current_move)
 
