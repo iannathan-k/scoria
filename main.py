@@ -85,15 +85,26 @@ def __main__():
             target1 = int(input("Player move row: "))
             target2 = int(input("Player move column: "))
             move_piece([origin1, origin2], [target1, target2])
+
+            if [origin1, origin2] == get_king_pos(turn):
+                set_king_pos([target1, target2], turn)
+
             print_board(board)
             turn = not turn
 
         else:
             coulee_move = minimax(board, depth, -inf, inf, turn)
             move_piece(coulee_move[1][0], coulee_move[1][1])
-            print("Evaluation,", coulee_move[0])
+
+            if coulee_move[1][0] == get_king_pos(turn):
+                set_king_pos(coulee_move[1][1], turn)
+
             print_board(board)
+            print("Evaluation,", coulee_move[0])
+            print(get_hit_count())
             turn = not turn
+
+        print(get_king_pos(not turn))
 
         if determine_winner(board, turn) == PieceColor.WHITE:
             print("WHITE WON")

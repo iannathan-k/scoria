@@ -1,28 +1,135 @@
 from copy import deepcopy
 from enum import Enum
 
+black_king_pos = [0, 4]
+white_king_pos = [7, 4]
+hit_count = 0
+
+def get_king_pos(side):
+    if side:
+        return white_king_pos
+    else:
+        return black_king_pos
+
+def set_king_pos(new_pos, side):
+    global white_king_pos
+    global black_king_pos
+    if side:
+        white_king_pos = new_pos
+    else:
+        black_king_pos = new_pos
+
+def get_hit_count():
+    global hit_count
+    temp_count = hit_count
+    hit_count = 0
+    return temp_count
+
 def in_range(position):
+    global hit_count
+    hit_count += 1
     if 0 <= position[0] <= 7 and 0 <= position[1] <= 7:
         return True
     else:
         return False
 
 def king_in_check(board, color):
-    king_pos = []
-    opponent_moves = []
-    for row in board:
-        for square in row:
-            if square.get_type() == PieceType.EMPTY:
-                continue
-            if square.get_type() == PieceType.KING and square.get_color() == color:
-                king_pos = square.get_position()
-            if square.get_color() != color:
-                opponent_moves += square.get_moves(board, True)
-
-    if king_pos in opponent_moves:
-        return True
+    if color == PieceColor.WHITE:
+        king_pos = get_king_pos(True)
     else:
-        return False
+        king_pos = get_king_pos(False)
+
+    directionsR = [
+        [-1, 0],  # N
+        [1, 0],  # S
+        [0, 1],  # E
+        [0, -1],  # W
+    ]
+
+    directionsB = [
+        [1, 1],  # SE
+        [1, -1],  # SW
+        [-1, 1],  # NE
+        [-1, -1]  # NW
+    ]
+
+    # Rook Capture
+    for direction in directionsR:
+        current_move = king_pos
+        while in_range(current_move):
+            if current_move != king_pos:
+                if board[current_move[0]][current_move[1]].get_type() != PieceType.EMPTY:
+                    if board[current_move[0]][current_move[1]].get_color() == color:
+                        break
+                    if board[current_move[0]][current_move[1]].get_color() != color:
+                        if board[current_move[0]][current_move[1]].get_type() == PieceType.ROOK:
+                            return True
+                        elif board[current_move[0]][current_move[1]].get_type() == PieceType.QUEEN:
+                            return True
+
+            current_move = [current_move[0] + direction[0], current_move[1] + direction[1]]
+
+    # Bishop Capture
+    for direction in directionsB:
+        current_move = king_pos
+        while in_range(current_move):
+            if current_move != king_pos:
+                if board[current_move[0]][current_move[1]].get_type() != PieceType.EMPTY:
+                    if board[current_move[0]][current_move[1]].get_color() == color:
+                        break
+                    if board[current_move[0]][current_move[1]].get_color() != color:
+                        if board[current_move[0]][current_move[1]].get_type() == PieceType.BISHOP:
+                            return True
+                        elif board[current_move[0]][current_move[1]].get_type() == PieceType.QUEEN:
+                            return True
+
+            current_move = [current_move[0] + direction[0], current_move[1] + direction[1]]
+
+    movesK = [
+        [king_pos[0] + 2, king_pos[1] + 1],
+        [king_pos[0] + 2, king_pos[1] - 1],
+        [king_pos[0] - 2, king_pos[1] + 1],
+        [king_pos[0] - 2, king_pos[1] - 1],
+        [king_pos[0] + 1, king_pos[1] - 2],
+        [king_pos[0] - 1, king_pos[1] - 2],
+        [king_pos[0] + 1, king_pos[1] + 2],
+        [king_pos[0] - 1, king_pos[1] + 2]
+    ]
+
+    # Knight Capture
+    for move in movesK:
+        if in_range(move):
+            if board[move[0]][move[1]].get_color() != color:
+                if board[move[0]][move[1]].get_type() == PieceType.KNIGHT:
+                    return True
+
+    movesPB = [
+        [king_pos[0] - 1, king_pos[1] - 1],
+        [king_pos[0] - 1, king_pos[1] + 1]
+    ]
+
+    movesPW = [
+        [king_pos[0] + 1, king_pos[1] - 1],
+        [king_pos[0] + 1, king_pos[1] + 1]
+    ]
+
+    # Pawn Capture
+    if color == PieceColor.BLACK:
+        for move in movesPB:
+            if in_range(move):
+                if board[move[0]][move[1]].get_type() == PieceType.PAWN:
+                    if board[move[0]][move[1]].get_color() == PieceColor.WHITE:
+                        return True
+
+    if color == PieceColor.WHITE:
+        for move in movesPW:
+            if in_range(move):
+                if board[move[0]][move[1]].get_type() == PieceType.PAWN:
+                    if board[move[0]][move[1]].get_color() == PieceColor.BLACK:
+                        return True
+
+    return False
+
 
 def king_check(board, origin_pos, target_pos, color):
     new_board = deepcopy(board)
