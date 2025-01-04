@@ -68,8 +68,6 @@ def move_piece(origin_pos, target_pos):
     board[origin_pos[0]][origin_pos[1]] = Empty()
     board[target_pos[0]][target_pos[1]].set_position(target_pos)
 
-
-
 def __main__():
     depth = int(input("Recursion Depth?: "))
     turn = True
@@ -92,25 +90,31 @@ def __main__():
             print_board(board)
             turn = not turn
 
+            # coulee_move = minimax(board, depth, -inf, inf, turn)
+            # move_piece(coulee_move[1][0], coulee_move[1][1])
+            #
+            # print_board(board)
+            # print("Evaluation,", coulee_move[0])
+            # print(get_hit_count())
+            # turn = not turn
+
         else:
             coulee_move = minimax(board, depth, -inf, inf, turn)
             move_piece(coulee_move[1][0], coulee_move[1][1])
-
-            if coulee_move[1][0] == get_king_pos(turn):
-                set_king_pos(coulee_move[1][1], turn)
 
             print_board(board)
             print("Evaluation,", coulee_move[0])
             print(get_hit_count())
             turn = not turn
 
-        print(get_king_pos(not turn))
+        print(get_king_pos(board, not turn))
 
         if determine_winner(board, turn) == PieceColor.WHITE:
             print("WHITE WON")
             break
         if determine_winner(board, turn) == PieceColor.BLACK:
             print("BLACK WON")
+            print(board[6][4].get_moves(board))
             break
         if determine_winner(board, turn) == PieceType.EMPTY:
             print("STALEMATE")

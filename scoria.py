@@ -1,3 +1,4 @@
+from copy import deepcopy
 from evaluation import *
 from math import inf
 

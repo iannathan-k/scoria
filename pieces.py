@@ -1,15 +1,40 @@
-from copy import deepcopy
 from enum import Enum
 
 black_king_pos = [0, 4]
 white_king_pos = [7, 4]
 hit_count = 0
 
-def get_king_pos(side):
-    if side:
-        return white_king_pos
-    else:
-        return black_king_pos
+def print_board(game_board):
+    piece_chars = {
+        PieceType.PAWN : "P",
+        PieceType.KNIGHT : "N",
+        PieceType.BISHOP : "B",
+        PieceType.ROOK : "R",
+        PieceType.QUEEN : "Q",
+        PieceType.KING : "K",
+        PieceType.EMPTY : " "
+    }
+
+    print("+---+---+---+---+---+---+---+---+")
+    for line in game_board:
+        game_line = "| "
+        for piece in line:
+            if piece.get_color() == PieceColor.BLACK:
+                game_line += piece_chars[piece.get_type()].lower()
+            else:
+                game_line += piece_chars[piece.get_type()]
+            game_line += " | "
+        print(game_line)
+        print("+---+---+---+---+---+---+---+---+")
+
+def get_king_pos(board, side):
+
+    for i in range(64):
+        if board[i // 8][i % 8].get_type() == PieceType.KING:
+            if board[i // 8][i % 8].get_color() == PieceColor.BLACK and not side:
+                return [i // 8, i % 8]
+            elif board[i // 8][i % 8].get_color() == PieceColor.WHITE and side:
+                return [i // 8, i % 8]
 
 def set_king_pos(new_pos, side):
     global white_king_pos
@@ -34,10 +59,11 @@ def in_range(position):
         return False
 
 def king_in_check(board, color):
+
     if color == PieceColor.WHITE:
-        king_pos = get_king_pos(True)
+        king_pos = get_king_pos(board, True)
     else:
-        king_pos = get_king_pos(False)
+        king_pos = get_king_pos(board, False)
 
     directionsR = [
         [-1, 0],  # N
@@ -50,7 +76,7 @@ def king_in_check(board, color):
         [1, 1],  # SE
         [1, -1],  # SW
         [-1, 1],  # NE
-        [-1, -1]  # NW
+        [-1, -1]  # NWv
     ]
 
     # Rook Capture
@@ -108,13 +134,13 @@ def king_in_check(board, color):
                     return True
 
     movesPB = [
-        [king_pos[0] - 1, king_pos[1] - 1],
-        [king_pos[0] - 1, king_pos[1] + 1]
+        [king_pos[0] + 1, king_pos[1] - 1],
+        [king_pos[0] + 1, king_pos[1] + 1]
     ]
 
     movesPW = [
-        [king_pos[0] + 1, king_pos[1] - 1],
-        [king_pos[0] + 1, king_pos[1] + 1]
+        [king_pos[0] - 1, king_pos[1] - 1],
+        [king_pos[0] - 1, king_pos[1] + 1]
     ]
 
     # Pawn Capture
@@ -136,12 +162,14 @@ def king_in_check(board, color):
 
 
 def king_check(board, origin_pos, target_pos, color):
+
     piece = board[origin_pos[0]][origin_pos[1]]
     captured_piece = board[target_pos[0]][target_pos[1]]
     board[target_pos[0]][target_pos[1]] = piece
     board[origin_pos[0]][origin_pos[1]] = Empty()
 
     result = king_in_check(board, color)
+
 
     board[origin_pos[0]][origin_pos[1]] = piece
     board[target_pos[0]][target_pos[1]] = captured_piece
@@ -208,24 +236,28 @@ class Pawn:
             [self._position[0] + self._direction, self._position[1] - 1] # capture left
         ]
 
-        if in_range(moves[0]) and not king_check(board, self._position, moves[0], self._color):
+        if in_range(moves[0]):
             if board[moves[0][0]][moves[0][1]].get_type() == PieceType.EMPTY:
-                possible_moves.append(moves[0])
+                if not king_check(board, self._position, moves[0], self._color):
+                    possible_moves.append(moves[0])
 
-        if in_range(moves[1]) and not king_check(board, self._position, moves[1], self._color):
+        if in_range(moves[1]):
             if board[moves[1][0]][moves[1][1]].get_type() == PieceType.EMPTY:
                 if possible_moves and (self._position[0] == 6 or self._position[0] == 1):
-                    possible_moves.append(moves[1])
+                    if not king_check(board, self._position, moves[1], self._color):
+                        possible_moves.append(moves[1])
 
-        if in_range(moves[2]) and not king_check(board, self._position, moves[2], self._color):
+        if in_range(moves[2]):
             if board[moves[2][0]][moves[2][1]].get_type() != PieceType.EMPTY:
                 if board[moves[2][0]][moves[2][1]].get_color() != self._color:
-                    possible_moves.append(moves[2])
+                    if not king_check(board, self._position, moves[2], self._color):
+                        possible_moves.append(moves[2])
 
-        if in_range(moves[3]) and not king_check(board, self._position, moves[3], self._color):
+        if in_range(moves[3]):
             if board[moves[3][0]][moves[3][1]].get_type() != PieceType.EMPTY:
                 if board[moves[3][0]][moves[3][1]].get_color() != self._color:
-                    possible_moves.append(moves[3])
+                    if not king_check(board, self._position, moves[3], self._color):
+                        possible_moves.append(moves[3])
 
         return possible_moves
 
@@ -265,9 +297,10 @@ class Knight:
         ]
 
         for move in moves:
-            if in_range(move) and not king_check(board, self._position, move, self._color):
+            if in_range(move):
                 if board[move[0]][move[1]].get_color() != self._color:
-                    possible_moves.append(move)
+                    if not king_check(board, self._position, move, self._color):
+                        possible_moves.append(move)
 
         return possible_moves
 
@@ -304,17 +337,16 @@ class Bishop:
         ]
 
         for direction in directions:
-            current_move = [self._position[0], self._position[1]]
+            current_move = [self._position[0] + direction[0], self._position[1] + direction[1]]
             while in_range(current_move):
-                if not king_check(board, self._position, current_move, self._color):
-                    if current_move != self._position:
-                        if board[current_move[0]][current_move[1]].get_color() == self._color:
-                            break
-                        elif board[current_move[0]][current_move[1]].get_type() == PieceType.EMPTY:
-                            possible_moves.append(current_move)
-                        else:
-                            possible_moves.append(current_move)
-                            break
+                if board[current_move[0]][current_move[1]].get_color() == self._color:
+                    break
+                elif board[current_move[0]][current_move[1]].get_type() == PieceType.EMPTY:
+                    if not king_check(board, self._position, current_move, self._color):
+                        possible_moves.append(current_move)
+                elif not king_check(board, self._position, current_move, self._color):
+                    possible_moves.append(current_move)
+                    break
 
                 current_move = [current_move[0] + direction[0], current_move[1] + direction[1]]
 
@@ -353,17 +385,16 @@ class Rook:
         ]
 
         for direction in directions:
-            current_move = [self._position[0], self._position[1]]
+            current_move = [self._position[0] + direction[0], self._position[1] + direction[1]]
             while in_range(current_move):
-                if not king_check(board, self._position, current_move, self._color):
-                    if current_move != self._position:
-                        if board[current_move[0]][current_move[1]].get_color() == self._color:
-                            break
-                        elif board[current_move[0]][current_move[1]].get_type() == PieceType.EMPTY:
-                            possible_moves.append(current_move)
-                        else:
-                            possible_moves.append(current_move)
-                            break
+                if board[current_move[0]][current_move[1]].get_color() == self._color:
+                    break
+                elif board[current_move[0]][current_move[1]].get_type() == PieceType.EMPTY:
+                    if not king_check(board, self._position, current_move, self._color):
+                        possible_moves.append(current_move)
+                elif not king_check(board, self._position, current_move, self._color):
+                    possible_moves.append(current_move)
+                    break
 
                 current_move = [current_move[0] + direction[0], current_move[1] + direction[1]]
 
@@ -406,17 +437,17 @@ class Queen:
         ]
 
         for direction in directions:
-            current_move = [self._position[0], self._position[1]]
+            current_move = [self._position[0] + direction[0], self._position[1] + direction[1]]
             while in_range(current_move):
-                if not king_check(board, self._position, current_move, self._color):
-                    if current_move != self._position:
-                        if board[current_move[0]][current_move[1]].get_color() == self._color:
-                            break
-                        elif board[current_move[0]][current_move[1]].get_type() == PieceType.EMPTY:
+                if current_move != self._position:
+                    if board[current_move[0]][current_move[1]].get_color() == self._color:
+                        break
+                    elif board[current_move[0]][current_move[1]].get_type() == PieceType.EMPTY:
+                        if not king_check(board, self._position, current_move, self._color):
                             possible_moves.append(current_move)
-                        else:
-                            possible_moves.append(current_move)
-                            break
+                    elif not king_check(board, self._position, current_move, self._color):
+                        possible_moves.append(current_move)
+                        break
 
                 current_move = [current_move[0] + direction[0], current_move[1] + direction[1]]
 
@@ -461,8 +492,9 @@ class King:
         for direction in directions:
             current_move = [self._position[0] + direction[0], self._position[1] + direction[1]]
             if in_range(current_move):
-                if not king_check(board, self._position, current_move, self._color):
-                    if board[current_move[0]][current_move[1]].get_color() != self._color:
+                if board[current_move[0]][current_move[1]].get_color() != self._color:
+                    if not king_check(board, self._position, current_move, self._color):
                         possible_moves.append(current_move)
+
 
         return possible_moves
