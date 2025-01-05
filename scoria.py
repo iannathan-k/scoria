@@ -1,34 +1,37 @@
-from copy import deepcopy
 from evaluation import *
 from math import inf
 
 def move_state(board, origin_pos, target_pos):
-    new_board = deepcopy(board)
-    piece = new_board[origin_pos[0]][origin_pos[1]]
-    new_board[target_pos[0]][target_pos[1]] = piece
-    new_board[origin_pos[0]][origin_pos[1]] = Empty()
-    piece.set_position(target_pos)
+    piece = board[origin_pos[0]][origin_pos[1]]
+    captured_piece = board[target_pos[0]][target_pos[1]]
+    board[target_pos[0]][target_pos[1]] = piece
+    board[origin_pos[0]][origin_pos[1]] = Empty()
+
+    if origin_pos == target_pos:
+        print("OOPS")
+        print("OLD: ", str(origin_pos))
+        print("NEW: ", str(target_pos))
+
+    new_board = [row[:] for row in board]
+    # print("OLD: ", str(get_king_pos(board, False)))
+    # print("NEW: ", str(get_king_pos(new_board, False)))
+    # print(new_board)
+
+    board[origin_pos[0]][origin_pos[1]] = piece
+    board[target_pos[0]][target_pos[1]] = captured_piece
+
     return new_board
-
-def get_possible_moves(board, side):
-    # side = True --> White
-    # side = False --> Black
-    possible_moves = []
-    if side:
-        color = PieceColor.WHITE
-    else:
-        color = PieceColor.BLACK
-
-    for i in range(64):
-        piece = board[i // 8][i % 8]
-        if piece.get_color() == color:
-            for move in piece.get_moves(board):
-                possible_moves.append([piece.get_position(), move])
-
-    return possible_moves
 
 def minimax(board, depth, alpha, beta, turn):
     if depth == 0 or determine_winner(board, turn) != PieceColor.NULL:
+        # evaluation = evaluate_board(board, turn)
+        # if turn and evaluation < 20:
+        #     return [evaluate_board(board, turn), []]
+        # elif not turn and evaluation > -20:
+        #     return [evaluate_board(board, turn), []]
+        # else:
+        #     depth += 1
+
         return [evaluate_board(board, turn), []]
 
     if turn:

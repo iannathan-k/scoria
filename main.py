@@ -94,27 +94,31 @@ def __main__():
             # target2 = int(input("Player move column: "))
             # move_piece([origin1, origin2], [target1, target2])
             #
-            # if [origin1, origin2] == get_king_pos(board, turn):
-            #     set_king_pos([target1, target2], turn)
-            #
             # print_board(board)
             # turn = not turn
-
+            #
             coulee_move = minimax(board, depth, -inf, inf, turn)
             move_piece(coulee_move[1][0], coulee_move[1][1])
 
+            print("~~~~~BLACK TO MOVE~~~~~")
             print_board(board)
+
             print("Evaluation,", coulee_move[0])
             print(get_hit_count())
+            print("Hit count: ", str(get_hit_count()))
+            print("Branches Searched: ", str(get_search_count()))
             turn = not turn
 
         else:
             coulee_move = minimax(board, depth, -inf, inf, turn)
             move_piece(coulee_move[1][0], coulee_move[1][1])
 
+            print("~~~~~WHITE TO MOVE~~~~~")
             print_board(board)
+
             print("Evaluation,", coulee_move[0])
-            print(get_hit_count())
+            print("Hit count: ", str(get_hit_count()))
+            print("Branches Searched: ", str(get_search_count()))
             turn = not turn
 
         print(get_king_pos(board, not turn))

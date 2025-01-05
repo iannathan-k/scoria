@@ -1,43 +1,57 @@
 from pieces import *
 
-def determine_winner(board, turn):
-    # turn = True --> White
-    # turn = False --> Black
+white_length = 0
+black_length = 0
 
-    # Black Win - PieceColor.BLACK
-    # White Win - PieceColor.WHITE
-    # Stalemate - PieceType.EMPTY
-    # No Winner - PieceColor.NULL
-    white_move = False
-    white_check = False
-    black_move = False
-    black_check = False
+def set_possible_length(new, side):
+    global white_length
+    global black_length
+    if side:
+        white_length = new
+    else:
+        black_length = new
 
-    if king_in_check(board, PieceColor.WHITE):
-        white_check = True
-    if king_in_check(board, PieceColor.BLACK):
-        black_check = True
+def get_possible_length(side):
+    if side:
+        return white_length
+    else:
+        return black_length
+
+def get_possible_moves(board, side):
+    # side = True --> White
+    # side = False --> Black
+    possible_moves = []
+    if side:
+        color = PieceColor.WHITE
+    else:
+        color = PieceColor.BLACK
 
     for i in range(64):
         piece = board[i // 8][i % 8]
+        if piece.get_color() == color:
+            for move in piece.get_moves(board):
+                possible_moves.append([piece.get_position(), move])
 
-        if piece.get_color() == PieceColor.WHITE:
-            if piece.get_moves(board):
-                white_move = True
+    return possible_moves
 
-        elif piece.get_color() == PieceColor.BLACK:
-            if piece.get_moves(board):
-                black_move = True
+def determine_winner(board, turn):
+    king_pos = get_king_pos(board, turn)
 
-    if white_move == False and turn and white_check:
-        return PieceColor.BLACK
-    elif black_move == False and not turn and black_check:
-        return PieceColor.WHITE
+    if not board[king_pos[0]][king_pos[1]].get_moves(board):
+        first_length = get_possible_moves(board, turn)
+        second_length = get_possible_moves(board, not turn)
+        set_possible_length(len(first_length), turn)
+        set_possible_length(len(second_length), not turn)
+        if not first_length:
 
-    if white_move == False and turn and not white_check:
-        return PieceType.EMPTY
-    elif black_move == False and not turn and not black_check:
-        return PieceType.EMPTY
+            if turn:
+                if king_in_check(board, PieceColor.WHITE):
+                    return PieceColor.BLACK
+            else:
+                if king_in_check(board, PieceColor.BLACK):
+                    return PieceColor.WHITE
+
+            return PieceType.EMPTY
 
     return PieceColor.NULL
 
@@ -57,9 +71,10 @@ def evaluate_board(board, turn):
         piece = board[i // 8][i % 8]
         if piece.get_color() == PieceColor.WHITE:
             white_advantage += piece.get_points() * 2
-            white_advantage += len(piece.get_moves(board))
         elif piece.get_color() == PieceColor.BLACK:
             black_advantage += piece.get_points() * 2
-            black_advantage += len(piece.get_moves(board))
+
+    white_advantage += get_possible_length(True)
+    black_advantage += get_possible_length(False)
 
     return white_advantage - black_advantage

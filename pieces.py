@@ -1,8 +1,40 @@
 from enum import Enum
 
-black_king_pos = [0, 4]
-white_king_pos = [7, 4]
 hit_count = 0
+searched_count = 0
+
+def print_board(game_board):
+    piece_chars_white = {
+        PieceType.PAWN : "♟",
+        PieceType.KNIGHT : "♞",
+        PieceType.BISHOP : "♝",
+        PieceType.ROOK : "♜",
+        PieceType.QUEEN : "♛",
+        PieceType.KING : "♚",
+        PieceType.EMPTY : " "
+    }
+
+    piece_chars_black = {
+        PieceType.PAWN: "♙",
+        PieceType.KNIGHT: "♘",
+        PieceType.BISHOP: "♗",
+        PieceType.ROOK: "♖",
+        PieceType.QUEEN: "♕",
+        PieceType.KING: "♔",
+        PieceType.EMPTY: " "
+    }
+
+    print("+---+---+---+---+---+---+---+---+")
+    for line in game_board:
+        game_line = "| "
+        for piece in line:
+            if piece.get_color() == PieceColor.BLACK:
+                game_line += piece_chars_black[piece.get_type()]
+            else:
+                game_line += piece_chars_white[piece.get_type()]
+            game_line += " | "
+        print(game_line)
+        print("+---+---+---+---+---+---+---+---+")
 
 def get_king_pos(board, side):
 
@@ -13,18 +45,19 @@ def get_king_pos(board, side):
             elif board[i // 8][i % 8].get_color() == PieceColor.WHITE and side:
                 return [i // 8, i % 8]
 
-def set_king_pos(new_pos, side):
-    global white_king_pos
-    global black_king_pos
-    if side:
-        white_king_pos = new_pos
-    else:
-        black_king_pos = new_pos
+    print("king not found?")
+    print_board(board)
 
 def get_hit_count():
     global hit_count
     temp_count = hit_count
     hit_count = 0
+    return temp_count
+
+def get_search_count():
+    global searched_count
+    temp_count = searched_count
+    searched_count = 0
     return temp_count
 
 def in_range(position):
@@ -147,13 +180,40 @@ def king_in_check(board, color):
 
 def king_check(board, origin_pos, target_pos, color):
 
+    global searched_count
+    searched_count += 1
+
+    # if origin_pos == target_pos:
+    #     print("OOPS")
+    #     print(origin_pos)
+    #     print(target_pos)
+
+    # if board[origin_pos[0]][origin_pos[1]].get_type() == PieceType.KING:
+    #     print(board[origin_pos[0]][origin_pos[1]])
+    #     print(board[target_pos[0]][target_pos[1]])
+
+    # if board[origin_pos[0]][origin_pos[1]].get_type() == PieceType.KING:
+        # print("MOVE[0]: ", str(origin_pos))
+        # print("MOVE[1]: ", str(target_pos))
+
+    # from inspect import getframeinfo, stack
+
+    # for i in range(1, 6):
+    #     caller = getframeinfo(stack()[i][0])
+    #     print("%s:%d" % (caller.filename, caller.lineno))
+    #
+    # print("-----------------------------------------")
+
+    # print("OLD: ", str(get_king_pos(board, False)))
+
     piece = board[origin_pos[0]][origin_pos[1]]
     captured_piece = board[target_pos[0]][target_pos[1]]
     board[target_pos[0]][target_pos[1]] = piece
     board[origin_pos[0]][origin_pos[1]] = Empty()
 
-    result = king_in_check(board, color)
+    # print("NEW: ", str(get_king_pos(board, False)))
 
+    result = king_in_check(board, color)
 
     board[origin_pos[0]][origin_pos[1]] = piece
     board[target_pos[0]][target_pos[1]] = captured_piece
