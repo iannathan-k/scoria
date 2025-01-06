@@ -1,24 +1,48 @@
+from copy import deepcopy
+
 from evaluation import *
 from math import inf
 
 def move_state(board, origin_pos, target_pos):
     piece = board[origin_pos[0]][origin_pos[1]]
+
+    if piece.get_type() == PieceType.PAWN:
+        if target_pos[0] == 7 or target_pos[0] == 0:
+            board[origin_pos[0]][origin_pos[1]] = Empty()
+            board[target_pos[0]][target_pos[1]] = Queen(target_pos, piece.get_color())
+
+            new_board = [row[:] for row in board]
+
+            board[origin_pos[0]][origin_pos[1]] = piece
+            board[target_pos[0]][target_pos[1]] = Empty()
+
+            return new_board
+
     captured_piece = board[target_pos[0]][target_pos[1]]
     board[target_pos[0]][target_pos[1]] = piece
     board[origin_pos[0]][origin_pos[1]] = Empty()
 
-    if origin_pos == target_pos:
-        print("OOPS")
-        print("OLD: ", str(origin_pos))
-        print("NEW: ", str(target_pos))
+    # print(board[target_pos[0]][target_pos[1]])
+    # print(board[origin_pos[0]][origin_pos[1]])
+    # print(target_pos)
+    # print(origin_pos)
+    # king_pos = get_king_pos(board, True)
+    # print("SELF POSITION:", str(board[king_pos[0]][king_pos[1]].get_position()))
+    # print("BOARD POSITION:", str(get_king_pos(board, True)))
+
+    board[target_pos[0]][target_pos[1]].set_position(target_pos)
+
+    # king_pos = get_king_pos(board, True)
+    # print("SELF POSITION:", str(board[king_pos[0]][king_pos[1]].get_position()))
+    # print("BOARD POSITION:", str(get_king_pos(board, True)))
+    # print(board[target_pos[0]][target_pos[1]])
+    # print(board[origin_pos[0]][origin_pos[1]])
 
     new_board = [row[:] for row in board]
-    # print("OLD: ", str(get_king_pos(board, False)))
-    # print("NEW: ", str(get_king_pos(new_board, False)))
-    # print(new_board)
 
     board[origin_pos[0]][origin_pos[1]] = piece
     board[target_pos[0]][target_pos[1]] = captured_piece
+    board[origin_pos[0]][origin_pos[1]].set_position(origin_pos)
 
     return new_board
 

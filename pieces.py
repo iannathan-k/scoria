@@ -45,9 +45,6 @@ def get_king_pos(board, side):
             elif board[i // 8][i % 8].get_color() == PieceColor.WHITE and side:
                 return [i // 8, i % 8]
 
-    print("king not found?")
-    print_board(board)
-
 def get_hit_count():
     global hit_count
     temp_count = hit_count
@@ -183,40 +180,55 @@ def king_check(board, origin_pos, target_pos, color):
     global searched_count
     searched_count += 1
 
-    # if origin_pos == target_pos:
-    #     print("OOPS")
-    #     print(origin_pos)
-    #     print(target_pos)
-
-    # if board[origin_pos[0]][origin_pos[1]].get_type() == PieceType.KING:
-    #     print(board[origin_pos[0]][origin_pos[1]])
-    #     print(board[target_pos[0]][target_pos[1]])
-
-    # if board[origin_pos[0]][origin_pos[1]].get_type() == PieceType.KING:
-        # print("MOVE[0]: ", str(origin_pos))
-        # print("MOVE[1]: ", str(target_pos))
-
-    # from inspect import getframeinfo, stack
-
-    # for i in range(1, 6):
-    #     caller = getframeinfo(stack()[i][0])
-    #     print("%s:%d" % (caller.filename, caller.lineno))
-    #
-    # print("-----------------------------------------")
-
-    # print("OLD: ", str(get_king_pos(board, False)))
+    if board[target_pos[0]][target_pos[1]].get_type() == PieceType.KING:
+        return True
 
     piece = board[origin_pos[0]][origin_pos[1]]
+
+    if piece.get_type() == PieceType.PAWN:
+        if target_pos[0] == 7 or target_pos[0] == 0:
+            board[origin_pos[0]][origin_pos[1]] = Empty()
+            board[target_pos[0]][target_pos[1]] = Queen(target_pos, piece.get_color())
+
+            result = king_in_check(board, color)
+
+            board[origin_pos[0]][origin_pos[1]] = piece
+            board[target_pos[0]][target_pos[1]] = Empty()
+
+            return result
+
     captured_piece = board[target_pos[0]][target_pos[1]]
     board[target_pos[0]][target_pos[1]] = piece
     board[origin_pos[0]][origin_pos[1]] = Empty()
 
-    # print("NEW: ", str(get_king_pos(board, False)))
+    # print(color)
+    # print(board[target_pos[0]][target_pos[1]])
+    # print(board[origin_pos[0]][origin_pos[1]])
+    # print(target_pos)
+    # print(origin_pos)
+    # king_pos = get_king_pos(board, True)
+    # print("SELF POSITION:", str(board[king_pos[0]][king_pos[1]].get_position()))
+    # print("BOARD POSITION:", str(get_king_pos(board, True)))
+
+    board[target_pos[0]][target_pos[1]].set_position(target_pos)
+
+    king_pos = get_king_pos(board, True)
+    # print("SELF POSITION:", str(board[king_pos[0]][king_pos[1]].get_position()))
+    # print("BOARD POSITION:", str(get_king_pos(board, True)))
+    # print(board[target_pos[0]][target_pos[1]])
+    # print(board[origin_pos[0]][origin_pos[1]])
 
     result = king_in_check(board, color)
 
     board[origin_pos[0]][origin_pos[1]] = piece
     board[target_pos[0]][target_pos[1]] = captured_piece
+    board[origin_pos[0]][origin_pos[1]].set_position(origin_pos)
+
+    king_pos = get_king_pos(board, True)
+    # print("SELF POSITION:", str(board[king_pos[0]][king_pos[1]].get_position()))
+    # print("BOARD POSITION:", str(get_king_pos(board, True)))
+    # print(board[target_pos[0]][target_pos[1]])
+    # print(board[origin_pos[0]][origin_pos[1]])
 
     return result
 
@@ -388,8 +400,9 @@ class Bishop:
                 elif board[current_move[0]][current_move[1]].get_type() == PieceType.EMPTY:
                     if not king_check(board, self._position, current_move, self._color):
                         possible_moves.append(current_move)
-                elif not king_check(board, self._position, current_move, self._color):
-                    possible_moves.append(current_move)
+                else:
+                    if not king_check(board, self._position, current_move, self._color):
+                        possible_moves.append(current_move)
                     break
 
                 current_move = [current_move[0] + direction[0], current_move[1] + direction[1]]
@@ -436,8 +449,9 @@ class Rook:
                 elif board[current_move[0]][current_move[1]].get_type() == PieceType.EMPTY:
                     if not king_check(board, self._position, current_move, self._color):
                         possible_moves.append(current_move)
-                elif not king_check(board, self._position, current_move, self._color):
-                    possible_moves.append(current_move)
+                else:
+                    if not king_check(board, self._position, current_move, self._color):
+                        possible_moves.append(current_move)
                     break
 
                 current_move = [current_move[0] + direction[0], current_move[1] + direction[1]]
@@ -489,8 +503,9 @@ class Queen:
                     elif board[current_move[0]][current_move[1]].get_type() == PieceType.EMPTY:
                         if not king_check(board, self._position, current_move, self._color):
                             possible_moves.append(current_move)
-                    elif not king_check(board, self._position, current_move, self._color):
-                        possible_moves.append(current_move)
+                    else:
+                        if not king_check(board, self._position, current_move, self._color):
+                            possible_moves.append(current_move)
                         break
 
                 current_move = [current_move[0] + direction[0], current_move[1] + direction[1]]
@@ -519,7 +534,7 @@ class King:
     def set_position(self, position):
         self._position = position
 
-    def get_moves(self, board):
+    def get_moves(self, board, a=False):
         possible_moves = []
 
         directions = [
@@ -539,6 +554,14 @@ class King:
                 if board[current_move[0]][current_move[1]].get_color() != self._color:
                     if not king_check(board, self._position, current_move, self._color):
                         possible_moves.append(current_move)
+
+            # # if a:
+            #     if self._color == PieceColor.BLACK:
+            #         print("SELF POSITION:", str(self._position))
+            #         print("BOARD POSITION:", str(get_king_pos(board, False)))
+            #         print("PIECE: ", print(board[self._position[0]][self._position[1]]))
+            #         print(current_move)
+            #         print(king_check(board, self._position, current_move, self._color))
 
 
         return possible_moves

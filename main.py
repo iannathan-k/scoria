@@ -74,9 +74,14 @@ def set_up(fen_string):
             index += 1
 
 def move_piece(origin_pos, target_pos):
-    board[target_pos[0]][target_pos[1]] = board[origin_pos[0]][origin_pos[1]]
+    piece = board[origin_pos[0]][origin_pos[1]]
+    board[target_pos[0]][target_pos[1]] = piece
     board[origin_pos[0]][origin_pos[1]] = Empty()
-    board[target_pos[0]][target_pos[1]].set_position(target_pos)
+    piece.set_position(target_pos)
+
+    if board[target_pos[0]][target_pos[1]].get_type() == PieceType.PAWN:
+        if target_pos[0] == 7 or target_pos[0] == 0:
+            board[target_pos[0]][target_pos[1]] = Queen(target_pos, board[target_pos[0]][target_pos[1]].get_color())
 
 def __main__():
     depth = int(input("Recursion Depth?: "))
@@ -95,21 +100,7 @@ def __main__():
             # move_piece([origin1, origin2], [target1, target2])
             #
             # print_board(board)
-            # turn = not turn
-            #
-            coulee_move = minimax(board, depth, -inf, inf, turn)
-            move_piece(coulee_move[1][0], coulee_move[1][1])
 
-            print("~~~~~BLACK TO MOVE~~~~~")
-            print_board(board)
-
-            print("Evaluation,", coulee_move[0])
-            print(get_hit_count())
-            print("Hit count: ", str(get_hit_count()))
-            print("Branches Searched: ", str(get_search_count()))
-            turn = not turn
-
-        else:
             coulee_move = minimax(board, depth, -inf, inf, turn)
             move_piece(coulee_move[1][0], coulee_move[1][1])
 
@@ -119,8 +110,20 @@ def __main__():
             print("Evaluation,", coulee_move[0])
             print("Hit count: ", str(get_hit_count()))
             print("Branches Searched: ", str(get_search_count()))
-            turn = not turn
 
+        else:
+            coulee_move = minimax(board, depth, -inf, inf, turn)
+            move_piece(coulee_move[1][0], coulee_move[1][1])
+
+            print("~~~~~BLACK TO MOVE~~~~~")
+            print_board(board)
+
+            print("Evaluation,", coulee_move[0])
+            print("Hit count: ", str(get_hit_count()))
+            print("Branches Searched: ", str(get_search_count()))
+
+        turn = not turn
+        add_state(board)
         print(get_king_pos(board, not turn))
 
         if determine_winner(board, turn) == PieceColor.WHITE:
