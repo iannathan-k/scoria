@@ -184,6 +184,7 @@ def king_check(board, origin_pos, target_pos, color):
         return True
 
     piece = board[origin_pos[0]][origin_pos[1]]
+    captured_piece = board[target_pos[0]][target_pos[1]]
 
     if piece.get_type() == PieceType.PAWN:
         if target_pos[0] == 7 or target_pos[0] == 0:
@@ -193,42 +194,19 @@ def king_check(board, origin_pos, target_pos, color):
             result = king_in_check(board, color)
 
             board[origin_pos[0]][origin_pos[1]] = piece
-            board[target_pos[0]][target_pos[1]] = Empty()
+            board[target_pos[0]][target_pos[1]] = captured_piece
 
             return result
 
-    captured_piece = board[target_pos[0]][target_pos[1]]
     board[target_pos[0]][target_pos[1]] = piece
     board[origin_pos[0]][origin_pos[1]] = Empty()
-
-    # print(color)
-    # print(board[target_pos[0]][target_pos[1]])
-    # print(board[origin_pos[0]][origin_pos[1]])
-    # print(target_pos)
-    # print(origin_pos)
-    # king_pos = get_king_pos(board, True)
-    # print("SELF POSITION:", str(board[king_pos[0]][king_pos[1]].get_position()))
-    # print("BOARD POSITION:", str(get_king_pos(board, True)))
-
-    board[target_pos[0]][target_pos[1]].set_position(target_pos)
-
-    king_pos = get_king_pos(board, True)
-    # print("SELF POSITION:", str(board[king_pos[0]][king_pos[1]].get_position()))
-    # print("BOARD POSITION:", str(get_king_pos(board, True)))
-    # print(board[target_pos[0]][target_pos[1]])
-    # print(board[origin_pos[0]][origin_pos[1]])
+    piece.set_position(target_pos)
 
     result = king_in_check(board, color)
 
     board[origin_pos[0]][origin_pos[1]] = piece
     board[target_pos[0]][target_pos[1]] = captured_piece
-    board[origin_pos[0]][origin_pos[1]].set_position(origin_pos)
-
-    king_pos = get_king_pos(board, True)
-    # print("SELF POSITION:", str(board[king_pos[0]][king_pos[1]].get_position()))
-    # print("BOARD POSITION:", str(get_king_pos(board, True)))
-    # print(board[target_pos[0]][target_pos[1]])
-    # print(board[origin_pos[0]][origin_pos[1]])
+    piece.set_position(origin_pos)
 
     return result
 

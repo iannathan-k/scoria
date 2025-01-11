@@ -5,39 +5,6 @@ black_length = 0
 
 past_states = {}
 
-def print_board(game_board):
-    piece_chars_white = {
-        PieceType.PAWN : "♟",
-        PieceType.KNIGHT : "♞",
-        PieceType.BISHOP : "♝",
-        PieceType.ROOK : "♜",
-        PieceType.QUEEN : "♛",
-        PieceType.KING : "♚",
-        PieceType.EMPTY : " "
-    }
-
-    piece_chars_black = {
-        PieceType.PAWN: "♙",
-        PieceType.KNIGHT: "♘",
-        PieceType.BISHOP: "♗",
-        PieceType.ROOK: "♖",
-        PieceType.QUEEN: "♕",
-        PieceType.KING: "♔",
-        PieceType.EMPTY: " "
-    }
-
-    print("+---+---+---+---+---+---+---+---+")
-    for line in game_board:
-        game_line = "| "
-        for piece in line:
-            if piece.get_color() == PieceColor.BLACK:
-                game_line += piece_chars_black[piece.get_type()]
-            else:
-                game_line += piece_chars_white[piece.get_type()]
-            game_line += " | "
-        print(game_line)
-        print("+---+---+---+---+---+---+---+---+")
-
 def get_state(board):
     key_board = ""
     # print(past_states.values())
@@ -96,6 +63,7 @@ def determine_winner(board, turn, caller=False):
     # caller = True --> evaluate_board()
     if caller:
         if get_state(board) + 2 == 3:
+            # print("THIS IS THE GREATEST SHOW")
             return PieceType.EMPTY
     else:
         if get_state(board) == 3:
@@ -126,13 +94,12 @@ def evaluate_board(board, turn):
     if board_state == PieceColor.BLACK:
         return -1000
     elif board_state == PieceColor.WHITE:
-        print("BOOM")
-        pos = get_king_pos(board, False)
-        print(board[pos[0]][pos[1]].get_moves(board, True))
-        print_board(board)
         return 1000
     elif board_state == PieceType.EMPTY:
-        return 0
+        if turn:
+            return -100
+        else:
+            return 100
 
     white_advantage = 0
     black_advantage = 0
