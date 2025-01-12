@@ -10,7 +10,7 @@ pawn_weights = [
     [50, 50, 50, 50, 50, 50, 50, 50],
     [10, 10, 20, 30, 30, 20, 10, 10],
     [5, 5, 10, 25, 25, 10, 5, 5],
-    [0, 0, 0, 30, 30, 0, 0, 0],
+    [0, 0, 0, 50, 50, 0, 0, 0],
     [5, -5,-10, 0, 0,-10, -5, 5],
     [5, 10, 10,-20,-20, 10, 10, 5],
     [0, 0, 0, 0, 0, 0, 0, 0]
@@ -160,10 +160,7 @@ def evaluate_board(board, turn):
     elif board_state == PieceColor.WHITE:
         return 10000
     elif board_state == PieceType.EMPTY:
-        if turn:
-            return -5000
-        else:
-            return 5000
+        return 0
 
     white_advantage = 0
     black_advantage = 0
@@ -190,9 +187,9 @@ def evaluate_board(board, turn):
             white_advantage += piece_board[piece_pos[0]][piece_pos[1]]
         elif piece.get_color() == PieceColor.BLACK:
             black_advantage += piece.get_points()
-            black_advantage += piece_board[::-1][piece_pos[0]][piece_pos[1]]
+            black_advantage += piece_board[7 - piece_pos[0]][piece_pos[1]]
 
-        white_advantage += get_possible_length(True)
-        black_advantage += get_possible_length(False)
+    white_advantage += get_possible_length(True) * 5
+    black_advantage += get_possible_length(False) * 5
 
     return white_advantage - black_advantage

@@ -10,15 +10,13 @@ def move_state(board, origin_pos, target_pos):
         if target_pos[0] == 7 or target_pos[0] == 0:
             board[origin_pos[0]][origin_pos[1]] = Empty()
             board[target_pos[0]][target_pos[1]] = Queen(target_pos, piece.get_color())
-
-            return [captured_piece, piece, "P"]
+            return [captured_piece, piece]
 
     # if not promotion
     board[target_pos[0]][target_pos[1]] = piece
     board[origin_pos[0]][origin_pos[1]] = Empty()
     piece.set_position(target_pos)
-
-    return [captured_piece, piece, "N"]
+    return [captured_piece, piece]
 
 def undo_move(board, origin_pos, target_pos, board_info):
     piece = board[target_pos[0]][target_pos[1]]

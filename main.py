@@ -3,7 +3,7 @@ from math import inf
 
 board = [[Empty() for i in range(8)] for j in range(8)]
 
-def print_board(game_board):
+def print_board():
     piece_chars_white = {
         PieceType.PAWN : "♟",
         PieceType.KNIGHT : "♞",
@@ -78,10 +78,10 @@ def set_up(fen_string):
 
         else:
 
-            if letter == "b":
-                return False
-            elif letter == "w":
+            if letter == "w":
                 return True
+            elif letter == "b":
+                return False
 
 def move_piece(origin_pos, target_pos):
     piece = board[origin_pos[0]][origin_pos[1]]
@@ -97,7 +97,7 @@ def __main__():
     depth = int(input("Recursion Depth?: "))
     fen = input("fen?: ")
     turn = set_up(fen)
-    print_board(board)
+    print_board()
 
     while True:
         if turn:
@@ -107,13 +107,13 @@ def __main__():
             # target2 = int(input("Player move column: "))
             # move_piece([origin1, origin2], [target1, target2])
             #
-            # print_board(board)
+            # print_board()
 
             coulee_move = minimax(board, depth, -inf, inf, turn)
             move_piece(coulee_move[1][0], coulee_move[1][1])
 
             print("~~~~~BLACK TO MOVE~~~~~")
-            print_board(board)
+            print_board()
 
             print("Evaluation,", coulee_move[0])
             print("Hit count: ", str(get_hit_count()))
@@ -124,7 +124,7 @@ def __main__():
             move_piece(coulee_move[1][0], coulee_move[1][1])
 
             print("~~~~~WHITE TO MOVE~~~~~")
-            print_board(board)
+            print_board()
 
             print("Evaluation,", coulee_move[0])
             print("Hit count: ", str(get_hit_count()))
