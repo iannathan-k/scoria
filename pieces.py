@@ -2,48 +2,13 @@ from enum import Enum
 
 hit_count = 0
 searched_count = 0
+king_pieces = [None, None]
 
-def print_board(game_board):
-    piece_chars_white = {
-        PieceType.PAWN : "♟",
-        PieceType.KNIGHT : "♞",
-        PieceType.BISHOP : "♝",
-        PieceType.ROOK : "♜",
-        PieceType.QUEEN : "♛",
-        PieceType.KING : "♚",
-        PieceType.EMPTY : " "
-    }
-
-    piece_chars_black = {
-        PieceType.PAWN: "♙",
-        PieceType.KNIGHT: "♘",
-        PieceType.BISHOP: "♗",
-        PieceType.ROOK: "♖",
-        PieceType.QUEEN: "♕",
-        PieceType.KING: "♔",
-        PieceType.EMPTY: " "
-    }
-
-    print("+---+---+---+---+---+---+---+---+")
-    for line in game_board:
-        game_line = "| "
-        for piece in line:
-            if piece.get_color() == PieceColor.BLACK:
-                game_line += piece_chars_black[piece.get_type()]
-            else:
-                game_line += piece_chars_white[piece.get_type()]
-            game_line += " | "
-        print(game_line)
-        print("+---+---+---+---+---+---+---+---+")
-
-def get_king_pos(board, side):
-
-    for i in range(64):
-        if board[i // 8][i % 8].get_type() == PieceType.KING:
-            if board[i // 8][i % 8].get_color() == PieceColor.BLACK and not side:
-                return [i // 8, i % 8]
-            elif board[i // 8][i % 8].get_color() == PieceColor.WHITE and side:
-                return [i // 8, i % 8]
+def get_king_pos(side):
+    if side:
+        return king_pieces[0].get_position()
+    else:
+        return king_pieces[1].get_position()
 
 def get_hit_count():
     global hit_count
@@ -68,9 +33,9 @@ def in_range(position):
 def king_in_check(board, color):
 
     if color == PieceColor.WHITE:
-        king_pos = get_king_pos(board, True)
+        king_pos = get_king_pos(True)
     else:
-        king_pos = get_king_pos(board, False)
+        king_pos = get_king_pos(False)
 
     directionsR = [
         [-1, 0],  # N
@@ -532,14 +497,6 @@ class King:
                 if board[current_move[0]][current_move[1]].get_color() != self._color:
                     if not king_check(board, self._position, current_move, self._color):
                         possible_moves.append(current_move)
-
-            # # if a:
-            #     if self._color == PieceColor.BLACK:
-            #         print("SELF POSITION:", str(self._position))
-            #         print("BOARD POSITION:", str(get_king_pos(board, False)))
-            #         print("PIECE: ", print(board[self._position[0]][self._position[1]]))
-            #         print(current_move)
-            #         print(king_check(board, self._position, current_move, self._color))
 
 
         return possible_moves

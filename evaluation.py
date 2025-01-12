@@ -7,7 +7,6 @@ past_states = {}
 
 def get_state(board):
     key_board = ""
-    # print(past_states.values())
     for row in board:
         for piece in row:
             key_board += str(piece.get_type())
@@ -63,13 +62,12 @@ def determine_winner(board, turn, caller=False):
     # caller = True --> evaluate_board()
     if caller:
         if get_state(board) + 2 == 3:
-            # print("THIS IS THE GREATEST SHOW")
             return PieceType.EMPTY
     else:
         if get_state(board) == 3:
             return PieceType.EMPTY
 
-    king_pos = get_king_pos(board, turn)
+    king_pos = get_king_pos(turn)
 
     if not board[king_pos[0]][king_pos[1]].get_moves(board):
         first_length = get_possible_moves(board, turn)
