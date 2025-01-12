@@ -24,56 +24,64 @@ def print_board(game_board):
         PieceType.EMPTY: " "
     }
 
-    print("+---+---+---+---+---+---+---+---+")
-    for line in game_board:
-        game_line = "| "
-        for piece in line:
+    print("    0   1   2   3   4   5   6   7  ")
+    print("  +---+---+---+---+---+---+---+---+")
+    for i in range(8):
+        game_line = str(i) + " | "
+        for piece in board[i]:
             if piece.get_color() == PieceColor.BLACK:
                 game_line += piece_chars_black[piece.get_type()]
             else:
                 game_line += piece_chars_white[piece.get_type()]
             game_line += " | "
         print(game_line)
-        print("+---+---+---+---+---+---+---+---+")
+        print("  +---+---+---+---+---+---+---+---+")
 
 def set_up(fen_string):
     index = 0
     for letter in fen_string:
+        if index < 64:
+            if letter == "/": continue
 
-        if letter == "/": continue
+            if letter == "P":
+                board[index // 8][index % 8] = Pawn([index // 8, index % 8], PieceColor.WHITE, -1)
+            elif letter == "N":
+                board[index // 8][index % 8] = Knight([index // 8, index % 8], PieceColor.WHITE)
+            elif letter == "B":
+                board[index // 8][index % 8] = Bishop([index // 8, index % 8], PieceColor.WHITE)
+            elif letter == "R":
+                board[index // 8][index % 8] = Rook([index // 8, index % 8], PieceColor.WHITE)
+            elif letter == "Q":
+                board[index // 8][index % 8] = Queen([index // 8, index % 8], PieceColor.WHITE)
+            elif letter == "K":
+                board[index // 8][index % 8] = King([index // 8, index % 8], PieceColor.WHITE)
+                king_pieces[0] = board[index // 8][index % 8]
 
-        if letter == "P":
-            board[index // 8][index % 8] = Pawn([index // 8, index % 8], PieceColor.WHITE, -1)
-        elif letter == "N":
-            board[index // 8][index % 8] = Knight([index // 8, index % 8], PieceColor.WHITE)
-        elif letter == "B":
-            board[index // 8][index % 8] = Bishop([index // 8, index % 8], PieceColor.WHITE)
-        elif letter == "R":
-            board[index // 8][index % 8] = Rook([index // 8, index % 8], PieceColor.WHITE)
-        elif letter == "Q":
-            board[index // 8][index % 8] = Queen([index // 8, index % 8], PieceColor.WHITE)
-        elif letter == "K":
-            board[index // 8][index % 8] = King([index // 8, index % 8], PieceColor.WHITE)
-            king_pieces[0] = board[index // 8][index % 8]
+            if letter == "p":
+                board[index // 8][index % 8] = Pawn([index // 8, index % 8], PieceColor.BLACK, 1)
+            elif letter == "n":
+                board[index // 8][index % 8] = Knight([index // 8, index % 8], PieceColor.BLACK)
+            elif letter == "b":
+                board[index // 8][index % 8] = Bishop([index // 8, index % 8], PieceColor.BLACK)
+            elif letter == "r":
+                board[index // 8][index % 8] = Rook([index // 8, index % 8], PieceColor.BLACK)
+            elif letter == "q":
+                board[index // 8][index % 8] = Queen([index // 8, index % 8], PieceColor.BLACK)
+            elif letter == "k":
+                board[index // 8][index % 8] = King([index // 8, index % 8], PieceColor.BLACK)
+                king_pieces[1] = board[index // 8][index % 8]
 
-        if letter == "p":
-            board[index // 8][index % 8] = Pawn([index // 8, index % 8], PieceColor.BLACK, 1)
-        elif letter == "n":
-            board[index // 8][index % 8] = Knight([index // 8, index % 8], PieceColor.BLACK)
-        elif letter == "b":
-            board[index // 8][index % 8] = Bishop([index // 8, index % 8], PieceColor.BLACK)
-        elif letter == "r":
-            board[index // 8][index % 8] = Rook([index // 8, index % 8], PieceColor.BLACK)
-        elif letter == "q":
-            board[index // 8][index % 8] = Queen([index // 8, index % 8], PieceColor.BLACK)
-        elif letter == "k":
-            board[index // 8][index % 8] = King([index // 8, index % 8], PieceColor.BLACK)
-            king_pieces[1] = board[index // 8][index % 8]
+            if letter in ["1", "2", "3", "4", "5", "6", "7", "8"]:
+                index += int(letter) - 1
 
-        if letter in ["1", "2", "3", "4", "5", "6", "7", "8"]:
-            index += int(letter) - 1
+            index += 1
 
-        index += 1
+        else:
+
+            if letter == "b":
+                return False
+            elif letter == "w":
+                return True
 
 def move_piece(origin_pos, target_pos):
     piece = board[origin_pos[0]][origin_pos[1]]
@@ -87,13 +95,8 @@ def move_piece(origin_pos, target_pos):
 
 def __main__():
     depth = int(input("Recursion Depth?: "))
-    if input("Side?: ").lower() in ["w", "white", "true"]:
-        turn = True
-    else:
-        turn = False
-
     fen = input("fen?: ")
-    set_up(fen)
+    turn = set_up(fen)
     print_board(board)
 
     while True:
@@ -109,7 +112,7 @@ def __main__():
             coulee_move = minimax(board, depth, -inf, inf, turn)
             move_piece(coulee_move[1][0], coulee_move[1][1])
 
-            print("~~~~~WHITE TO MOVE~~~~~")
+            print("~~~~~BLACK TO MOVE~~~~~")
             print_board(board)
 
             print("Evaluation,", coulee_move[0])
@@ -120,7 +123,7 @@ def __main__():
             coulee_move = minimax(board, depth, -inf, inf, turn)
             move_piece(coulee_move[1][0], coulee_move[1][1])
 
-            print("~~~~~BLACK TO MOVE~~~~~")
+            print("~~~~~WHITE TO MOVE~~~~~")
             print_board(board)
 
             print("Evaluation,", coulee_move[0])
