@@ -132,7 +132,6 @@ def __main__():
 
         turn = not turn
         add_state(board)
-        print(get_king_pos(not turn))
 
         if determine_winner(board, turn) == PieceColor.WHITE:
             print("WHITE WON")

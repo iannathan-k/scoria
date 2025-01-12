@@ -206,7 +206,7 @@ class Pawn:
         self._type = PieceType.PAWN
         self._color = color
         self._direction = direction # +1 downward, -1 upward
-        self._points = 1
+        self._points = 100
 
     def get_position(self):
         return self._position
@@ -265,7 +265,7 @@ class Knight:
         self._position = position
         self._type = PieceType.KNIGHT
         self._color = color
-        self._points = 3
+        self._points = 320
 
     def get_position(self):
         return self._position
@@ -308,7 +308,7 @@ class Bishop:
         self._position = position
         self._type = PieceType.BISHOP
         self._color = color
-        self._points = 3
+        self._points = 330
 
     def get_position(self):
         return self._position
@@ -357,7 +357,7 @@ class Rook:
         self._position = position
         self._type = PieceType.ROOK
         self._color = color
-        self._points = 5
+        self._points = 500
 
     def get_position(self):
         return self._position
@@ -406,7 +406,7 @@ class Queen:
         self._position = position
         self._type = PieceType.QUEEN
         self._color = color
-        self._points = 9
+        self._points = 900
 
     def get_position(self):
         return self._position
