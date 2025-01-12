@@ -2,6 +2,10 @@
 
 An *extremely* rudimentary chess bot, designed and programmed completely in Python.
 
+## Credits
+### Ian Nathan Kusmiantoro
+### iannathan-k
+
 ## How to Operate
 
 1. Start the program, whether in an IDE, terminal or some other dedicated interpreter.
@@ -141,6 +145,3 @@ Each piece precomputes the squares which it jumps through, and then filters thro
 King check is done by taking the possible squares attackers can be on, like the diagonals and direct lines of sight, and seeing if certain pieces exist on those squares and provide a check to the king. The king can be found itself as it is stored in an array which removes the need to iterate through the entire board to find the position of the king.
 
 Every time a piece is moved, whether it is for finding whether a move is valid, evaluating the board, or searching in the next depth for the minimax algorithm, there is only ever one board which is modified. Simply, the board is reverted when you backtrack, allowing memory saving because there need not a million different copies of the same board.
-
-## Credits
-### Ian Nathan Kusmiantoro
