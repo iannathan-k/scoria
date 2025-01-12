@@ -64,7 +64,7 @@ An *extremely* rudimentary chess bot, designed and programmed completely in Pyth
 
 Board states are evaluated using an evaluation function, that takes into consideration 2 facts. Piece values, which a doubled weighting, and the number of possible moves to make. This encourages the bot to develop its position and avoid cramped positions, which not needlessly trading off pieces.
 
-$$ E = 2(\Sigma p) + \Sigma m $$
+## $$ E = 2(\Sigma p) + \Sigma m $$
 
 This also suggests that a higher evaluation, `> 0` means white has an advantage, while a lower evaluation, `< 0` favours black. An evaluation of 1000 or -1000 means one of the sides has won the game. A result of -100 or 100 is given in the case of a stalemate as discouragement.
 
