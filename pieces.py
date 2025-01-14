@@ -53,37 +53,37 @@ def king_in_check(board, color):
 
     # Rook Capture
     for direction in directionsR:
-        current_move = king_pos
+        current_move = [king_pos[0] + direction[0], king_pos[1] + direction[1]]
         while in_range(current_move):
-            if current_move != king_pos:
-                if board[current_move[0]][current_move[1]].get_type() != PieceType.EMPTY:
-                    if board[current_move[0]][current_move[1]].get_color() == color:
+            square = board[current_move[0]][current_move[1]]
+            if square.get_type() != PieceType.EMPTY:
+                if square.get_color() == color:
+                    break
+                if square.get_color() != color:
+                    if square.get_type() == PieceType.ROOK:
+                        return True
+                    elif square.get_type() == PieceType.QUEEN:
+                        return True
+                    else:
                         break
-                    if board[current_move[0]][current_move[1]].get_color() != color:
-                        if board[current_move[0]][current_move[1]].get_type() == PieceType.ROOK:
-                            return True
-                        elif board[current_move[0]][current_move[1]].get_type() == PieceType.QUEEN:
-                            return True
-                        else:
-                            break
 
             current_move = [current_move[0] + direction[0], current_move[1] + direction[1]]
 
     # Bishop Capture
     for direction in directionsB:
-        current_move = king_pos
+        current_move = [king_pos[0] + direction[0], king_pos[1] + direction[1]]
         while in_range(current_move):
-            if current_move != king_pos:
-                if board[current_move[0]][current_move[1]].get_type() != PieceType.EMPTY:
-                    if board[current_move[0]][current_move[1]].get_color() == color:
+            square = board[current_move[0]][current_move[1]]
+            if square.get_type() != PieceType.EMPTY:
+                if square.get_color() == color:
+                    break
+                if square.get_color() != color:
+                    if square.get_type() == PieceType.BISHOP:
+                        return True
+                    elif square.get_type() == PieceType.QUEEN:
+                        return True
+                    else:
                         break
-                    if board[current_move[0]][current_move[1]].get_color() != color:
-                        if board[current_move[0]][current_move[1]].get_type() == PieceType.BISHOP:
-                            return True
-                        elif board[current_move[0]][current_move[1]].get_type() == PieceType.QUEEN:
-                            return True
-                        else:
-                            break
 
             current_move = [current_move[0] + direction[0], current_move[1] + direction[1]]
 
@@ -101,8 +101,9 @@ def king_in_check(board, color):
     # Knight Capture
     for move in movesK:
         if in_range(move):
-            if board[move[0]][move[1]].get_color() != color:
-                if board[move[0]][move[1]].get_type() == PieceType.KNIGHT:
+            square = board[move[0]][move[1]]
+            if square.get_color() != color:
+                if square.get_type() == PieceType.KNIGHT:
                     return True
 
     movesPB = [
@@ -119,15 +120,17 @@ def king_in_check(board, color):
     if color == PieceColor.BLACK:
         for move in movesPB:
             if in_range(move):
-                if board[move[0]][move[1]].get_type() == PieceType.PAWN:
-                    if board[move[0]][move[1]].get_color() == PieceColor.WHITE:
+                square = board[move[0]][move[1]]
+                if square.get_type() == PieceType.PAWN:
+                    if square.get_color() == PieceColor.WHITE:
                         return True
 
     if color == PieceColor.WHITE:
         for move in movesPW:
             if in_range(move):
-                if board[move[0]][move[1]].get_type() == PieceType.PAWN:
-                    if board[move[0]][move[1]].get_color() == PieceColor.BLACK:
+                square = board[move[0]][move[1]]
+                if square.get_type() == PieceType.PAWN:
+                    if square.get_color() == PieceColor.BLACK:
                         return True
 
     # King Capture

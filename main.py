@@ -98,6 +98,7 @@ def __main__():
     fen = input("fen?: ")
     turn = set_up(fen)
     print_board()
+    move_count = 0
 
     while True:
         if turn:
@@ -106,8 +107,10 @@ def __main__():
             # target1 = int(input("Player move row: "))
             # target2 = int(input("Player move column: "))
             # move_piece([origin1, origin2], [target1, target2])
-            #
+            
             # print_board()
+
+
 
             coulee_move = minimax(board, depth, -inf, inf, turn)
             move_piece(coulee_move[1][0], coulee_move[1][1])
@@ -118,6 +121,7 @@ def __main__():
             print("Evaluation,", coulee_move[0])
             print("Hit count: ", str(get_hit_count()))
             print("Branches Searched: ", str(get_search_count()))
+            move_count += 1
 
         else:
             coulee_move = minimax(board, depth, -inf, inf, turn)
@@ -135,12 +139,15 @@ def __main__():
 
         if determine_winner(board, turn) == PieceColor.WHITE:
             print("WHITE WON")
+            print(move_count)
             break
         if determine_winner(board, turn) == PieceColor.BLACK:
             print("BLACK WON")
+            print(move_count)
             break
         if determine_winner(board, turn) == PieceType.EMPTY:
             print("STALEMATE")
+            print(move_count)
             break
 
 if __name__ == __main__():

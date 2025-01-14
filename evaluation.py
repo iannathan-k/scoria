@@ -71,21 +71,24 @@ king_weights = [
     [20, 30, 10, 0, 0, 10, 30, 20]
 ]
 
+piece_weights = {
+            PieceType.PAWN: pawn_weights,
+            PieceType.KNIGHT: knight_weights,
+            PieceType.BISHOP: bishop_weights,
+            PieceType.ROOK: rook_weights,
+            PieceType.QUEEN: queen_weights,
+            PieceType.KING: king_weights
+        }
+
 def get_state(board):
-    key_board = ""
-    for row in board:
-        for piece in row:
-            key_board += str(piece.get_type())
+    key_board = "".join(str(piece.get_type()) for row in board for piece in row)
     if key_board in past_states:
         return past_states[key_board]
     else:
         return 0
 
 def add_state(board):
-    key_board = ""
-    for row in board:
-        for piece in row:
-            key_board += str(piece.get_type())
+    key_board = "".join(str(piece.get_type()) for row in board for piece in row)
     if key_board in past_states:
         past_states[key_board] += 1
     else:
@@ -106,48 +109,34 @@ def get_possible_length(side):
         return black_length
 
 def get_possible_moves(board, side):
-    # side = True --> White
-    # side = False --> Black
-    possible_moves = []
-    if side:
-        color = PieceColor.WHITE
-    else:
-        color = PieceColor.BLACK
-
-    for i in range(64):
-        piece = board[i // 8][i % 8]
-        if piece.get_color() == color:
-            for move in piece.get_moves(board):
-                possible_moves.append([piece.get_position(), move])
-
-    return possible_moves
+    color = PieceColor.WHITE if side else PieceColor.BLACK
+    return [
+        [piece.get_position(), move]
+        for i in range(64)
+        if (piece := board[i // 8][i % 8]).get_color() == color
+        for move in piece.get_moves(board)
+    ]
 
 def determine_winner(board, turn, caller=False):
-
-    # caller = False --> __main__()
-    # caller = True --> evaluate_board()
-    if caller:
-        if get_state(board) + 2 == 3:
-            return PieceType.EMPTY
-    else:
-        if get_state(board) == 3:
-            return PieceType.EMPTY
+    if caller and get_state(board) + 2 == 3:
+        return PieceType.EMPTY
+    elif not caller and get_state(board) == 3:
+        return PieceType.EMPTY
 
     king_pos = get_king_pos(turn)
+    king_moves = board[king_pos[0]][king_pos[1]].get_moves(board)
 
-    if not board[king_pos[0]][king_pos[1]].get_moves(board):
+    if not king_moves:
         first_length = get_possible_moves(board, turn)
         second_length = get_possible_moves(board, not turn)
         set_possible_length(len(first_length), turn)
         set_possible_length(len(second_length), not turn)
-        if not first_length:
 
-            if turn:
-                if king_in_check(board, PieceColor.WHITE):
-                    return PieceColor.BLACK
-            else:
-                if king_in_check(board, PieceColor.BLACK):
-                    return PieceColor.WHITE
+        if not first_length:
+            if turn and king_in_check(board, PieceColor.WHITE):
+                return PieceColor.BLACK
+            elif not turn and king_in_check(board, PieceColor.BLACK):
+                return PieceColor.WHITE
 
             return PieceType.EMPTY
 
@@ -167,27 +156,16 @@ def evaluate_board(board, turn):
 
     for i in range(64):
         piece = board[i // 8][i % 8]
-
-        if piece.get_type() == PieceType.EMPTY:
+        piece_type = piece.get_type()
+        if piece_type == PieceType.EMPTY:
             continue
 
-        piece_weights = {
-            PieceType.PAWN: pawn_weights,
-            PieceType.KNIGHT: knight_weights,
-            PieceType.BISHOP: bishop_weights,
-            PieceType.ROOK: rook_weights,
-            PieceType.QUEEN: queen_weights,
-            PieceType.KING: king_weights
-        }
-
         piece_pos = piece.get_position()
-        piece_board = piece_weights[piece.get_type()]
+        piece_board = piece_weights[piece_type]
         if piece.get_color() == PieceColor.WHITE:
-            white_advantage += piece.get_points()
-            white_advantage += piece_board[piece_pos[0]][piece_pos[1]]
-        elif piece.get_color() == PieceColor.BLACK:
-            black_advantage += piece.get_points()
-            black_advantage += piece_board[7 - piece_pos[0]][piece_pos[1]]
+            white_advantage += piece.get_points() + piece_board[piece_pos[0]][piece_pos[1]]
+        else:
+            black_advantage += piece.get_points() + piece_board[7 - piece_pos[0]][piece_pos[1]]
 
     white_advantage += get_possible_length(True) * 5
     black_advantage += get_possible_length(False) * 5

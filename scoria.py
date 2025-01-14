@@ -1,6 +1,29 @@
 from evaluation import *
 from math import inf
 
+transposition_table = {}
+
+def heuristic_ordering(moves, board):
+    def move_value(move):
+        origin, target = move
+        piece = board[origin[0]][origin[1]]
+        target_piece = board[target[0]][target[1]]
+        value = 0
+
+        if target_piece.get_type() != PieceType.EMPTY:
+            value += target_piece.get_points() * 10 - piece.get_points()
+
+        if piece.get_type() == PieceType.PAWN and (target[0] == 0 or target[0] == 7):
+            value += 900
+
+
+        return value
+
+    return sorted(moves, key=move_value, reverse=True)
+
+def board_hash(board):
+    return "".join(str(piece.get_type()) for row in board for piece in row)
+
 def move_state(board, origin_pos, target_pos):
     piece = board[origin_pos[0]][origin_pos[1]]
     captured_piece = board[target_pos[0]][target_pos[1]]
@@ -25,12 +48,18 @@ def undo_move(board, origin_pos, target_pos, board_info):
     piece.set_position(origin_pos)
 
 def minimax(board, depth, alpha, beta, turn):
+    board_key = board_hash(board)
+    if board_key in transposition_table and transposition_table[board_key][1] >= depth:
+        return transposition_table[board_key][0]
+
     if depth == 0 or determine_winner(board, turn) != PieceColor.NULL:
         return [evaluate_board(board, turn), []]
+    
+    possible_moves = heuristic_ordering(get_possible_moves(board, turn), board)
 
     if turn:
         max_eval = [-inf, []]
-        for move in get_possible_moves(board, turn):
+        for move in possible_moves:
             board_info = move_state(board, move[0], move[1])
             evaluation = minimax(board, depth - 1, alpha, beta, False)[0]
             undo_move(board, move[0], move[1], board_info)
@@ -43,7 +72,7 @@ def minimax(board, depth, alpha, beta, turn):
 
     else:
         min_eval = [+inf, []]
-        for move in get_possible_moves(board, turn):
+        for move in possible_moves:
             board_info = move_state(board, move[0], move[1])
             evaluation = minimax(board, depth - 1, alpha, beta, True)[0]
             undo_move(board, move[0], move[1], board_info)
