@@ -104,24 +104,24 @@ def __main__():
 
     while True:
         if turn:
-            # origin1 = int(input("Player piece row: "))
-            # origin2 = int(input("Player piece column: "))
-            # target1 = int(input("Player move row: "))
-            # target2 = int(input("Player move column: "))
-            # move_piece([origin1, origin2], [target1, target2])
-            #
-            # print_board()
+            origin1 = int(input("Player piece row: "))
+            origin2 = int(input("Player piece column: "))
+            target1 = int(input("Player move row: "))
+            target2 = int(input("Player move column: "))
+            move_piece([origin1, origin2], [target1, target2])
 
-            coulee_move = minimax(board, depth, -inf, inf, turn)
-            move_piece(coulee_move[1][0], coulee_move[1][1])
-
-            print("~~~~~BLACK TO MOVE~~~~~")
             print_board()
 
-            print("Evaluation,", coulee_move[0])
-            print("Hit count: ", str(get_hit_count()))
-            print("Branches Searched: ", str(get_search_count()))
-            move_count += 1
+            # coulee_move = minimax(board, depth, -inf, inf, turn)
+            # move_piece(coulee_move[1][0], coulee_move[1][1])
+            #
+            # print("~~~~~BLACK TO MOVE~~~~~")
+            # print_board()
+            #
+            # print("Evaluation,", coulee_move[0])
+            # print("Hit count: ", str(get_hit_count()))
+            # print("Branches Searched: ", str(get_search_count()))
+            # move_count += 1
 
         else:
             coulee_move = minimax(board, depth, -inf, inf, turn)
