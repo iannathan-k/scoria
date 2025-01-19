@@ -54,7 +54,6 @@ def minimax(board, depth, alpha, beta, turn):
 
     if depth == 0 or determine_winner(board, turn) != PieceColor.NULL:
         return [evaluate_board(board, turn), []]
-    
     possible_moves = heuristic_ordering(get_possible_moves(board, turn), board)
 
     if turn:

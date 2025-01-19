@@ -3,6 +3,11 @@ from enum import Enum
 hit_count = 0
 searched_count = 0
 king_pieces = [None, None]
+past_states = {}
+past_moves = {}
+
+def hash_board(board):
+    return hash(tuple(tuple(row) for row in board))
 
 def get_king_pos(side):
     if side:
@@ -25,13 +30,9 @@ def get_search_count():
 def in_range(position):
     global hit_count
     hit_count += 1
-    if 0 <= position[0] <= 7 and 0 <= position[1] <= 7:
-        return True
-    else:
-        return False
+    return 0 <= position[0] <= 7 and 0 <= position[1] <= 7
 
 def king_in_check(board, color):
-
     if color == PieceColor.WHITE:
         king_pos = get_king_pos(True)
     else:
@@ -230,6 +231,11 @@ class Pawn:
         self._position = position
 
     def get_moves(self, board):
+        board_hash = hash_board(board)
+        if board_hash in past_moves:
+            if self in past_moves[board_hash]:
+                return past_moves[board_hash][self]
+
         possible_moves = []
         moves = [
             [self._position[0] + self._direction, self._position[1]], # advance 1
@@ -261,6 +267,11 @@ class Pawn:
                     if not king_check(board, self._position, moves[3], self._color):
                         possible_moves.append(moves[3])
 
+        if board_hash in past_moves:
+            past_moves[board_hash][self] = possible_moves
+        else:
+            past_moves[board_hash] = {board_hash: possible_moves}
+
         return possible_moves
 
 class Knight:
@@ -269,6 +280,7 @@ class Knight:
         self._type = PieceType.KNIGHT
         self._color = color
         self._points = 320
+        self._moved = True
 
     def get_position(self):
         return self._position
@@ -285,7 +297,14 @@ class Knight:
     def set_position(self, position):
         self._position = position
 
+    
+
     def get_moves(self, board):
+        board_hash = hash_board(board)
+        if board_hash in past_moves:
+            if self in past_moves[board_hash]:
+                return past_moves[board_hash][self]
+
         possible_moves = []
         moves = [
             [self._position[0] + 2, self._position[1] + 1],
@@ -304,6 +323,11 @@ class Knight:
                     if not king_check(board, self._position, move, self._color):
                         possible_moves.append(move)
 
+        if board_hash in past_moves:
+            past_moves[board_hash][self] = possible_moves
+        else:
+            past_moves[board_hash] = {board_hash: possible_moves}
+
         return possible_moves
 
 class Bishop:
@@ -312,6 +336,7 @@ class Bishop:
         self._type = PieceType.BISHOP
         self._color = color
         self._points = 330
+        self._moved = True
 
     def get_position(self):
         return self._position
@@ -328,7 +353,14 @@ class Bishop:
     def set_position(self, position):
         self._position = position
 
+    
+
     def get_moves(self, board):
+        board_hash = hash_board(board)
+        if board_hash in past_moves:
+            if self in past_moves[board_hash]:
+                return past_moves[board_hash][self]
+
         possible_moves = []
 
         directions = [
@@ -353,6 +385,11 @@ class Bishop:
 
                 current_move = [current_move[0] + direction[0], current_move[1] + direction[1]]
 
+        if board_hash in past_moves:
+            past_moves[board_hash][self] = possible_moves
+        else:
+            past_moves[board_hash] = {board_hash: possible_moves}
+
         return possible_moves
 
 class Rook:
@@ -361,6 +398,7 @@ class Rook:
         self._type = PieceType.ROOK
         self._color = color
         self._points = 500
+        self._moved = True
 
     def get_position(self):
         return self._position
@@ -377,7 +415,14 @@ class Rook:
     def set_position(self, position):
         self._position = position
 
+    
+
     def get_moves(self, board):
+        board_hash = hash_board(board)
+        if board_hash in past_moves:
+            if self in past_moves[board_hash]:
+                return past_moves[board_hash][self]
+
         possible_moves = []
 
         directions = [
@@ -402,6 +447,11 @@ class Rook:
 
                 current_move = [current_move[0] + direction[0], current_move[1] + direction[1]]
 
+        if board_hash in past_moves:
+            past_moves[board_hash][self] = possible_moves
+        else:
+            past_moves[board_hash] = {board_hash: possible_moves}
+
         return possible_moves
 
 class Queen:
@@ -410,6 +460,7 @@ class Queen:
         self._type = PieceType.QUEEN
         self._color = color
         self._points = 900
+        self._moved = True
 
     def get_position(self):
         return self._position
@@ -426,7 +477,14 @@ class Queen:
     def set_position(self, position):
         self._position = position
 
+    
+
     def get_moves(self, board):
+        board_hash = hash_board(board)
+        if board_hash in past_moves:
+            if self in past_moves[board_hash]:
+                return past_moves[board_hash][self]
+
         possible_moves = []
 
         directions = [
@@ -456,6 +514,11 @@ class Queen:
 
                 current_move = [current_move[0] + direction[0], current_move[1] + direction[1]]
 
+        if board_hash in past_moves:
+            past_moves[board_hash][self] = possible_moves
+        else:
+            past_moves[board_hash] = {board_hash: possible_moves}
+
         return possible_moves
 
 class King:
@@ -464,6 +527,7 @@ class King:
         self._type = PieceType.KING
         self._color = color
         self._points = 10
+        self._moved = True
 
     def get_position(self):
         return self._position
@@ -480,7 +544,14 @@ class King:
     def set_position(self, position):
         self._position = position
 
-    def get_moves(self, board, a=False):
+    
+
+    def get_moves(self, board):
+        board_hash = hash_board(board)
+        if board_hash in past_moves:
+            if self in past_moves[board_hash]:
+                return past_moves[board_hash][self]
+
         possible_moves = []
 
         directions = [
@@ -501,5 +572,9 @@ class King:
                     if not king_check(board, self._position, current_move, self._color):
                         possible_moves.append(current_move)
 
+        if board_hash in past_moves:
+            past_moves[board_hash][self] = possible_moves
+        else:
+            past_moves[board_hash] = {board_hash: possible_moves}
 
         return possible_moves

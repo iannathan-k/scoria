@@ -99,6 +99,8 @@ def __main__():
     turn = set_up(fen)
     print_board()
     move_count = 0
+    # get_possible_moves(board, True)
+    # get_possible_moves(board, False)
 
     while True:
         if turn:
@@ -107,10 +109,8 @@ def __main__():
             # target1 = int(input("Player move row: "))
             # target2 = int(input("Player move column: "))
             # move_piece([origin1, origin2], [target1, target2])
-            
+            #
             # print_board()
-
-
 
             coulee_move = minimax(board, depth, -inf, inf, turn)
             move_piece(coulee_move[1][0], coulee_move[1][1])
