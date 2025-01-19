@@ -62,9 +62,15 @@ An *extremely* rudimentary chess bot, designed and programmed completely in Pyth
 
 ### Evaluation
 
-Board states are evaluated using an evaluation function, that takes into consideration 2 facts. Piece values, which a doubled weighting, and the number of possible moves to make. This encourages the bot to develop its position and avoid cramped positions, which not needlessly trading off pieces.
+Board states are evaluated using an evaluation function, which considers a number of things. Most importantly, pieces are given map weightings, favouring some squares and disfavouring others. For example, knights should be in the center and not at the edges, so the weightings towards the center and high and towards the ends negative. Secondly is the piece values, with some adjustments to make them more reflective rather than the standard piece values, and the mobility, meaning number of possible moves favouring positions where the bot is in control.
 
-$$ E = 2(\Sigma p) + \Sigma m $$
+(https://www.chessprogramming.org/Simplified_Evaluation_Function)
+
+
+
+> $$ E = \Sigma P + 5\Sigma M + \Sigma Pw $$
+
+
 
 This also suggests that a higher evaluation, `> 0` means white has an advantage, while a lower evaluation, `< 0` favours black. An evaluation of 1000 or -1000 means one of the sides has won the game. A result of -100 or 100 is given in the case of a stalemate as discouragement.
 
@@ -101,6 +107,10 @@ def minimax(board, depth, turn):
 ### Optimization
 
 Alpha-Beta pruning is the largest optimization made to the minimax algorithm. It prunes branches which are guaranteed to never be chosen as the path in an optimal game, which saves time by not searching those branches. It is implemented using alpha and beta values which have simple logic to tell if the branch is useless.
+
+Order heuristic is the second greatest, which works to assists alpha beta pruning by increasing effectivity. It essentially predicts which moves are likely to be good, like pawn promotion or beneficial piece captures and pushes them to be evaluated first. This means that the computer will get a better evaluation first, and is able to cut out the worse evaluations later.
+
+History heuristic remembers the board states and the possible moves for each piece in that board state. This means that whenever that same state is revisited, the piece moves don't have to be recalucalted as they have already been stored, and just need to be accessed.
 
 ~~~
 def minimax(board, depth, alpha, beta, turn):
@@ -142,5 +152,5 @@ King check is done by taking the possible squares attackers can be on, like the 
 
 Every time a piece is moved, whether it is for finding whether a move is valid, evaluating the board, or searching in the next depth for the minimax algorithm, there is only ever one board which is modified. Simply, the board is reverted when you backtrack, allowing memory saving because there need not a million different copies of the same board.
 
-## Credits
+## Author
 ### Ian Nathan Kusmiantoro
