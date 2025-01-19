@@ -155,7 +155,10 @@ def evaluate_board(board, turn):
     elif board_state == PieceColor.WHITE:
         return 10000
     elif board_state == PieceType.EMPTY:
-        return 0
+        if turn:
+            return -5000
+        else:
+            return 5000
 
     white_advantage = 0
     black_advantage = 0

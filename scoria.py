@@ -16,13 +16,9 @@ def heuristic_ordering(moves, board):
         if piece.get_type() == PieceType.PAWN and (target[0] == 0 or target[0] == 7):
             value += 900
 
-
         return value
 
     return sorted(moves, key=move_value, reverse=True)
-
-def board_hash(board):
-    return "".join(str(piece.get_type()) for row in board for piece in row)
 
 def move_state(board, origin_pos, target_pos):
     piece = board[origin_pos[0]][origin_pos[1]]
@@ -48,7 +44,7 @@ def undo_move(board, origin_pos, target_pos, board_info):
     piece.set_position(origin_pos)
 
 def minimax(board, depth, alpha, beta, turn):
-    board_key = board_hash(board)
+    board_key = hash_board(board)
     if board_key in transposition_table and transposition_table[board_key][1] >= depth:
         return transposition_table[board_key][0]
 
