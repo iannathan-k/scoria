@@ -66,11 +66,7 @@ Board states are evaluated using an evaluation function, which considers a numbe
 
 (https://www.chessprogramming.org/Simplified_Evaluation_Function)
 
-
-
-> $$ E = \Sigma P + 5\Sigma M + \Sigma Pw $$
-
-
+$$ E = \Sigma P + 5\Sigma M + \Sigma Pw $$
 
 This also suggests that a higher evaluation, `> 0` means white has an advantage, while a lower evaluation, `< 0` favours black. An evaluation of 1000 or -1000 means one of the sides has won the game. A result of -100 or 100 is given in the case of a stalemate as discouragement.
 
