@@ -49,7 +49,7 @@ def king_in_check(board, color):
         [1, 1],  # SE
         [1, -1],  # SW
         [-1, 1],  # NE
-        [-1, -1]  # NWv
+        [-1, -1]  # NW
     ]
 
     # Rook Capture
@@ -280,7 +280,6 @@ class Knight:
         self._type = PieceType.KNIGHT
         self._color = color
         self._points = 320
-        self._moved = True
 
     def get_position(self):
         return self._position
@@ -296,8 +295,6 @@ class Knight:
 
     def set_position(self, position):
         self._position = position
-
-    
 
     def get_moves(self, board):
         board_hash = hash_board(board)
@@ -336,7 +333,6 @@ class Bishop:
         self._type = PieceType.BISHOP
         self._color = color
         self._points = 330
-        self._moved = True
 
     def get_position(self):
         return self._position
@@ -352,8 +348,6 @@ class Bishop:
 
     def set_position(self, position):
         self._position = position
-
-    
 
     def get_moves(self, board):
         board_hash = hash_board(board)
@@ -398,7 +392,7 @@ class Rook:
         self._type = PieceType.ROOK
         self._color = color
         self._points = 500
-        self._moved = True
+        self._moved = [True, True]
 
     def get_position(self):
         return self._position
@@ -415,7 +409,14 @@ class Rook:
     def set_position(self, position):
         self._position = position
 
-    
+    def set_deep_moved(self, move):
+        self._moved[1] = move
+
+    def set_shallow_moved(self, move):
+        self._moved[0] = move
+
+    def get_moved(self):
+        return self._moved
 
     def get_moves(self, board):
         board_hash = hash_board(board)
@@ -460,7 +461,6 @@ class Queen:
         self._type = PieceType.QUEEN
         self._color = color
         self._points = 900
-        self._moved = True
 
     def get_position(self):
         return self._position
@@ -476,8 +476,6 @@ class Queen:
 
     def set_position(self, position):
         self._position = position
-
-    
 
     def get_moves(self, board):
         board_hash = hash_board(board)
@@ -527,7 +525,7 @@ class King:
         self._type = PieceType.KING
         self._color = color
         self._points = 10
-        self._moved = True
+        self._moved = [True, True]
 
     def get_position(self):
         return self._position
@@ -544,7 +542,14 @@ class King:
     def set_position(self, position):
         self._position = position
 
-    
+    def set_deep_moved(self, move):
+        self._moved[1] = move
+
+    def set_shallow_moved(self, move):
+        self._moved[0] = move
+
+    def get_moved(self):
+        return self._moved
 
     def get_moves(self, board):
         board_hash = hash_board(board)
@@ -571,6 +576,43 @@ class King:
                 if board[current_move[0]][current_move[1]].get_color() != self._color:
                     if not king_check(board, self._position, current_move, self._color):
                         possible_moves.append(current_move)
+
+        castle_long = [
+            [0, -1],
+            [0, -2],
+            [0, -3]
+        ]
+
+        castle_short = [
+            [0, 1],
+            [0, 2]
+        ]
+
+        if in_range([self._position[0], self._position[1] + 3]):
+            piece = board[self._position[0]][self._position[1] + 3]
+
+            if piece.get_type() == PieceType.ROOK and not piece.get_moved()[0] and not self._moved[0]:
+                for square in castle_short:
+                    new_pos = [self._position[0] + square[0], self._position[1] + square[1]]
+                    if board[new_pos[0]][new_pos[1]].get_type() != PieceType.EMPTY:
+                        break
+                    if king_check(board, self._position, new_pos, self._color):
+                        break
+                else:
+                    possible_moves.append([self._position[0], self._position[1] + 2])
+
+        if in_range([self._position[0], self._position[1] - 4]):
+            piece = board[self._position[0]][self._position[1] - 4]
+
+            if piece.get_type() == PieceType.ROOK and not piece.get_moved()[0] and not self._moved[0]:
+                for square in castle_long:
+                    new_pos = [self._position[0] + square[0], self._position[1] + square[1]]
+                    if board[new_pos[0]][new_pos[1]].get_type() != PieceType.EMPTY:
+                        break
+                    if king_check(board, self._position, new_pos, self._color):
+                        break
+                else:
+                    possible_moves.append([self._position[0], self._position[1] - 3])
 
         if board_hash in past_moves:
             past_moves[board_hash][self] = possible_moves

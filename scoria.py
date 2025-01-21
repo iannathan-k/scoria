@@ -35,6 +35,11 @@ def move_state(board, origin_pos, target_pos):
     board[target_pos[0]][target_pos[1]] = piece
     board[origin_pos[0]][origin_pos[1]] = Empty()
     piece.set_position(target_pos)
+
+    # Has moved logic
+    if piece.get_type() == PieceType.ROOK or piece.get_type() == PieceType.KING:
+        piece.set_shallow_moved(True)
+
     return [captured_piece, piece]
 
 def undo_move(board, origin_pos, target_pos, board_info):
@@ -42,6 +47,11 @@ def undo_move(board, origin_pos, target_pos, board_info):
     board[origin_pos[0]][origin_pos[1]] = board_info[1]
     board[target_pos[0]][target_pos[1]] = board_info[0]
     piece.set_position(origin_pos)
+
+    # Undo moved logic
+    if piece.get_type() == PieceType.ROOK or piece.get_type() == PieceType.KING:
+        if not piece.get_moved()[1]:
+            piece.set_shallow_moved(False)
 
 def minimax(board, depth, alpha, beta, turn):
     board_key = hash_board(board)
