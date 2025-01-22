@@ -5,6 +5,7 @@ searched_count = 0
 king_pieces = [None, None]
 past_states = {}
 past_moves = {}
+# current_count = 0
 
 def hash_board(board):
     return hash(tuple(tuple(row) for row in board))
@@ -211,6 +212,7 @@ class Pawn:
         self._color = color
         self._direction = direction # +1 downward, -1 upward
         self._points = 100
+        # self._eligible = -1
 
     def get_position(self):
         return self._position
@@ -243,6 +245,20 @@ class Pawn:
             [self._position[0] + self._direction, self._position[1] + 1], # capture right
             [self._position[0] + self._direction, self._position[1] - 1] # capture left
         ]
+        #
+        # if in_range(moves[2]):
+        #     if board[moves[2][0]][moves[2][1]].get_type() != PieceType.EMPTY:
+        #         if not king_check(board, self._position, moves[2], self._color):
+        #             if board[self._position[0]][self._position[1] + 1].get_type() == PieceType.PAWN:
+        #                 if board[self._position[0]][self._position[1] + 1].get_elegible() == current_count:
+        #                     possible_moves.append([self._position[0] + self._direction, self._position[1] + 2])
+        #
+        # if in_range(moves[3]):
+        #     if board[moves[3][0]][moves[3][1]].get_type() != PieceType.EMPTY:
+        #         if not king_check(board, self._position, moves[3], self._color):
+        #             if board[self._position[0]][self._position[1] - 1].get_type() == PieceType.PAWN:
+        #                 if board[self._position[0]][self._position[1] - 1].get_elegible() == current_count:
+        #                     possible_moves.append([self._position[0] + self._direction, self._position[1] - 2])
 
         if in_range(moves[0]):
             if board[moves[0][0]][moves[0][1]].get_type() == PieceType.EMPTY:
