@@ -123,8 +123,24 @@ def castle(origin_pos, target_pos):
         rook.set_deep_moved(True)
         rook.set_shallow_moved(True)
 
+def en_passant(origin_pos, target_pos):
+    print(board[origin_pos[0]][origin_pos[1]])
+    if target_pos[1] - origin_pos[1] > 1:
+        move_piece(origin_pos, [target_pos[0], target_pos[1] - 1])
+        board[origin_pos[0]][origin_pos[1] + 1] = Empty()
+    elif target_pos[1] - origin_pos[1] < -1:
+        move_piece(origin_pos, [target_pos[0], target_pos[1] + 1])
+        board[origin_pos[0]][origin_pos[1] - 1] = Empty()
+
 def move_piece(origin_pos, target_pos):
     piece = board[origin_pos[0]][origin_pos[1]]
+
+    if piece.get_type() == PieceType.PAWN:
+        en_passant(origin_pos, target_pos)
+
+    if abs(target_pos[1] - origin_pos[1]) > 1:
+        return
+
     board[target_pos[0]][target_pos[1]] = piece
     board[origin_pos[0]][origin_pos[1]] = Empty()
     piece.set_position(target_pos)
@@ -139,6 +155,20 @@ def move_piece(origin_pos, target_pos):
         if abs(origin_pos[1] - target_pos[1]) > 1:
             castle(origin_pos, target_pos)
 
+    # En Passant Logic
+    if in_range([target_pos[0], target_pos[1] + 1]):
+        right_piece = board[target_pos[0]][target_pos[1] + 1]
+        if right_piece.get_type() == PieceType.PAWN:
+            right_piece.set_passant(True, 1)
+            right_piece.set_passant(True, 0)
+            right_piece.set_count()
+    if in_range([target_pos[0], target_pos[1] - 1]):
+        left_piece = board[target_pos[0]][target_pos[1] - 1]
+        if left_piece.get_type() == PieceType.PAWN:
+            left_piece.set_passant(True, 1)
+            left_piece.set_passant(True, 0)
+            left_piece.set_count()
+
     # Promotion Logic
     if board[target_pos[0]][target_pos[1]].get_type() == PieceType.PAWN:
         if target_pos[0] == 7 or target_pos[0] == 0:
@@ -151,28 +181,26 @@ def __main__():
     turn = set_up(fen)
     print_board()
     move_count = 0
-    # get_possible_moves(board, True)
-    # get_possible_moves(board, False)
 
     while True:
         if turn:
-            # origin1 = int(input("Player piece row: "))
-            # origin2 = int(input("Player piece column: "))
-            # target1 = int(input("Player move row: "))
-            # target2 = int(input("Player move column: "))
-            # move_piece([origin1, origin2], [target1, target2])
-            #
-            # print_board()
+            origin1 = int(input("Player piece row: "))
+            origin2 = int(input("Player piece column: "))
+            target1 = int(input("Player move row: "))
+            target2 = int(input("Player move column: "))
+            move_piece([origin1, origin2], [target1, target2])
 
-            coulee_move = minimax(board, depth, -inf, inf, turn)
-            move_piece(coulee_move[1][0], coulee_move[1][1])
-
-            print("~~~~~BLACK TO MOVE~~~~~")
             print_board()
 
-            print("Evaluation,", coulee_move[0])
-            print("Hit count: ", str(get_hit_count()))
-            print("Branches Searched: ", str(get_search_count()))
+            # coulee_move = minimax(board, depth, -inf, inf, turn)
+            # move_piece(coulee_move[1][0], coulee_move[1][1])
+            #
+            # print("~~~~~BLACK TO MOVE~~~~~")
+            # print_board()
+            #
+            # print("Evaluation,", coulee_move[0])
+            # print("Hit count: ", str(get_hit_count()))
+            # print("Branches Searched: ", str(get_search_count()))
             move_count += 1
 
         else:
@@ -188,6 +216,7 @@ def __main__():
 
         turn = not turn
         add_state(board)
+        set_current_count()
 
         if determine_winner(board, turn) == PieceColor.WHITE:
             print("WHITE WON")
