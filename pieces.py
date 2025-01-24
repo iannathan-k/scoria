@@ -5,11 +5,11 @@ searched_count = 0
 king_pieces = [None, None]
 past_states = {}
 past_moves = {}
-# current_count = 0
-#
-# def set_current_count():
-#     global current_count
-#     current_count += 1
+current_count = 0
+
+def set_current_count():
+    global current_count
+    current_count += 1
 
 def hash_board(board):
     return hash(tuple(tuple(row) for row in board))
@@ -216,8 +216,8 @@ class Pawn:
         self._color = color
         self._direction = direction # +1 downward, -1 upward
         self._points = 100
-        # self._passant = [False, False]
-        # self._count = 0
+        self._passant = [False, False] # Left, Right
+        self._count = 0
 
     def get_position(self):
         return self._position
@@ -237,14 +237,14 @@ class Pawn:
     def set_position(self, position):
         self._position = position
 
-    # def set_passant(self, passant, index):
-    #     self._passant[index] = passant
-    #
-    # def get_deep_passant(self):
-    #     return self._passant[0]
-    #
-    # def set_count(self):
-    #     self._count = current_count
+    def set_passant(self, passant, index):
+        self._passant[index] = passant
+
+    def get_passant(self):
+        return self._passant
+
+    def set_count(self):
+        self._count = current_count
 
     def get_moves(self, board):
         board_hash = hash_board(board)
@@ -260,13 +260,13 @@ class Pawn:
             [self._position[0] + self._direction, self._position[1] - 1] # capture left
         ]
 
-        # if self._passant[1] and self._count + 1 == current_count:
-        #     move = [self._position[0] + self._direction, self._position[1] + 2]
-        #     possible_moves.append(move)
-        #
-        # if self._passant[1] and self._count + 1 == current_count:
-        #     move = [self._position[0] + self._direction, self._position[1] - 2]
-        #     possible_moves.append(move)
+        # Left Passant
+        if self._passant[0] and self._count + 1 == current_count:
+            possible_moves.append(moves[3])
+
+        # Right Passant
+        if self._passant[1] and self._count + 1 == current_count:
+            possible_moves.append(moves[2])
 
         if in_range(moves[0]):
             if board[moves[0][0]][moves[0][1]].get_type() == PieceType.EMPTY:

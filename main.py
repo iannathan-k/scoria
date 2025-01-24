@@ -124,22 +124,19 @@ def castle(origin_pos, target_pos):
         rook.set_shallow_moved(True)
 
 def en_passant(origin_pos, target_pos):
-    print(board[origin_pos[0]][origin_pos[1]])
-    if target_pos[1] - origin_pos[1] > 1:
-        move_piece(origin_pos, [target_pos[0], target_pos[1] - 1])
-        board[origin_pos[0]][origin_pos[1] + 1] = Empty()
-    elif target_pos[1] - origin_pos[1] < -1:
-        move_piece(origin_pos, [target_pos[0], target_pos[1] + 1])
-        board[origin_pos[0]][origin_pos[1] - 1] = Empty()
+    piece = board[origin_pos[0]][origin_pos[1]]
+    board[target_pos[0]][target_pos[1]] = piece
+    board[target_pos[0] - 1][target_pos[1]] = Empty()
+    piece.set_position(target_pos)
 
 def move_piece(origin_pos, target_pos):
     piece = board[origin_pos[0]][origin_pos[1]]
+    captured_piece = board[target_pos[0]][target_pos[1]]
 
     if piece.get_type() == PieceType.PAWN:
-        en_passant(origin_pos, target_pos)
-
-    if abs(target_pos[1] - origin_pos[1]) > 1:
-        return
+        if target_pos[1] != origin_pos[1]:
+            if captured_piece.get_type() == PieceType.EMPTY:
+                en_passant(origin_pos, target_pos)
 
     board[target_pos[0]][target_pos[1]] = piece
     board[origin_pos[0]][origin_pos[1]] = Empty()
@@ -156,18 +153,17 @@ def move_piece(origin_pos, target_pos):
             castle(origin_pos, target_pos)
 
     # En Passant Logic
-    if in_range([target_pos[0], target_pos[1] + 1]):
-        right_piece = board[target_pos[0]][target_pos[1] + 1]
-        if right_piece.get_type() == PieceType.PAWN:
-            right_piece.set_passant(True, 1)
-            right_piece.set_passant(True, 0)
-            right_piece.set_count()
-    if in_range([target_pos[0], target_pos[1] - 1]):
-        left_piece = board[target_pos[0]][target_pos[1] - 1]
-        if left_piece.get_type() == PieceType.PAWN:
-            left_piece.set_passant(True, 1)
-            left_piece.set_passant(True, 0)
-            left_piece.set_count()
+    if piece.get_type() == PieceType.PAWN:
+        if in_range([target_pos[0], target_pos[1] + 1]):
+            right_piece = board[target_pos[0]][target_pos[1] + 1]
+            if right_piece.get_type() == PieceType.PAWN:
+                right_piece.set_passant(True, 0)
+                right_piece.set_count()
+        if in_range([target_pos[0], target_pos[1] - 1]):
+            left_piece = board[target_pos[0]][target_pos[1] - 1]
+            if left_piece.get_type() == PieceType.PAWN:
+                left_piece.set_passant(True, 1)
+                left_piece.set_count()
 
     # Promotion Logic
     if board[target_pos[0]][target_pos[1]].get_type() == PieceType.PAWN:
@@ -184,23 +180,23 @@ def __main__():
 
     while True:
         if turn:
-            origin1 = int(input("Player piece row: "))
-            origin2 = int(input("Player piece column: "))
-            target1 = int(input("Player move row: "))
-            target2 = int(input("Player move column: "))
-            move_piece([origin1, origin2], [target1, target2])
+            # origin1 = int(input("Player piece row: "))
+            # origin2 = int(input("Player piece column: "))
+            # target1 = int(input("Player move row: "))
+            # target2 = int(input("Player move column: "))
+            # move_piece([origin1, origin2], [target1, target2])
+            #
+            # print_board()
 
+            coulee_move = minimax(board, depth, -inf, inf, turn)
+            move_piece(coulee_move[1][0], coulee_move[1][1])
+
+            print("~~~~~BLACK TO MOVE~~~~~")
             print_board()
 
-            # coulee_move = minimax(board, depth, -inf, inf, turn)
-            # move_piece(coulee_move[1][0], coulee_move[1][1])
-            #
-            # print("~~~~~BLACK TO MOVE~~~~~")
-            # print_board()
-            #
-            # print("Evaluation,", coulee_move[0])
-            # print("Hit count: ", str(get_hit_count()))
-            # print("Branches Searched: ", str(get_search_count()))
+            print("Evaluation,", coulee_move[0])
+            print("Hit count: ", str(get_hit_count()))
+            print("Branches Searched: ", str(get_search_count()))
             move_count += 1
 
         else:
