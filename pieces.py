@@ -12,7 +12,7 @@ def set_current_count():
     current_count += 1
 
 def hash_board(board):
-    return hash(tuple(tuple(row) for row in board))
+    return hash(tuple(tuple((piece.get_type(), piece.get_color()) for piece in row) for row in board))
 
 def get_king_pos(side):
     if side:

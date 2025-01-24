@@ -27,7 +27,7 @@ def move_state(board, origin_pos, target_pos):
     # if en passant
     if piece.get_type() == PieceType.PAWN:
         if target_pos[1] != origin_pos[1]:
-            if captured_piece.get_type() == PieceType.EMPTY:
+            if captured_piece.get_type() == PieceType.EMPTY and board[target_pos[0] - 1][target_pos[1]].get_color() != piece.get_color():
                 captured_piece = board[target_pos[0] - 1][target_pos[1]]
                 board[target_pos[0]][target_pos[1]] = piece
                 board[target_pos[0] - 1][target_pos[1]] = Empty()
@@ -57,7 +57,7 @@ def undo_move(board, origin_pos, target_pos, board_info):
     piece = board[target_pos[0]][target_pos[1]]
 
     # If En Passant
-    if piece.get_type() == PieceType.PAWN:
+    if piece.get_type() == PieceType.PAWN and board_info[0].get_color() != piece.get_color():
         if target_pos[1] != origin_pos[1]:
             if board_info[0].get_position()[0] == piece.get_position()[0] - 1:
                 board[origin_pos[0]][origin_pos[1]] = piece
