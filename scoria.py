@@ -53,8 +53,7 @@ def move_state(board, origin_pos, target_pos):
     return [captured_piece, piece]
 
 def undo_move(board, origin_pos, target_pos, board_info):
-    # Can be replaced with board_info[1]?
-    piece = board[target_pos[0]][target_pos[1]]
+    piece = board_info[1]
 
     # If En Passant
     if piece.get_type() == PieceType.PAWN and board_info[0].get_color() != piece.get_color():
@@ -66,7 +65,7 @@ def undo_move(board, origin_pos, target_pos, board_info):
                 piece.set_position(origin_pos)
                 return
 
-    board[origin_pos[0]][origin_pos[1]] = board_info[1]
+    board[origin_pos[0]][origin_pos[1]] = piece
     board[target_pos[0]][target_pos[1]] = board_info[0]
     piece.set_position(origin_pos)
 
@@ -77,11 +76,12 @@ def undo_move(board, origin_pos, target_pos, board_info):
 
 def minimax(board, depth, alpha, beta, turn):
     board_key = hash_board(board)
-    if board_key in transposition_table and transposition_table[board_key][1] >= depth:
-        return transposition_table[board_key][0]
+    if board_key in transposition_table and transposition_table[board_key][0] >= depth:
+        return transposition_table[board_key][1]
 
     if depth == 0 or determine_winner(board, turn) != PieceColor.NULL:
         return [evaluate_board(board, turn), []]
+
     possible_moves = heuristic_ordering(get_possible_moves(board, turn), board)
 
     if turn:
@@ -95,6 +95,7 @@ def minimax(board, depth, alpha, beta, turn):
             alpha = max(alpha, evaluation)
             if beta <= alpha:
                 break
+        transposition_table[board_key] = [depth, max_eval]
         return max_eval
 
     else:
@@ -108,4 +109,5 @@ def minimax(board, depth, alpha, beta, turn):
             beta = min(beta, evaluation)
             if beta <= alpha:
                 break
+        transposition_table[board_key] = [depth, min_eval]
         return min_eval
