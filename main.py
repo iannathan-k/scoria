@@ -128,6 +128,8 @@ def en_passant(origin_pos, target_pos):
     board[target_pos[0]][target_pos[1]] = piece
     board[target_pos[0] - 1][target_pos[1]] = Empty()
     piece.set_position(target_pos)
+    piece.set_passant(False, 0)
+    piece.set_passant(False, 1)
 
 def move_piece(origin_pos, target_pos):
     piece = board[origin_pos[0]][origin_pos[1]]
@@ -154,16 +156,17 @@ def move_piece(origin_pos, target_pos):
 
     # En Passant Logic
     if piece.get_type() == PieceType.PAWN:
-        if in_range([target_pos[0], target_pos[1] + 1]):
-            right_piece = board[target_pos[0]][target_pos[1] + 1]
-            if right_piece.get_type() == PieceType.PAWN and right_piece.get_color() != piece.get_color():
-                right_piece.set_passant(True, 0)
-                right_piece.set_count()
-        if in_range([target_pos[0], target_pos[1] - 1]):
-            left_piece = board[target_pos[0]][target_pos[1] - 1]
-            if left_piece.get_type() == PieceType.PAWN and left_piece.get_color() != piece.get_color():
-                left_piece.set_passant(True, 1)
-                left_piece.set_count()
+        if abs(origin_pos[0] - target_pos[0]) > 1:
+            if in_range([target_pos[0], target_pos[1] + 1]):
+                right_piece = board[target_pos[0]][target_pos[1] + 1]
+                if right_piece.get_type() == PieceType.PAWN and right_piece.get_color() != piece.get_color():
+                    right_piece.set_passant(True, 0)
+                    right_piece.set_count()
+            if in_range([target_pos[0], target_pos[1] - 1]):
+                left_piece = board[target_pos[0]][target_pos[1] - 1]
+                if left_piece.get_type() == PieceType.PAWN and left_piece.get_color() != piece.get_color():
+                    left_piece.set_passant(True, 1)
+                    left_piece.set_count()
 
     # Promotion Logic
     if board[target_pos[0]][target_pos[1]].get_type() == PieceType.PAWN:
