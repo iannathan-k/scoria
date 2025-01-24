@@ -31,10 +31,6 @@ def move_state(board, origin_pos, target_pos):
                 captured_piece = board[target_pos[0] - 1][target_pos[1]]
                 board[target_pos[0]][target_pos[1]] = piece
                 board[target_pos[0] - 1][target_pos[1]] = Empty()
-                print(piece)
-                print(captured_piece)
-                print(origin_pos)
-                print(target_pos)
                 piece.set_position(target_pos)
                 return [captured_piece, piece]
 
