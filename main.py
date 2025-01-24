@@ -156,12 +156,12 @@ def move_piece(origin_pos, target_pos):
     if piece.get_type() == PieceType.PAWN:
         if in_range([target_pos[0], target_pos[1] + 1]):
             right_piece = board[target_pos[0]][target_pos[1] + 1]
-            if right_piece.get_type() == PieceType.PAWN:
+            if right_piece.get_type() == PieceType.PAWN and right_piece.get_color() != piece.get_color():
                 right_piece.set_passant(True, 0)
                 right_piece.set_count()
         if in_range([target_pos[0], target_pos[1] - 1]):
             left_piece = board[target_pos[0]][target_pos[1] - 1]
-            if left_piece.get_type() == PieceType.PAWN:
+            if left_piece.get_type() == PieceType.PAWN and left_piece.get_color() != piece.get_color():
                 left_piece.set_passant(True, 1)
                 left_piece.set_count()
 
