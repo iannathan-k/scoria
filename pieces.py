@@ -612,35 +612,37 @@ class King:
             [0, 2]
         ]
 
-        if in_range([self._position[0], self._position[1] + 3]):
-            piece = board[self._position[0]][self._position[1] + 3]
+        if not king_in_check(board, self._color):
 
-            if piece.get_type() == PieceType.ROOK and not piece.get_moved()[0] and not self._moved[0]:
-                for square in castle_short:
-                    new_pos = [self._position[0] + square[0], self._position[1] + square[1]]
-                    if board[new_pos[0]][new_pos[1]].get_type() != PieceType.EMPTY:
-                        break
-                    if king_check(board, self._position, new_pos, self._color):
-                        break
-                else:
-                    possible_moves.append([self._position[0], self._position[1] + 2])
+            if in_range([self._position[0], self._position[1] + 3]):
+                piece = board[self._position[0]][self._position[1] + 3]
 
-        if in_range([self._position[0], self._position[1] - 4]):
-            piece = board[self._position[0]][self._position[1] - 4]
+                if piece.get_type() == PieceType.ROOK and not piece.get_moved()[0] and not self._moved[0]:
+                    for square in castle_short:
+                        new_pos = [self._position[0] + square[0], self._position[1] + square[1]]
+                        if board[new_pos[0]][new_pos[1]].get_type() != PieceType.EMPTY:
+                            break
+                        if king_check(board, self._position, new_pos, self._color):
+                            break
+                    else:
+                        possible_moves.append([self._position[0], self._position[1] + 2])
 
-            if piece.get_type() == PieceType.ROOK and not piece.get_moved()[0] and not self._moved[0]:
-                for square in castle_long:
-                    new_pos = [self._position[0] + square[0], self._position[1] + square[1]]
-                    if board[new_pos[0]][new_pos[1]].get_type() != PieceType.EMPTY:
-                        break
-                    if king_check(board, self._position, new_pos, self._color):
-                        break
-                else:
-                    possible_moves.append([self._position[0], self._position[1] - 3])
+            if in_range([self._position[0], self._position[1] - 4]):
+                piece = board[self._position[0]][self._position[1] - 4]
 
-        if board_hash in past_moves:
-            past_moves[board_hash][self] = possible_moves
-        else:
-            past_moves[board_hash] = {board_hash: possible_moves}
+                if piece.get_type() == PieceType.ROOK and not piece.get_moved()[0] and not self._moved[0]:
+                    for square in castle_long:
+                        new_pos = [self._position[0] + square[0], self._position[1] + square[1]]
+                        if board[new_pos[0]][new_pos[1]].get_type() != PieceType.EMPTY:
+                            break
+                        if king_check(board, self._position, new_pos, self._color):
+                            break
+                    else:
+                        possible_moves.append([self._position[0], self._position[1] - 3])
+
+            if board_hash in past_moves:
+                past_moves[board_hash][self] = possible_moves
+            else:
+                past_moves[board_hash] = {board_hash: possible_moves}
 
         return possible_moves

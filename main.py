@@ -1,5 +1,6 @@
 from scoria import *
 from math import inf
+from interface import *
 
 board = [[Empty() for i in range(8)] for j in range(8)]
 
@@ -24,10 +25,10 @@ def print_board():
         PieceType.EMPTY: " "
     }
 
-    print("    0   1   2   3   4   5   6   7  ")
+    print("    a   b   c   d   e   f   g   h")
     print("  +---+---+---+---+---+---+---+---+")
     for i in range(8):
-        game_line = str(i) + " | "
+        game_line = str(7 - i + 1) + " | "
         for piece in board[i]:
             if piece.get_color() == PieceColor.BLACK:
                 game_line += piece_chars_black[piece.get_type()]
@@ -174,44 +175,64 @@ def move_piece(origin_pos, target_pos):
             board[target_pos[0]][target_pos[1]] = Queen(target_pos, board[target_pos[0]][target_pos[1]].get_color())
 
 def __main__():
-    depth = int(input("Recursion Depth?: "))
+    depth = input("Recursion Depth?: ")
     fen = input("fen?: ")
+    mode = input("mode?: ")
+    # Mode 1 - Human vs Bot
+    # Mode 2 - Human vs Bot UCI
+    # Mode 3 - Bot vs Bot
+    # Mode 4 - Bot vs Bot UCI
+    if not mode: mode = 3
     if not fen: fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq"
+    if not depth: depth = 2
+    depth = int(depth)
+    mode = int(mode)
     turn = set_up(fen)
-    print_board()
     move_count = 0
+
+    if mode == 1 or mode == 3:
+        print_board()
 
     while True:
         if turn:
-            # origin1 = int(input("Player piece row: "))
-            # origin2 = int(input("Player piece column: "))
-            # target1 = int(input("Player move row: "))
-            # target2 = int(input("Player move column: "))
-            # move_piece([origin1, origin2], [target1, target2])
-            #
-            # print_board()
+            if mode == 1 or mode == 2:
+                uci = input("Enter Move: ")
+                move_piece(uci_to_move(uci)[0], uci_to_move(uci)[1])
 
-            coulee_move = minimax(board, depth, -inf, inf, turn)
-            move_piece(coulee_move[1][0], coulee_move[1][1])
+                if mode == 1:
+                    print_board()
 
-            print("~~~~~BLACK TO MOVE~~~~~")
-            print_board()
+            if mode == 3 or mode == 4:
+                coulee_move = minimax(board, depth, -inf, inf, turn)
+                move_piece(coulee_move[1][0], coulee_move[1][1])
 
-            print("Evaluation,", coulee_move[0])
-            print("Hit count: ", str(get_hit_count()))
-            print("Branches Searched: ", str(get_search_count()))
+                if mode == 3:
+                    print("~~~~~BLACK TO MOVE~~~~~")
+                    print_board()
+
+                    print("Evaluation,", coulee_move[0])
+                    print("Hit count: ", str(get_hit_count()))
+                    print("Branches Searched: ", str(get_search_count()))
+
+                if mode == 4:
+                    print(move_to_uci(coulee_move[1][0], coulee_move[1][1], board))
+
             move_count += 1
 
         else:
             coulee_move = minimax(board, depth, -inf, inf, turn)
             move_piece(coulee_move[1][0], coulee_move[1][1])
 
-            print("~~~~~WHITE TO MOVE~~~~~")
-            print_board()
+            if mode == 3 or mode == 1:
+                print("~~~~~WHITE TO MOVE~~~~~")
+                print_board()
 
-            print("Evaluation,", coulee_move[0])
-            print("Hit count: ", str(get_hit_count()))
-            print("Branches Searched: ", str(get_search_count()))
+                print("Evaluation,", coulee_move[0])
+                print("Hit count: ", str(get_hit_count()))
+                print("Branches Searched: ", str(get_search_count()))
+
+            if mode == 2 or mode == 4:
+                print(move_to_uci(coulee_move[1][0], coulee_move[1][1], board))
 
         turn = not turn
         add_state(board)
