@@ -4,40 +4,6 @@ from interface import *
 
 board = [[Empty() for i in range(8)] for j in range(8)]
 
-def print_board():
-    piece_chars_white = {
-        PieceType.PAWN : "♟",
-        PieceType.KNIGHT : "♞",
-        PieceType.BISHOP : "♝",
-        PieceType.ROOK : "♜",
-        PieceType.QUEEN : "♛",
-        PieceType.KING : "♚",
-        PieceType.EMPTY : " "
-    }
-
-    piece_chars_black = {
-        PieceType.PAWN: "♙",
-        PieceType.KNIGHT: "♘",
-        PieceType.BISHOP: "♗",
-        PieceType.ROOK: "♖",
-        PieceType.QUEEN: "♕",
-        PieceType.KING: "♔",
-        PieceType.EMPTY: " "
-    }
-
-    print("    a   b   c   d   e   f   g   h")
-    print("  +---+---+---+---+---+---+---+---+")
-    for i in range(8):
-        game_line = str(7 - i + 1) + " | "
-        for piece in board[i]:
-            if piece.get_color() == PieceColor.BLACK:
-                game_line += piece_chars_black[piece.get_type()]
-            else:
-                game_line += piece_chars_white[piece.get_type()]
-            game_line += " | "
-        print(game_line)
-        print("  +---+---+---+---+---+---+---+---+")
-
 def enter_piece(letter, index):
     if letter == "P":
         board[index // 8][index % 8] = Pawn([index // 8, index % 8], PieceColor.WHITE, -1)
@@ -191,7 +157,7 @@ def __main__():
     move_count = 0
 
     if mode == 1 or mode == 3:
-        print_board()
+        print_board(board)
 
     while True:
         if turn:
@@ -200,7 +166,7 @@ def __main__():
                 move_piece(uci_to_move(uci)[0], uci_to_move(uci)[1])
 
                 if mode == 1:
-                    print_board()
+                    print_board(board)
 
             if mode == 3 or mode == 4:
                 coulee_move = minimax(board, depth, -inf, inf, turn)
@@ -208,7 +174,7 @@ def __main__():
 
                 if mode == 3:
                     print("~~~~~BLACK TO MOVE~~~~~")
-                    print_board()
+                    print_board(board)
 
                     print("Evaluation,", coulee_move[0])
                     print("Hit count: ", str(get_hit_count()))
@@ -225,7 +191,7 @@ def __main__():
 
             if mode == 3 or mode == 1:
                 print("~~~~~WHITE TO MOVE~~~~~")
-                print_board()
+                print_board(board)
 
                 print("Evaluation,", coulee_move[0])
                 print("Hit count: ", str(get_hit_count()))

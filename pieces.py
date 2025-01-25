@@ -1,4 +1,4 @@
-from enum import Enum
+from information import *
 
 hit_count = 0
 searched_count = 0
@@ -10,9 +10,6 @@ current_count = 0
 def set_current_count():
     global current_count
     current_count += 1
-
-def hash_board(board):
-    return hash(tuple(tuple((piece.get_type(), piece.get_color()) for piece in row) for row in board))
 
 def get_king_pos(side):
     if side:
@@ -43,55 +40,16 @@ def king_in_check(board, color):
     else:
         king_pos = get_king_pos(False)
 
-    directionsR = [
+    directions = [
         [-1, 0],  # N
         [1, 0],  # S
         [0, 1],  # E
         [0, -1],  # W
-    ]
-
-    directionsB = [
         [1, 1],  # SE
         [1, -1],  # SW
         [-1, 1],  # NE
         [-1, -1]  # NW
     ]
-
-    # Rook Capture
-    for direction in directionsR:
-        current_move = [king_pos[0] + direction[0], king_pos[1] + direction[1]]
-        while in_range(current_move):
-            square = board[current_move[0]][current_move[1]]
-            if square.get_type() != PieceType.EMPTY:
-                if square.get_color() == color:
-                    break
-                if square.get_color() != color:
-                    if square.get_type() == PieceType.ROOK:
-                        return True
-                    elif square.get_type() == PieceType.QUEEN:
-                        return True
-                    else:
-                        break
-
-            current_move = [current_move[0] + direction[0], current_move[1] + direction[1]]
-
-    # Bishop Capture
-    for direction in directionsB:
-        current_move = [king_pos[0] + direction[0], king_pos[1] + direction[1]]
-        while in_range(current_move):
-            square = board[current_move[0]][current_move[1]]
-            if square.get_type() != PieceType.EMPTY:
-                if square.get_color() == color:
-                    break
-                if square.get_color() != color:
-                    if square.get_type() == PieceType.BISHOP:
-                        return True
-                    elif square.get_type() == PieceType.QUEEN:
-                        return True
-                    else:
-                        break
-
-            current_move = [current_move[0] + direction[0], current_move[1] + direction[1]]
 
     movesK = [
         [king_pos[0] + 2, king_pos[1] + 1],
@@ -104,50 +62,73 @@ def king_in_check(board, color):
         [king_pos[0] - 1, king_pos[1] + 2]
     ]
 
-    # Knight Capture
-    for move in movesK:
-        if in_range(move):
-            square = board[move[0]][move[1]]
-            if square.get_color() != color:
-                if square.get_type() == PieceType.KNIGHT:
-                    return True
-
-    movesPB = [
+    movesP = [
         [king_pos[0] + 1, king_pos[1] - 1],
-        [king_pos[0] + 1, king_pos[1] + 1]
-    ]
-
-    movesPW = [
+        [king_pos[0] + 1, king_pos[1] + 1],
         [king_pos[0] - 1, king_pos[1] - 1],
         [king_pos[0] - 1, king_pos[1] + 1]
     ]
 
-    # Pawn Capture
-    if color == PieceColor.BLACK:
-        for move in movesPB:
-            if in_range(move):
-                square = board[move[0]][move[1]]
-                if square.get_type() == PieceType.PAWN:
-                    if square.get_color() == PieceColor.WHITE:
-                        return True
+    def sliding_piece(dirs, attack_pieces):
+        for direction in dirs:
+            current_move = [king_pos[0] + direction[0], king_pos[1] + direction[1]]
+            while in_range(current_move):
+                square = board[current_move[0]][current_move[1]]
+                if square.get_type() == PieceType.EMPTY:
+                    current_move = [current_move[0] + direction[0], current_move[1] + direction[1]]
+                    continue
+                if square.get_color() == color:
+                    break
+                if square.get_type() in attack_pieces:
+                    return True
+                break
 
-    if color == PieceColor.WHITE:
-        for move in movesPW:
-            if in_range(move):
-                square = board[move[0]][move[1]]
-                if square.get_type() == PieceType.PAWN:
-                    if square.get_color() == PieceColor.BLACK:
-                        return True
+        return False
 
-    # King Capture
-    for direction in directionsB + directionsR:
-        current_move = [king_pos[0] + direction[0], king_pos[1] + direction[1]]
-        if in_range(current_move):
-            if board[current_move[0]][current_move[1]].get_type() == PieceType.KING:
+    # Rook Capture
+    if sliding_piece(directions[:4], {PieceType.ROOK, PieceType.QUEEN}): return True
+
+    # Bishop Capture
+    if sliding_piece(directions[4:], {PieceType.BISHOP, PieceType.QUEEN}): return True
+
+    # Knight Capture
+    for move in movesK:
+        if not in_range(move):
+            continue
+        square = board[move[0]][move[1]]
+        if square.get_color() == color:
+            continue
+        if square.get_type() == PieceType.KNIGHT:
+            return True
+
+    def pawn_piece(moves, attack_color):
+
+        for move in moves:
+            if not in_range(move):
+                continue
+            square = board[move[0]][move[1]]
+            if square.get_type() != PieceType.PAWN:
+                continue
+            if square.get_color() == attack_color:
                 return True
 
-    return False
+        return False
 
+    # Pawn Capture
+    if color == PieceColor.BLACK:
+        if pawn_piece(movesP[:2], PieceColor.WHITE): return True
+    else:
+        if pawn_piece(movesP[2:], PieceColor.BLACK): return True
+
+    # King Capture
+    for direction in directions:
+        current_move = [king_pos[0] + direction[0], king_pos[1] + direction[1]]
+        if not in_range(current_move):
+            continue
+        if board[current_move[0]][current_move[1]].get_type() == PieceType.KING:
+            return True
+
+    return False
 
 def king_check(board, origin_pos, target_pos, color):
 
@@ -183,20 +164,6 @@ def king_check(board, origin_pos, target_pos, color):
     piece.set_position(origin_pos)
 
     return result
-
-class PieceType(Enum):
-    EMPTY = 0
-    PAWN = 1
-    KNIGHT = 2
-    BISHOP = 3
-    ROOK = 4
-    QUEEN = 5
-    KING = 6
-
-class PieceColor(Enum):
-    NULL = 0
-    BLACK = 1
-    WHITE = 2
 
 class Empty:
     def __init__(self):
@@ -279,17 +246,15 @@ class Pawn:
                     if not king_check(board, self._position, moves[1], self._color):
                         possible_moves.append(moves[1])
 
-        if in_range(moves[2]):
-            if board[moves[2][0]][moves[2][1]].get_type() != PieceType.EMPTY:
-                if board[moves[2][0]][moves[2][1]].get_color() != self._color:
-                    if not king_check(board, self._position, moves[2], self._color):
-                        possible_moves.append(moves[2])
-
-        if in_range(moves[3]):
-            if board[moves[3][0]][moves[3][1]].get_type() != PieceType.EMPTY:
-                if board[moves[3][0]][moves[3][1]].get_color() != self._color:
-                    if not king_check(board, self._position, moves[3], self._color):
-                        possible_moves.append(moves[3])
+        for move in moves[2:4]:
+            if not in_range(move):
+                continue
+            if board[move[0]][move[1]].get_type() == PieceType.EMPTY:
+                continue
+            if board[move[0]][move[1]].get_color() == self._color:
+                continue
+            if not king_check(board, self._position, move, self._color):
+                possible_moves.append(move)
 
         if board_hash in past_moves:
             past_moves[board_hash][self] = possible_moves
@@ -339,10 +304,12 @@ class Knight:
         ]
 
         for move in moves:
-            if in_range(move):
-                if board[move[0]][move[1]].get_color() != self._color:
-                    if not king_check(board, self._position, move, self._color):
-                        possible_moves.append(move)
+            if not in_range(move):
+                continue
+            if board[move[0]][move[1]].get_color() == self._color:
+                continue
+            if not king_check(board, self._position, move, self._color):
+                possible_moves.append(move)
 
         if board_hash in past_moves:
             past_moves[board_hash][self] = possible_moves
@@ -523,16 +490,15 @@ class Queen:
         for direction in directions:
             current_move = [self._position[0] + direction[0], self._position[1] + direction[1]]
             while in_range(current_move):
-                if current_move != self._position:
-                    if board[current_move[0]][current_move[1]].get_color() == self._color:
-                        break
-                    elif board[current_move[0]][current_move[1]].get_type() == PieceType.EMPTY:
-                        if not king_check(board, self._position, current_move, self._color):
-                            possible_moves.append(current_move)
-                    else:
-                        if not king_check(board, self._position, current_move, self._color):
-                            possible_moves.append(current_move)
-                        break
+                if board[current_move[0]][current_move[1]].get_color() == self._color:
+                    break
+                elif board[current_move[0]][current_move[1]].get_type() == PieceType.EMPTY:
+                    if not king_check(board, self._position, current_move, self._color):
+                        possible_moves.append(current_move)
+                else:
+                    if not king_check(board, self._position, current_move, self._color):
+                        possible_moves.append(current_move)
+                    break
 
                 current_move = [current_move[0] + direction[0], current_move[1] + direction[1]]
 
@@ -596,53 +562,44 @@ class King:
 
         for direction in directions:
             current_move = [self._position[0] + direction[0], self._position[1] + direction[1]]
-            if in_range(current_move):
-                if board[current_move[0]][current_move[1]].get_color() != self._color:
-                    if not king_check(board, self._position, current_move, self._color):
-                        possible_moves.append(current_move)
+            if not in_range(current_move):
+                continue
+            if board[current_move[0]][current_move[1]].get_color() == self._color:
+                continue
+            if not king_check(board, self._position, current_move, self._color):
+                possible_moves.append(current_move)
 
-        castle_long = [
+        castle_squares = [
             [0, -1],
             [0, -2],
-            [0, -3]
-        ]
-
-        castle_short = [
+            [0, -3],
             [0, 1],
             [0, 2]
         ]
 
+        def king_castle(rook_offset, castle_list):
+            if not in_range([self._position[0], self._position[1] + rook_offset]):
+                return
+            piece = board[self._position[0]][self._position[1] + rook_offset]
+            if piece.get_type() != PieceType.ROOK:
+                return
+            if piece.get_moved()[0] or self._moved[0]:
+                return
+            for square in castle_list:
+                new_pos = [self._position[0] + square[0], self._position[1] + square[1]]
+                if board[new_pos[0]][new_pos[1]].get_type() != PieceType.EMPTY:
+                    return
+                if king_check(board, self._position, new_pos, self._color):
+                    return
+            possible_moves.append([self._position[0], self._position[1] + 2])
+
         if not king_in_check(board, self._color):
+            king_castle(3, castle_squares[3:])
+            king_castle(-4, castle_squares[:3])
 
-            if in_range([self._position[0], self._position[1] + 3]):
-                piece = board[self._position[0]][self._position[1] + 3]
-
-                if piece.get_type() == PieceType.ROOK and not piece.get_moved()[0] and not self._moved[0]:
-                    for square in castle_short:
-                        new_pos = [self._position[0] + square[0], self._position[1] + square[1]]
-                        if board[new_pos[0]][new_pos[1]].get_type() != PieceType.EMPTY:
-                            break
-                        if king_check(board, self._position, new_pos, self._color):
-                            break
-                    else:
-                        possible_moves.append([self._position[0], self._position[1] + 2])
-
-            if in_range([self._position[0], self._position[1] - 4]):
-                piece = board[self._position[0]][self._position[1] - 4]
-
-                if piece.get_type() == PieceType.ROOK and not piece.get_moved()[0] and not self._moved[0]:
-                    for square in castle_long:
-                        new_pos = [self._position[0] + square[0], self._position[1] + square[1]]
-                        if board[new_pos[0]][new_pos[1]].get_type() != PieceType.EMPTY:
-                            break
-                        if king_check(board, self._position, new_pos, self._color):
-                            break
-                    else:
-                        possible_moves.append([self._position[0], self._position[1] - 3])
-
-            if board_hash in past_moves:
-                past_moves[board_hash][self] = possible_moves
-            else:
-                past_moves[board_hash] = {board_hash: possible_moves}
+        if board_hash in past_moves:
+            past_moves[board_hash][self] = possible_moves
+        else:
+            past_moves[board_hash] = {board_hash: possible_moves}
 
         return possible_moves
