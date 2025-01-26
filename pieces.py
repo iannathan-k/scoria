@@ -7,9 +7,16 @@ past_states = {}
 past_moves = {}
 current_count = 0
 
+def get_current_count():
+    print(current_count)
+
 def set_current_count():
     global current_count
     current_count += 1
+
+def unset_current_count():
+    global current_count
+    current_count -= 1
 
 def get_king_pos(side):
     if side:
@@ -577,11 +584,11 @@ class King:
             [0, 2]
         ]
 
-        def king_castle(rook_offset, castle_list):
+        def king_castle(rook_offset, castle_list, king_offset):
             if not in_range([self._position[0], self._position[1] + rook_offset]):
                 return
             piece = board[self._position[0]][self._position[1] + rook_offset]
-            if piece.get_type() != PieceType.ROOK:
+            if piece.get_type() != PieceType.ROOK or piece.get_color() != self._color:
                 return
             if piece.get_moved()[0] or self._moved[0]:
                 return
@@ -591,11 +598,11 @@ class King:
                     return
                 if king_check(board, self._position, new_pos, self._color):
                     return
-            possible_moves.append([self._position[0], self._position[1] + 2])
+            possible_moves.append([self._position[0], self._position[1] + king_offset])
 
         if not king_in_check(board, self._color):
-            king_castle(3, castle_squares[3:])
-            king_castle(-4, castle_squares[:3])
+            king_castle(3, castle_squares[3:], 2)
+            king_castle(-4, castle_squares[:3], -2)
 
         if board_hash in past_moves:
             past_moves[board_hash][self] = possible_moves
