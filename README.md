@@ -2,40 +2,55 @@
 
 An *extremely* rudimentary chess bot, designed and programmed completely in Python.
 
+## Rating
+
+Note that these are only estimations, and are not reflective of what the true ratings may be.
+
+Depth 1: < 250 elo\
+Depth 2: ~ 250 elo\
+Depth 3: ~ 400 elo\
+Depth 4: ~ 700 elo
+
 ## How to Operate
 
 1. Start the program, whether in an IDE, terminal or some other dedicated interpreter.
 
 
-2. After launching you should see a prompt which asks you to enter your desired search depth for the algorithm. Enter your desired depth in the form of an integer greater than 0. The AI runs within a reasonable time with depths ranging from 1 to 4. Recursion depth is how many moves into the future the AI will be able to see.
+2. After launching, you should see a prompt which asks you to enter your desired search depth for the algorithm. Enter your desired depth in the form of an integer greater than 0. The AI runs within a reasonable time with depths ranging from 1 to 4. Recursion depth is how many moves into the future the AI will be able to see. If you choose to leave this blank, it will default to 2.
 
 > **Recursion Depth?:**
 > 3
 
-3. Next, the program should prompt you to enter a FEN string, to set up the board for play. Paste in a fen string which consists of a valid board state, without multiple kings, missing kings, etc. You should only include until the side is specified, and no further.
-
+3. Next, the program should prompt you to enter a FEN string, to set up the board for play. Paste in a fen string which consists of a valid board state, without multiple kings, missing kings, etc. You should include until the point where castling eligibility is defined (KQkq) If you choose to leave this blank it will default to a starting position.
     (https://www.chess.com/terms/fen-chess)
 
 > **fen?:**
-> rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w
+> rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq
 
-4. If it is white to move, the player will be prompted to play first. You will enter the row and column of the piece to move, followed by the row and column of the target square.
+4. You will then be prompted on the mode. There are 4 modes which can be played in.\
+\
+   Mode 1: Human vs Bot displayed in terminal\
+   Mode 2: Human vs Bot in full UCI\
+   Mode 3: Bot vs Bot displayed in terminal\
+   Mode 4: Bot vs Bot in full UCI
 
-|   | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+### Mode 1
+
+To move, you will be prompted to enter your move using UCI format. UCI is the universal chess interface, stating the starting square and the final square.
+(https://en.wikipedia.org/wiki/Universal_Chess_Interface)
+
+|   | a | b | c | d | e | f | g | h |
 |---|---|---|---|---|---|---|---|---|
-| 0 |   |   |   |   |   |   |   |   |
-| 1 |   |   |   |   |   |   |   |   |
-| 2 |   |   |   |   |   |   |   |   |
-| 3 |   |   |   | N |   |   |   |   |
-| 4 |   |   |   |   |   |   |   |   |
-| 5 |   |   |   |   | q |   |   |   |
-| 6 |   |   |   |   |   |   |   |   |
+| 8 |   |   |   |   |   |   |   |   |
 | 7 |   |   |   |   |   |   |   |   |
+| 6 |   |   |   |   |   |   |   |   |
+| 5 |   |   |   | N |   |   |   |   |
+| 4 |   |   |   |   |   |   |   |   |
+| 3 |   |   |   |   | q |   |   |   |
+| 2 |   |   |   |   |   |   |   |   |
+| 1 |   |   |   |   |   |   |   |   |
 
-> **Player piece row:** 3\
-> **Player piece column:** 3\
-> **Player move row:** 5\
-> **Player move column:** 4
+> **Enter Move:** d5e3
 
 |   | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
 |---|---|---|---|---|---|---|---|---|
@@ -54,9 +69,10 @@ An *extremely* rudimentary chess bot, designed and programmed completely in Pyth
 > **Hit count:**  77500\
 > **Branches Searched:**  1913
 
-6. When an end-game state has been reached, either Checkmate or Stalemate, the game will automatically end, and the winner/result will be printed out.
+6. When an end-game state has been reached, either Checkmate or Stalemate, the game will automatically end, and the winner/result will be printed out along with the number of moves (white + black pairs).
 
-> BLACK WON
+> BLACK WON\
+> 21
 
 ## How it Works
 
@@ -66,9 +82,9 @@ Board states are evaluated using an evaluation function, which considers a numbe
 
 (https://www.chessprogramming.org/Simplified_Evaluation_Function)
 
-$$ E = \Sigma P + 5\Sigma M + \Sigma Pw $$
+$$ Eval = \Sigma Points + 5\Sigma Mobility + \Sigma Weights $$
 
-This also suggests that a higher evaluation, `> 0` means white has an advantage, while a lower evaluation, `< 0` favours black. An evaluation of 1000 or -1000 means one of the sides has won the game. A result of -100 or 100 is given in the case of a stalemate as discouragement.
+This also suggests that a higher evaluation, `> 0` means white has an advantage, while a lower evaluation, `< 0` favours black. An evaluation of 10000 or -10000 means one of the sides has won the game and 0 for stalemate.
 
 ### Recursive Search
 
@@ -110,12 +126,18 @@ History heuristic remembers the board states and the possible moves for each pie
 
 ~~~
 def minimax(board, depth, alpha, beta, turn):
+    board_key = hash_board(board)
+    if board_key in transposition_table and transposition_table[board_key][0] >= depth:
+        return transposition_table[board_key][1]
+
     if depth == 0 or determine_winner(board, turn) != PieceColor.NULL:
         return [evaluate_board(board, turn), []]
 
+    possible_moves = heuristic_ordering(get_possible_moves(board, turn), board)
+
     if turn:
         max_eval = [-inf, []]
-        for move in get_possible_moves(board, turn):
+        for move in possible_moves:
             board_info = move_state(board, move[0], move[1])
             evaluation = minimax(board, depth - 1, alpha, beta, False)[0]
             undo_move(board, move[0], move[1], board_info)
@@ -124,11 +146,12 @@ def minimax(board, depth, alpha, beta, turn):
             alpha = max(alpha, evaluation)
             if beta <= alpha:
                 break
+        transposition_table[board_key] = [depth, max_eval]
         return max_eval
 
     else:
         min_eval = [+inf, []]
-        for move in get_possible_moves(board, turn):
+        for move in possible_moves:
             board_info = move_state(board, move[0], move[1])
             evaluation = minimax(board, depth - 1, alpha, beta, True)[0]
             undo_move(board, move[0], move[1], board_info)
@@ -137,6 +160,7 @@ def minimax(board, depth, alpha, beta, turn):
             beta = min(beta, evaluation)
             if beta <= alpha:
                 break
+        transposition_table[board_key] = [depth, min_eval]
         return min_eval
 ~~~
 
