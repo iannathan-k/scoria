@@ -23,6 +23,7 @@ def heuristic_ordering(moves, board):
 def move_state(board, origin_pos, target_pos):
     piece = board[origin_pos[0]][origin_pos[1]]
     captured_piece = board[target_pos[0]][target_pos[1]]
+    set_current_count()
 
     # if en passant
     if piece.get_type() == PieceType.PAWN:
@@ -55,6 +56,7 @@ def move_state(board, origin_pos, target_pos):
 
 def undo_move(board, origin_pos, target_pos, board_info):
     piece = board_info[1]
+    unset_current_count()
 
     # If En Passant
     if piece.get_type() == PieceType.PAWN and board_info[0].get_color() != piece.get_color():

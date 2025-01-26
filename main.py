@@ -76,9 +76,9 @@ def set_up(fen_string):
 
 def castle(origin_pos, target_pos):
     if origin_pos[1] - target_pos[1] > 1:
-        rook = board[target_pos[0]][target_pos[1] - 1]
+        rook = board[target_pos[0]][target_pos[1] - 2]
         board[origin_pos[0]][origin_pos[1] - 1] = rook
-        board[target_pos[0]][target_pos[1] - 1] = Empty()
+        board[target_pos[0]][target_pos[1] - 2] = Empty()
         rook.set_position([origin_pos[0], origin_pos[1] - 1])
         rook.set_deep_moved(True)
         rook.set_shallow_moved(True)
