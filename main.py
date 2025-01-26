@@ -140,6 +140,25 @@ def move_piece(origin_pos, target_pos):
         if target_pos[0] == 7 or target_pos[0] == 0:
             board[target_pos[0]][target_pos[1]] = Queen(target_pos, board[target_pos[0]][target_pos[1]].get_color())
 
+def get_move_input():
+    while True:
+        uci = input("Enter Move: ")
+        if len(uci) < 4:
+            print("Invalid Move")
+            continue
+
+        move = [uci_to_move(uci)[0], uci_to_move(uci)[1]]
+        piece = board[move[0][0]][move[0][1]]
+        if piece.get_color() != PieceColor.WHITE:
+            print("Invalid Move")
+            continue
+        if move[1] not in piece.get_moves(board):
+            print("Invalid Move")
+            continue
+        break
+
+    return move
+
 def __main__():
     depth = input("Recursion Depth?: ")
     fen = input("fen?: ")
@@ -148,9 +167,9 @@ def __main__():
     # Mode 2 - Human vs Bot UCI
     # Mode 3 - Bot vs Bot
     # Mode 4 - Bot vs Bot UCI
-    if not mode: mode = 3
+    if not mode.isdigit(): mode = 3
     if not fen: fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq"
-    if not depth: depth = 2
+    if not depth.isdigit(): depth = 2
     depth = int(depth)
     mode = int(mode)
     turn = set_up(fen)
@@ -162,26 +181,26 @@ def __main__():
     while True:
         if turn:
             if mode == 1 or mode == 2:
-                uci = input("Enter Move: ")
-                move_piece(uci_to_move(uci)[0], uci_to_move(uci)[1])
+                move = get_move_input()
+                move_piece(move[0], move[1])
 
-                if mode == 1:
-                    print_board(board)
+            if mode == 1:
+                print_board(board)
 
             if mode == 3 or mode == 4:
                 coulee_move = minimax(board, depth, -inf, inf, turn)
                 move_piece(coulee_move[1][0], coulee_move[1][1])
 
-                if mode == 3:
-                    print("~~~~~BLACK TO MOVE~~~~~")
-                    print_board(board)
+            if mode == 3:
+                print("~~~~~BLACK TO MOVE~~~~~")
+                print_board(board)
 
-                    print("Evaluation,", coulee_move[0])
-                    print("Hit count: ", str(get_hit_count()))
-                    print("Branches Searched: ", str(get_search_count()))
+                print("Evaluation,", coulee_move[0])
+                print("Hit count: ", str(get_hit_count()))
+                print("Branches Searched: ", str(get_search_count()))
 
-                if mode == 4:
-                    print(move_to_uci(coulee_move[1][0], coulee_move[1][1], board))
+            if mode == 4:
+                print(move_to_uci(coulee_move[1][0], coulee_move[1][1], board))
 
             move_count += 1
 
