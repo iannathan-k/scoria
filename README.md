@@ -52,16 +52,16 @@ To move, you will be prompted to enter your move using UCI format. UCI is the un
 
 > **Enter Move:** d5e3
 
-|   | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+|   | a | b | c | d | e | f | g | h |
 |---|---|---|---|---|---|---|---|---|
-| 0 |   |   |   |   |   |   |   |   |
-| 1 |   |   |   |   |   |   |   |   |
-| 2 |   |   |   |   |   |   |   |   |
-| 3 |   |   |   |   |   |   |   |   |
-| 4 |   |   |   |   |   |   |   |   |
-| 5 |   |   |   |   | N |   |   |   |
-| 6 |   |   |   |   |   |   |   |   |
+| 8 |   |   |   |   |   |   |   |   |
 | 7 |   |   |   |   |   |   |   |   |
+| 6 |   |   |   |   |   |   |   |   |
+| 5 |   |   |   |   |   |   |   |   |
+| 4 |   |   |   |   |   |   |   |   |
+| 3 |   |   |   |   | N |   |   |   |
+| 2 |   |   |   |   |   |   |   |   |
+| 1 |   |   |   |   |   |   |   |   |
 
 5. If it's the bot's turn, it will make its move automatically, and render the board for you to see. It will also give a few pieces of information. Including, the current board evaluation, the hit_count and the branches_searched.
 
