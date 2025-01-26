@@ -39,6 +39,7 @@ def move_state(board, origin_pos, target_pos):
         if target_pos[0] == 7 or target_pos[0] == 0:
             board[origin_pos[0]][origin_pos[1]] = Empty()
             board[target_pos[0]][target_pos[1]] = Queen(target_pos, piece.get_color())
+            piece.set_position(target_pos)
             return [captured_piece, piece]
 
     # if not promotion
