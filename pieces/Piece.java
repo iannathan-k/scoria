@@ -8,25 +8,25 @@ public abstract class Piece {
     protected PieceType type;
     protected int points;
 
-    public PieceType get_type() {
+    public PieceType getType() {
         return this.type;
     }
 
-    public PieceColor get_color() {
+    public PieceColor getColor() {
         return this.color;
     }
 
-    public int get_points() {
+    public int getPoints() {
         return this.points;
     }
 
-    public int[] get_pos() {
+    public int[] getPosition() {
         return this.pos;
     }
 
-    public void set_pos(int[] pos) {
+    public void setPosition(int[] pos) {
         this.pos = pos;
     }
 
-    public abstract ArrayList<int[]> get_moves(Piece[][] board);
+    public abstract ArrayList<int[]> getMoves(Piece[][] board);
 }

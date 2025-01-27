@@ -16,7 +16,7 @@ public class Pawn extends Piece {
     }
 
     @Override
-    public ArrayList<int[]> get_moves(Piece[][] board) {
+    public ArrayList<int[]> getMoves(Piece[][] board) {
         ArrayList<int[]> possible_moves = new ArrayList<int[]>();
 
         int[][] moves = {
@@ -26,18 +26,18 @@ public class Pawn extends Piece {
             {this.pos[0] + this.dir, this.pos[1] - 1}
         };
 
-        if (PieceHandler.in_range(moves[0])) {
-            if (board[moves[0][0]][moves[0][1]].get_type() == PieceType.EMPTY) {
-                if (!PieceHandler.king_check(board, this.pos, moves[0], this.color)) {
+        if (PieceHandler.inRange(moves[0])) {
+            if (board[moves[0][0]][moves[0][1]].getType() == PieceType.EMPTY) {
+                if (!PieceHandler.kingCheck(board, this.pos, moves[0], this.color)) {
                     possible_moves.add(moves[0]);
                 }
             }
         }
 
-        if (PieceHandler.in_range(moves[1])) {
-            if (board[moves[1][0]][moves[1][1]].get_type() == PieceType.EMPTY) {
+        if (PieceHandler.inRange(moves[1])) {
+            if (board[moves[1][0]][moves[1][1]].getType() == PieceType.EMPTY) {
                 if (!possible_moves.isEmpty() && (this.pos[0] == 6 || this.pos[0] == 1)) {
-                    if (!PieceHandler.king_check(board, this.pos, moves[1], this.color)) {
+                    if (!PieceHandler.kingCheck(board, this.pos, moves[1], this.color)) {
                         possible_moves.add(moves[1]);
                     }
                 }
@@ -45,16 +45,16 @@ public class Pawn extends Piece {
         }
 
         for (int i = 2; i < 4; i++) {
-            if (!PieceHandler.in_range(moves[i])) {
+            if (!PieceHandler.inRange(moves[i])) {
                 continue;
             }
-            if (board[moves[i][0]][moves[i][1]].get_type() == PieceType.EMPTY) {
+            if (board[moves[i][0]][moves[i][1]].getType() == PieceType.EMPTY) {
                 continue;
             }
-            if (board[moves[i][0]][moves[i][1]].get_color() == this.color) {
+            if (board[moves[i][0]][moves[i][1]].getColor() == this.color) {
                 continue;
             }
-            if (!PieceHandler.king_check(board, this.pos, moves[i], this.color)) {
+            if (!PieceHandler.kingCheck(board, this.pos, moves[i], this.color)) {
                 possible_moves.add(moves[i]);
             }
         }

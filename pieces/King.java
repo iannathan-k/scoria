@@ -12,7 +12,7 @@ public class King extends Piece {
     }
 
     @Override
-    public ArrayList<int[]> get_moves(Piece[][] board) {
+    public ArrayList<int[]> getMoves(Piece[][] board) {
         ArrayList<int[]> possible_moves = new ArrayList<int[]>();
         
         int[][] moves = {
@@ -27,13 +27,13 @@ public class King extends Piece {
         };
 
         for (int[] move : moves) {
-            if (!PieceHandler.in_range(move)) {
+            if (!PieceHandler.inRange(move)) {
                 continue;
             }
-            if (board[move[0]][move[1]].get_color() == this.color) {
+            if (board[move[0]][move[1]].getColor() == this.color) {
                 continue;
             }
-            if (!PieceHandler.king_check(board, this.pos, move, this.color)) {
+            if (!PieceHandler.kingCheck(board, this.pos, move, this.color)) {
                 possible_moves.add(move);
             }
         }

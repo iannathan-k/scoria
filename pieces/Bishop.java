@@ -13,7 +13,7 @@ public class Bishop extends Piece {
     }
 
     @Override
-    public ArrayList<int[]> get_moves(Piece[][] board) {
+    public ArrayList<int[]> getMoves(Piece[][] board) {
         ArrayList<int[]> possible_moves = new ArrayList<int[]>();
 
         int[][] dirs = {
@@ -25,14 +25,14 @@ public class Bishop extends Piece {
 
         for (int[] dir : dirs) {
             int[] move = {this.pos[0] + dir[0], this.pos[1] + dir[1]};
-            while (PieceHandler.in_range(move)) {
-                if (PieceHandler.king_check(board, this.pos, move, this.color)) {
+            while (PieceHandler.inRange(move)) {
+                if (PieceHandler.kingCheck(board, this.pos, move, this.color)) {
                     continue;
                 }
-                if (board[move[0]][move[1]].get_color() == this.color) {
+                if (board[move[0]][move[1]].getColor() == this.color) {
                     break;
                 }
-                if (board[move[0]][move[1]].get_type() == PieceType.EMPTY) {
+                if (board[move[0]][move[1]].getType() == PieceType.EMPTY) {
                     possible_moves.add(new int[] {move[0], move[1]});
                 } else {
                     possible_moves.add(new int[] {move[0], move[1]});
