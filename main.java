@@ -1,5 +1,4 @@
 import pieces.*;
-import pieces.enums.*;
 
 class Main {
 
@@ -13,7 +12,7 @@ class Main {
             }
         }
 
-        board[4][4] = new King(new int[] {4,4}, PieceColor.BLACK);
+        // board[4][4] = new King(new int[] {4,4}, PieceColor.BLACK);
         // board[3][5] = new Pawn(new int[] {4,7}, PieceColor.BLACK, -1);
         // System.out.println(PieceHandler.kingInCheck(board, PieceColor.WHITE));
 
@@ -28,6 +27,7 @@ class Main {
         //     System.out.println();
         // }
 
+        Setup.setUp(board, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
         Interface.printBoard(board);
     }
 

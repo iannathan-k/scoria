@@ -2,7 +2,7 @@ package pieces;
 
 import pieces.enums.*;
 
-public class PieceHandler {
+public abstract class PieceHandler {
     private static King[] king_pieces = new King[2];
 
     private static int[] getKingPos(PieceColor color) {

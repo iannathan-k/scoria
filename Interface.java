@@ -1,7 +1,7 @@
 import pieces.Piece;
 import pieces.enums.*;
 
-public class Interface {
+public abstract class Interface {
 
     private static String getChar(Piece piece) {
         PieceType type = piece.getType();
@@ -50,5 +50,21 @@ public class Interface {
             System.out.println(line);
             System.out.println("  +---+---+---+---+---+---+---+---+");
         }
+    }
+
+    public static String posToSquare(int[] pos) {
+        return (char) (97 + pos[1]) + Integer.toString(8 - pos[0]);
+    }
+
+    public static int[] squareToPos(String square) {
+        return new int[] {8 - (square.charAt(1) - '0'), square.charAt(0) - 'a'};
+    }
+
+    public static String moveToUci(int[] origin_pos, int[] target_pos) {
+        return posToSquare(origin_pos) + posToSquare(target_pos);
+    }
+
+    public static int[][] uciToMove(String uci) {
+        return new int[][] {squareToPos(uci.substring(0, 2)), squareToPos(uci.substring(2, 4))};
     }
 }
