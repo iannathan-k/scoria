@@ -18,8 +18,8 @@ public class King extends Piece {
         int[][] moves = {
             {this.pos[0] + 1, this.pos[1]},
             {this.pos[0] - 1, this.pos[1]},
-            {this.pos[0],     this.pos[1] + 1},
-            {this.pos[0],     this.pos[1] - 1},
+            {this.pos[0], this.pos[1] + 1},
+            {this.pos[0], this.pos[1] - 1},
             {this.pos[0] + 1, this.pos[1] + 1},
             {this.pos[0] + 1, this.pos[1] - 1},
             {this.pos[0] - 1, this.pos[1] + 1},
