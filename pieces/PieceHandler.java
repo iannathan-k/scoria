@@ -1,9 +1,10 @@
 package pieces;
 
 import pieces.enums.*;
+import src.*;
 
 public abstract class PieceHandler {
-    private static King[] king_pieces = new King[2];
+    public static King[] king_pieces = new King[2];
 
     private static int[] getKingPos(PieceColor color) {
         if (color == PieceColor.WHITE) {
@@ -20,7 +21,7 @@ public abstract class PieceHandler {
     private static boolean slidingPiece(Piece[][] board, int[] king_pos, int[][] dirs, PieceType[] attack_pieces, PieceColor color) {
         for (int[] dir : dirs) {
             int[] attack = {king_pos[0] + dir[0], king_pos[1] + dir[1]};
-            while (PieceHandler.inRange(attack)) {
+            while (inRange(attack)) {
                 Piece piece = board[attack[0]][attack[1]];
                 if (piece.getType() == PieceType.EMPTY) {
                     attack[0] += dir[0];
@@ -42,7 +43,7 @@ public abstract class PieceHandler {
 
     private static boolean pawnPiece(Piece[][] board, int[] king_pos, int[][] pawn_attacks, PieceColor color) {
         for (int[] attack : pawn_attacks) {
-            if (!PieceHandler.inRange(attack)) {
+            if (!inRange(attack)) {
                 continue;
             }
             Piece piece = board[attack[0]][attack[1]];
@@ -62,7 +63,7 @@ public abstract class PieceHandler {
     private static boolean kingPiece(Piece[][] board, int[] king_pos, int[][] dirs) {
         for (int[] dir : dirs) {
             int[] attack = {king_pos[0] + dir[0], king_pos[1] + dir[1]};
-            if (!PieceHandler.inRange(attack)) {
+            if (!inRange(attack)) {
                 continue;
             }
             if (board[attack[0]][attack[1]].getType() == PieceType.KING) {
@@ -121,7 +122,7 @@ public abstract class PieceHandler {
         }
 
         for (int[] attack : knight_attacks) {
-            if (!PieceHandler.inRange(attack)) {
+            if (!inRange(attack)) {
                 continue;
             }
             Piece piece = board[attack[0]][attack[1]];
@@ -133,7 +134,6 @@ public abstract class PieceHandler {
             }
         }
 
-        // Revise this section
         if (color == PieceColor.BLACK) {
             if (pawnPiece(board, king_pos, white_pawn_attacks, color)) {
                 return true;
@@ -155,16 +155,11 @@ public abstract class PieceHandler {
     }
 
     public static boolean kingCheck(Piece[][] board, int[] origin_pos, int[] target_pos, PieceColor color) {
-        Piece piece = board[origin_pos[0]][origin_pos[1]];
-        Piece captured = board[target_pos[0]][target_pos[1]];
-
-        board[target_pos[0]][target_pos[1]] = piece;
-        board[origin_pos[0]][origin_pos[1]] = new Empty();
+        Piece[] board_info = MoveHandler.moveState(board, origin_pos, target_pos);
 
         boolean result = kingInCheck(board, color);
 
-        board[origin_pos[0]][origin_pos[1]] = piece;
-        board[target_pos[0]][target_pos[1]] = captured;
+        MoveHandler.undoState(board, origin_pos, target_pos, board_info);
 
         return result;
     }

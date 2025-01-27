@@ -1,3 +1,4 @@
+package src;
 import pieces.*;
 
 class Main {

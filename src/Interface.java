@@ -1,3 +1,4 @@
+package src;
 import pieces.Piece;
 import pieces.enums.*;
 
