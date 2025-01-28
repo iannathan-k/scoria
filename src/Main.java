@@ -41,7 +41,7 @@ public class Main {
 
         long startTime = System.nanoTime();
 
-        int[][] scoria_move = Scoria.minimax(board, 4, -Integer.MAX_VALUE, Integer.MAX_VALUE, false);
+        int[][] scoria_move = Scoria.minimax(board, 5, -Integer.MAX_VALUE, Integer.MAX_VALUE, false);
         long endTime = System.nanoTime();
 
         long elapsedTime = (endTime - startTime) / 1_000_000;

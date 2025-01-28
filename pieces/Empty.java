@@ -2,7 +2,7 @@ package pieces;
 import pieces.enums.*;
 import java.util.ArrayList;
 
-public class Empty extends Piece{
+public class Empty extends Piece {
 
     private PieceColor color = PieceColor.EMPTY;
     private PieceType type = PieceType.EMPTY;
@@ -13,11 +13,6 @@ public class Empty extends Piece{
 
     public PieceType getType() {
         return this.type;
-    }
-
-    @Override
-    public int getPoints() {
-        throw new UnsupportedOperationException("!! EMPTY CANNOT GET POINTS !!");
     }
 
     @Override

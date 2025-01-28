@@ -2,10 +2,29 @@ package scoria;
 
 import java.util.ArrayList;
 import pieces.*;
-import pieces.enums.PieceColor;
+import pieces.enums.*;
 import src.*;
 
 public class Scoria {
+
+    private static int heuristicScore(Piece[][] board, int[][] move, PieceColor color) {
+        int[] origin_pos = move[0];
+        int[] target_pos = move[1];
+        Piece piece = board[origin_pos[0]][origin_pos[1]];
+        Piece capture = board[target_pos[0]][target_pos[1]];
+
+        int score = 0;
+
+        if (capture.getType() != PieceType.EMPTY) {
+            score += capture.getPoints() - piece.getPoints();
+        }
+
+        if (piece.getType() == PieceType.PAWN && (target_pos[0] == 0 || target_pos[0] == 7)) {
+            score += 500;
+        }
+
+        return score;
+    }
 
     public static int[][] minimax(Piece[][] board, int depth, int alpha, int beta, boolean turn) {
         if (depth == 0) {
@@ -15,6 +34,12 @@ public class Scoria {
 
         PieceColor color = turn ? PieceColor.WHITE : PieceColor.BLACK;
         ArrayList<int[][]> possible_moves = PieceHandler.getAllMoves(board, color);
+
+        possible_moves.sort((move1, move2) -> {
+            int score1 = heuristicScore(board, move1, color);
+            int score2 = heuristicScore(board, move2, color);
+            return Integer.compare(score2, score1); // Higher score first
+        });
 
         if (turn) {
             int[][] max_eval = {{-Integer.MAX_VALUE}, {}, {}};
