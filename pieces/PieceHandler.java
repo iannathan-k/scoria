@@ -1,21 +1,47 @@
 package pieces;
 
+import java.util.*;
 import pieces.enums.*;
 import src.*;
 
 public abstract class PieceHandler {
-    public static King[] king_pieces = new King[2];
+    private static King[] king_pieces = new King[2];
 
-    private static int[] getKingPos(PieceColor color) {
-        if (color == PieceColor.WHITE) {
-            return king_pieces[0].getPosition();
-        } else {
-            return king_pieces[1].getPosition();
-        }
+    public static void setKingPiece(King king, int index) {
+        king_pieces[index] = king;
+    }
+
+    public static King getKingPiece(int index) {
+        return king_pieces[index];
+    }
+
+    public static boolean isKingStuck(Piece[][] board, PieceColor color) {
+        int king_index = (color == PieceColor.WHITE) ? 0 : 1;
+        return king_pieces[king_index].getMoves(board).isEmpty();
+    }
+
+    public static int[] getKingPos(PieceColor color) {
+        int king_index = (color == PieceColor.WHITE) ? 0 : 1;
+        return king_pieces[king_index].getPosition();
     }
 
     public static boolean inRange(int[] pos) {
         return 0 <= pos[0] && pos[0] <= 7 && 0 <= pos[1] && pos[1] <= 7;
+    }
+
+    public static ArrayList<int[][]> getAllMoves(Piece[][] board, PieceColor color) {
+        ArrayList<int[][]> possible_moves = new ArrayList<int[][]>();
+
+        for (int i = 0; i < 64; i++) {
+            Piece piece = board[i / 8][i % 8];
+            if (piece.getColor() != color) {
+                continue;
+            }
+            for (int[] move : piece.getMoves(board)) {
+                possible_moves.add(new int[][] {{i / 8, i % 8}, move});
+            }
+        }
+        return possible_moves;
     }
 
     private static boolean slidingPiece(Piece[][] board, int[] king_pos, int[][] dirs, PieceType[] attack_pieces, PieceColor color) {

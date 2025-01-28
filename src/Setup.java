@@ -29,8 +29,8 @@ public abstract class Setup {
             case 'Q':
                 return new Queen(new int[] {index / 8, index % 8}, color);
             case 'K':
-                PieceHandler.king_pieces[king_index] = new King(new int[] {index / 8, index % 8}, PieceColor.WHITE);  
-                return PieceHandler.king_pieces[king_index];
+                PieceHandler.setKingPiece(new King(new int[] {index / 8, index % 8}, color), king_index); 
+                return PieceHandler.getKingPiece(king_index);
         }
 
         throw new UnsupportedOperationException("!! UNSUPPORTED PIECETYPE !!");

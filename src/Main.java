@@ -1,5 +1,6 @@
 package src;
 import pieces.*;
+import scoria.Scoria;
 
 class Main {
 
@@ -28,7 +29,10 @@ class Main {
         //     System.out.println();
         // }
 
-        Setup.setUp(board, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+        Setup.setUp(board, "r3k2r/p1ppqpb1/Bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPB1PPP/R3K2R");
+        Interface.printBoard(board);
+        int[][] scoria_move = Scoria.minimax(board, 3, false);
+        MoveHandler.moveState(board, scoria_move[1], scoria_move[2]);
         Interface.printBoard(board);
     }
 
