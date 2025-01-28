@@ -2,11 +2,13 @@ package src;
 import pieces.*;
 import scoria.Scoria;
 
-class Main {
+public class Main {
 
     public static Piece[][] board = new Piece[8][8];
+    public static int move_count = 0;
 
     public static void main(String args[]) {
+        
         System.out.println("Starting...");
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
@@ -30,10 +32,25 @@ class Main {
         // }
 
         Setup.setUp(board, "r3k2r/p1ppqpb1/Bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPB1PPP/R3K2R");
+        // Setup.setUp(board, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+        // Setup.setUp(board, "8/8/8/1K6/8/8/5k2/8");
+
         Interface.printBoard(board);
-        int[][] scoria_move = Scoria.minimax(board, 3, false);
+
+
+
+        long startTime = System.nanoTime();
+
+        int[][] scoria_move = Scoria.minimax(board, 4, -Integer.MAX_VALUE, Integer.MAX_VALUE, false);
+        long endTime = System.nanoTime();
+
+        long elapsedTime = (endTime - startTime) / 1_000_000;
+
         MoveHandler.moveState(board, scoria_move[1], scoria_move[2]);
         Interface.printBoard(board);
+        System.out.println(move_count);
+
+        System.out.println("Elapsed time: " + elapsedTime + " ms");
     }
 
 }

@@ -7,8 +7,9 @@ import src.*;
 
 public class Scoria {
 
-    public static int[][] minimax(Piece[][] board, int depth, boolean turn) {
+    public static int[][] minimax(Piece[][] board, int depth, int alpha, int beta, boolean turn) {
         if (depth == 0) {
+            Main.move_count += 1;
             return new int[][] {{Evaluator.boardEval(board, turn)}, {}, {}};
         }
 
@@ -19,7 +20,7 @@ public class Scoria {
             int[][] max_eval = {{-Integer.MAX_VALUE}, {}, {}};
             for (int[][] move : possible_moves) {
                 Piece[] board_info = MoveHandler.moveState(board, move[0], move[1]);
-                int eval = minimax(board, depth - 1, !turn)[0][0];
+                int eval = minimax(board, depth - 1, alpha, beta, !turn)[0][0];
                 MoveHandler.undoState(board, move[0], move[1], board_info);
 
                 // Make this section more efficient later
@@ -27,6 +28,11 @@ public class Scoria {
                     max_eval[0][0] = eval;
                     max_eval[1] = move[0];
                     max_eval[2] = move[1];
+                }
+
+                alpha = (eval > alpha) ? eval : alpha;
+                if (beta <= alpha) {
+                    break;
                 }
             }
 
@@ -36,7 +42,7 @@ public class Scoria {
             int[][] min_eval = {{Integer.MAX_VALUE}, {}, {}};
             for (int[][] move : possible_moves) {
                 Piece[] board_info = MoveHandler.moveState(board, move[0], move[1]);
-                int eval = minimax(board, depth - 1, !turn)[0][0];
+                int eval = minimax(board, depth - 1, alpha, beta, !turn)[0][0];
                 MoveHandler.undoState(board, move[0], move[1], board_info);
 
                 // Make this section more efficient later
@@ -44,6 +50,11 @@ public class Scoria {
                     min_eval[0][0] = eval;
                     min_eval[1] = move[0];
                     min_eval[2] = move[1];
+                }
+
+                beta = (eval < beta) ? eval : beta;
+                if (beta <= alpha) {
+                    break;
                 }
             }
 

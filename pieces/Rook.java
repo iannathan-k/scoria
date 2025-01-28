@@ -27,7 +27,9 @@ public class Rook extends Piece {
             int[] move = {this.pos[0] + dir[0], this.pos[1] + dir[1]};
             while (PieceHandler.inRange(move)) {
                 if (PieceHandler.kingCheck(board, this.pos, move, this.color)) {
-                    continue;
+                    move[0] += dir[0];
+                    move[1] += dir[1];
+                    break;
                 }
                 if (board[move[0]][move[1]].getColor() == this.color) {
                     break;

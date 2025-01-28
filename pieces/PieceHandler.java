@@ -41,6 +41,7 @@ public abstract class PieceHandler {
                 possible_moves.add(new int[][] {{i / 8, i % 8}, move});
             }
         }
+
         return possible_moves;
     }
 
