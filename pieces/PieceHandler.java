@@ -87,10 +87,13 @@ public abstract class PieceHandler {
         return false;
     }
 
-    private static boolean kingPiece(Piece[][] board, int[] king_pos, int[][] dirs) {
+    private static boolean kingPiece(Piece[][] board, int[] king_pos, int[][] dirs, PieceColor color) {
         for (int[] dir : dirs) {
             int[] attack = {king_pos[0] + dir[0], king_pos[1] + dir[1]};
             if (!inRange(attack)) {
+                continue;
+            }
+            if (board[attack[0]][attack[1]].getColor() == color) {
                 continue;
             }
             if (board[attack[0]][attack[1]].getType() == PieceType.KING) {
@@ -101,9 +104,7 @@ public abstract class PieceHandler {
         return false;
     }
 
-    public static boolean kingInCheck(Piece[][] board, PieceColor color) {
-
-        int[] king_pos = getKingPos(color);
+    public static boolean underAttack(Piece[][] board, PieceColor color, int[] pos) {
 
         int[][] rook_attack = {
             {1, 0},
@@ -120,31 +121,31 @@ public abstract class PieceHandler {
         };
 
         int[][] knight_attacks = {
-            {king_pos[0] + 2, king_pos[1] + 1},
-            {king_pos[0] + 2, king_pos[1] - 1},
-            {king_pos[0] - 2, king_pos[1] + 1},
-            {king_pos[0] - 2, king_pos[1] - 1},
-            {king_pos[0] + 1, king_pos[1] - 2},
-            {king_pos[0] - 1, king_pos[1] - 2},
-            {king_pos[0] + 1, king_pos[1] + 2},
-            {king_pos[0] - 1, king_pos[1] + 2}
+            {pos[0] + 2, pos[1] + 1},
+            {pos[0] + 2, pos[1] - 1},
+            {pos[0] - 2, pos[1] + 1},
+            {pos[0] - 2, pos[1] - 1},
+            {pos[0] + 1, pos[1] - 2},
+            {pos[0] - 1, pos[1] - 2},
+            {pos[0] + 1, pos[1] + 2},
+            {pos[0] - 1, pos[1] + 2}
         };
 
         int[][] white_pawn_attacks = {
-            {king_pos[0] + 1, king_pos[1] - 1},
-            {king_pos[0] + 1, king_pos[1] + 1}
+            {pos[0] + 1, pos[1] - 1},
+            {pos[0] + 1, pos[1] + 1}
         };
 
         int[][] black_pawn_attacks = {
-            {king_pos[0] - 1, king_pos[1] - 1},
-            {king_pos[0] - 1, king_pos[1] + 1}
+            {pos[0] - 1, pos[1] - 1},
+            {pos[0] - 1, pos[1] + 1}
         };
 
-        if (slidingPiece(board, king_pos, rook_attack, new PieceType[] {PieceType.ROOK, PieceType.QUEEN}, color)) {
+        if (slidingPiece(board, pos, rook_attack, new PieceType[] {PieceType.ROOK, PieceType.QUEEN}, color)) {
             return true;
         }
 
-        if (slidingPiece(board, king_pos, bishop_attack, new PieceType[] {PieceType.BISHOP, PieceType.QUEEN}, color)) {
+        if (slidingPiece(board, pos, bishop_attack, new PieceType[] {PieceType.BISHOP, PieceType.QUEEN}, color)) {
             return true;
         }
 
@@ -162,19 +163,19 @@ public abstract class PieceHandler {
         }
 
         if (color == PieceColor.BLACK) {
-            if (pawnPiece(board, king_pos, white_pawn_attacks, color)) {
+            if (pawnPiece(board, pos, white_pawn_attacks, color)) {
                 return true;
             }
         } else {
-            if (pawnPiece(board, king_pos, black_pawn_attacks, color)) {
+            if (pawnPiece(board, pos, black_pawn_attacks, color)) {
                 return true;
             }
         }
 
-        if (kingPiece(board, king_pos, rook_attack)) {
+        if (kingPiece(board, pos, rook_attack, color)) {
             return true;
         }
-        if (kingPiece(board, king_pos, bishop_attack)) {
+        if (kingPiece(board, pos, bishop_attack, color)) {
             return true;
         }
 
@@ -184,7 +185,7 @@ public abstract class PieceHandler {
     public static boolean kingCheck(Piece[][] board, int[] origin_pos, int[] target_pos, PieceColor color) {
         Piece[] board_info = MoveHandler.moveState(board, origin_pos, target_pos);
 
-        boolean result = kingInCheck(board, color);
+        boolean result = underAttack(board, color, getKingPos(color));
 
         MoveHandler.undoState(board, origin_pos, target_pos, board_info);
 

@@ -1,15 +1,31 @@
 package pieces;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import pieces.enums.*;
 
 public class Rook extends Piece {
+
+    public ArrayDeque<Boolean> moved_stack = new ArrayDeque<Boolean>();
 
     public Rook(int[] pos, PieceColor color) {
         this.pos = pos;
         this.color = color;                                                      
         this.type = PieceType.ROOK;
         this.points = 500;
+        this.moved_stack.push(false);
+    }
+
+    public void pushMove() {
+        moved_stack.push(true);
+    }
+
+    public void popMove() {
+        moved_stack.pop();
+    }
+
+    public boolean peekMoved() {
+        return moved_stack.peek();
     }
 
     @Override

@@ -20,7 +20,7 @@ public class Scoria {
         }
 
         if (piece.getType() == PieceType.PAWN && (target_pos[0] == 0 || target_pos[0] == 7)) {
-            score += 500;
+            score += 800;
         }
 
         return score;
@@ -38,7 +38,7 @@ public class Scoria {
         possible_moves.sort((move1, move2) -> {
             int score1 = heuristicScore(board, move1, color);
             int score2 = heuristicScore(board, move2, color);
-            return Integer.compare(score2, score1); // Higher score first
+            return Integer.compare(score2, score1);
         });
 
         if (turn) {
@@ -57,7 +57,7 @@ public class Scoria {
 
                 alpha = (eval > alpha) ? eval : alpha;
                 if (beta <= alpha) {
-                    break;
+                    // break;
                 }
             }
 
@@ -79,7 +79,7 @@ public class Scoria {
 
                 beta = (eval < beta) ? eval : beta;
                 if (beta <= alpha) {
-                    break;
+                    // break;
                 }
             }
 

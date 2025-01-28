@@ -10,7 +10,7 @@ public class Evaluator {
         if (!PieceHandler.isKingStuck(board, color)) {
             return PieceColor.EMPTY;
         }
-        if (PieceHandler.kingInCheck(board, color)) {
+        if (PieceHandler.underAttack(board, color, PieceHandler.getKingPos(color))) {
             return turn ? PieceColor.BLACK : PieceColor.WHITE;
         }
         if (PieceHandler.getAllMoves(board, color).isEmpty()) {
