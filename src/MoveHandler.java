@@ -5,11 +5,30 @@ import pieces.enums.*;
 
 public class MoveHandler {
     public static Piece[] moveState(Piece[][] board, int[] origin_pos, int[] target_pos) {
-
+        PieceHandler.nextMoveNumber();
         Piece piece = board[origin_pos[0]][origin_pos[1]];
         Piece captured = board[target_pos[0]][target_pos[1]];
 
+        // moved logic
+        if (piece.getType() == PieceType.ROOK) {
+            ((Rook) piece).pushMove();
+        } else if (piece.getType() == PieceType.KING) {
+            ((King) piece).pushMove();
+        }
+
         if (piece.getType() == PieceType.PAWN) {
+            // pawn double move
+            if (Math.abs(origin_pos[0] - target_pos[0]) > 1) {
+                int[] left_pos = {target_pos[0], target_pos[1] - 1};
+                int[] right_pos = {target_pos[0], target_pos[1] + 1};
+                if (PieceHandler.inRange(left_pos) && board[left_pos[0]][left_pos[1]].getType() == PieceType.PAWN) {
+                    ((Pawn) board[left_pos[0]][left_pos[1]]).pushRight(PieceHandler.currentMoveNumber());
+                }
+                if (PieceHandler.inRange(right_pos) && board[right_pos[0]][right_pos[1]].getType() == PieceType.PAWN) {
+                    ((Pawn) board[right_pos[0]][right_pos[1]]).pushLeft(PieceHandler.currentMoveNumber());
+                }
+            }
+
             if (captured.getType() == PieceType.EMPTY && origin_pos[1] != target_pos[1]) {
                 // en passant
                 int dir = ((Pawn) piece).getDirection();
@@ -50,13 +69,6 @@ public class MoveHandler {
             return new Piece[] {captured, piece};
         }
 
-        // moved logic
-        if (piece.getType() == PieceType.ROOK) {
-            ((Rook) piece).pushMove();
-        } else if (piece.getType() == PieceType.KING) {
-            ((King) piece).pushMove();
-        }
-
         board[target_pos[0]][target_pos[1]] = piece;
         board[origin_pos[0]][origin_pos[1]] = new Empty();
         piece.setPosition(target_pos);
@@ -65,10 +77,30 @@ public class MoveHandler {
     }
 
     public static void undoState(Piece[][] board, int[] origin_pos, int[] target_pos, Piece[] board_info) {
+        PieceHandler.lastMoveNumber();
         Piece piece = board_info[1];
         Piece captured = board_info[0];
 
+        // unmoved logic
+        if (piece.getType() == PieceType.ROOK) {
+            ((Rook) piece).popMove();
+        } else if (piece.getType() == PieceType.KING) {
+            ((King) piece).popMove();
+        }
+
         if (piece.getType() == PieceType.PAWN) {
+            if (Math.abs(origin_pos[0] - target_pos[0]) > 1) {
+                // double move
+                int[] left_pos = {target_pos[0], target_pos[1] - 1};
+                int[] right_pos = {target_pos[0], target_pos[1] + 1};
+                if (PieceHandler.inRange(left_pos) && board[left_pos[0]][left_pos[1]].getType() == PieceType.PAWN) {
+                    ((Pawn) board[left_pos[0]][left_pos[1]]).popRight();
+                }
+                if (PieceHandler.inRange(right_pos) && board[right_pos[0]][right_pos[1]].getType() == PieceType.PAWN) {
+                    ((Pawn) board[right_pos[0]][right_pos[1]]).popLeft();
+                }
+            }
+
             if (target_pos[0] == 0 || target_pos[0] == 7) {
                 // unpromote logic
                 board[origin_pos[0]][origin_pos[1]] = piece;
@@ -105,13 +137,6 @@ public class MoveHandler {
             captured.setPosition(new int[] {origin_pos[0], rook_col});
 
             return;
-        }
-
-        // unmoved logic
-        if (piece.getType() == PieceType.ROOK) {
-            ((Rook) piece).popMove();
-        } else if (piece.getType() == PieceType.KING) {
-            ((King) piece).popMove();
         }
 
         board[origin_pos[0]][origin_pos[1]] = piece;

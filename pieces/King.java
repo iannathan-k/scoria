@@ -1,7 +1,6 @@
 package pieces;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
+import java.util.*;
 import pieces.enums.*;
 
 public class King extends Piece {
@@ -12,7 +11,8 @@ public class King extends Piece {
         this.pos = pos;
         this.color = color;
         this.type = PieceType.KING;
-        this.moved_stack.push(false);
+        this.moved_stack.push(true);
+        // FIX THIS LATER
     }
 
     public void pushMove() {
@@ -27,10 +27,10 @@ public class King extends Piece {
         int[] square = new int[] {this.pos[0], this.pos[1] + dir};
 
         while (square[1] > 0 && square[1] < 7) {
-            if (PieceHandler.underAttack(board, this.color, square)) {
+            if (board[square[0]][square[1]].getType() != PieceType.EMPTY) {
                 return false;
             }
-            if (board[square[0]][square[1]].getType() != PieceType.EMPTY) {
+            if (PieceHandler.underAttack(board, this.color, square)) {
                 return false;
             }
 

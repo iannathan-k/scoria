@@ -10,6 +10,13 @@ public class Scoria {
     private static int heuristicScore(Piece[][] board, int[][] move, PieceColor color) {
         int[] origin_pos = move[0];
         int[] target_pos = move[1];
+
+        if (!PieceHandler.inRange(target_pos)) {
+            System.out.println(origin_pos[0] + ", " + origin_pos[1]);
+            System.out.println(target_pos[0] + ", " + target_pos[1]);
+            Interface.printBoard(board);
+        }
+
         Piece piece = board[origin_pos[0]][origin_pos[1]];
         Piece capture = board[target_pos[0]][target_pos[1]];
 
@@ -27,8 +34,10 @@ public class Scoria {
     }
 
     public static int[][] minimax(Piece[][] board, int depth, int alpha, int beta, boolean turn) {
+
         if (depth == 0) {
-            Main.move_count += 1;
+            Main.move_count++;
+
             return new int[][] {{Evaluator.boardEval(board, turn)}, {}, {}};
         }
 
@@ -44,6 +53,32 @@ public class Scoria {
         if (turn) {
             int[][] max_eval = {{-Integer.MAX_VALUE}, {}, {}};
             for (int[][] move : possible_moves) {
+
+                if (depth == 1) {
+                    Piece piece = board[move[0][0]][move[0][1]];
+                    Piece captured = board[move[1][0]][move[1][1]];
+
+                    if (piece.getType() == PieceType.PAWN) {
+                        if (captured.getType() == PieceType.EMPTY && move[0][1] != move[1][1]) {
+                            // en passant
+                            Main.ep_count++;
+                        }
+                        if (move[1][0] == 0 || move[1][0] == 7) {
+                            // promotion logic
+                            Main.promo_count++;
+                        }
+                    }
+                    if (piece.getType() == PieceType.KING && Math.abs(move[1][1] - move[0][1]) > 1) {
+                        // castle logic
+                        Main.castle_count++;
+                    }
+
+                    if (captured.getType() != PieceType.EMPTY) {
+                        Main.capture_count++;
+                    }
+                }
+                
+
                 Piece[] board_info = MoveHandler.moveState(board, move[0], move[1]);
                 int eval = minimax(board, depth - 1, alpha, beta, !turn)[0][0];
                 MoveHandler.undoState(board, move[0], move[1], board_info);
@@ -66,6 +101,31 @@ public class Scoria {
         } else {
             int[][] min_eval = {{Integer.MAX_VALUE}, {}, {}};
             for (int[][] move : possible_moves) {
+
+                if (depth == 1) {
+                    Piece piece = board[move[0][0]][move[0][1]];
+                    Piece captured = board[move[1][0]][move[1][1]];
+
+                    if (piece.getType() == PieceType.PAWN) {
+                        if (captured.getType() == PieceType.EMPTY && move[0][1] != move[1][1]) {
+                            // en passant
+                            Main.ep_count++;
+                        }
+                        if (move[1][0] == 0 || move[1][0] == 7) {
+                            // promotion logic
+                            Main.promo_count++;
+                        }
+                    }
+                    if (piece.getType() == PieceType.KING && Math.abs(move[1][1] - move[0][1]) > 1) {
+                        // castle logic
+                        Main.castle_count++;
+                    }
+
+                    if (captured.getType() != PieceType.EMPTY) {
+                        Main.capture_count++;
+                    }
+                }
+
                 Piece[] board_info = MoveHandler.moveState(board, move[0], move[1]);
                 int eval = minimax(board, depth - 1, alpha, beta, !turn)[0][0];
                 MoveHandler.undoState(board, move[0], move[1], board_info);

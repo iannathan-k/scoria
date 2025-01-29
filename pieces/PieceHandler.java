@@ -6,6 +6,19 @@ import src.*;
 
 public abstract class PieceHandler {
     private static King[] king_pieces = new King[2];
+    private static int move_number = 0;
+
+    public static int currentMoveNumber() {
+        return move_number;
+    }
+
+    public static void nextMoveNumber() {
+        move_number++;
+    }
+
+    public static void lastMoveNumber() {
+        move_number--;
+    } 
 
     public static void setKingPiece(King king, int index) {
         king_pieces[index] = king;
