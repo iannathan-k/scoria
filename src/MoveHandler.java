@@ -31,8 +31,7 @@ public class MoveHandler {
 
             if (captured.getType() == PieceType.EMPTY && origin_pos[1] != target_pos[1]) {
                 // en passant
-                int dir = ((Pawn) piece).getDirection();
-                captured = board[target_pos[0] + dir][target_pos[1]];
+                captured = board[origin_pos[0]][target_pos[1]];
                 board[target_pos[0]][target_pos[1]] = piece;
                 board[origin_pos[0]][target_pos[1]] = new Empty();
                 board[origin_pos[0]][origin_pos[1]] = new Empty();
