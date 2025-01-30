@@ -63,7 +63,7 @@ public abstract class PieceHandler {
             int[] attack = {king_pos[0] + dir[0], king_pos[1] + dir[1]};
             while (inRange(attack)) {
                 Piece piece = board[attack[0]][attack[1]];
-                if (piece.getType() == PieceType.EMPTY) {
+                if (piece instanceof Empty) {
                     attack[0] += dir[0];
                     attack[1] += dir[1];
                     continue;
@@ -87,7 +87,7 @@ public abstract class PieceHandler {
                 continue;
             }
             Piece piece = board[attack[0]][attack[1]];
-            if (piece.getType() != PieceType.PAWN) {
+            if (!(piece instanceof Pawn)) {
                 continue;
             }
             if (piece.getColor() == color) {
@@ -109,7 +109,7 @@ public abstract class PieceHandler {
             if (board[attack[0]][attack[1]].getColor() == color) {
                 continue;
             }
-            if (board[attack[0]][attack[1]].getType() == PieceType.KING) {
+            if (board[attack[0]][attack[1]] instanceof King) {
                 return true;
             }
         }
@@ -170,7 +170,7 @@ public abstract class PieceHandler {
             if (piece.getColor() == color) {
                 continue;
             }
-            if (piece.getType() == PieceType.KNIGHT) {
+            if (piece instanceof Knight) {
                 return true;
             }
         }

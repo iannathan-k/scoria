@@ -1,7 +1,12 @@
 package src;
 
+import java.util.Random;
+
 import pieces.*;
+import pieces.enums.PieceColor;
+import pieces.enums.PieceType;
 import scoria.Scoria;
+import scoria.Zobrist;
 
 public class Main {
 
@@ -21,6 +26,24 @@ public class Main {
         Setup.setUp(board, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
         // Setup.setUp(board, "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1");
 
+        // Zobrist.initTable();
+
+        // System.out.println(PieceType.KING.ordinal() + PieceColor.BLACK.ordinal() * 6);
+
+        final int TEST_RUNS = 1_000_000;
+        boolean turn = new Random().nextBoolean();
+        long startTime = System.nanoTime();
+        for (int i = 0; i < TEST_RUNS; i++) {
+            Zobrist.manualHash(board, turn);
+        }
+        long endTime = System.nanoTime();
+        long totalTime = endTime - startTime;
+        double avgTimePerHash = (double) totalTime / TEST_RUNS;
+        System.out.printf("Total time for %d hashes: %.3f ms%n", TEST_RUNS, totalTime / 1_000_000.0);
+        System.out.printf("Average time per hash: %.3f ns%n", avgTimePerHash);
+
+
+
         // ArrayList<int[][]> moves = PieceHandler.getAllMoves(board, PieceColor.WHITE);
         // // // ((King) board[0][5]).pushMove();
         // for (int i = 0; i < moves.size(); i++) {
@@ -34,19 +57,27 @@ public class Main {
         //     System.out.println();
         // }
 
-        long startTime = System.nanoTime();
+        // Interface.printBoard(board);
 
-        for (int i = 0; i < 1; i++) {
-            int[][] scoria_move = Scoria.minimax(board, 5, -Integer.MAX_VALUE, Integer.MAX_VALUE, true);
-        }
+        // long startTime = System.nanoTime();
 
-        long endTime = System.nanoTime();
+        // // for (int i = 0; i < 1; i++) {
+        // //     int[][] scoria_move = Scoria.minimax(board, 5, -Integer.MAX_VALUE, Integer.MAX_VALUE, true);
+        // // }
 
-        long elapsedTime = (endTime - startTime) / 1_000_000;
+        // int[][] scoria_move = Scoria.minimax(board, 7, -Integer.MAX_VALUE, Integer.MAX_VALUE, true);
 
-        System.out.println("Elapsed time: " + elapsedTime + " ms");
-        System.out.println("Average time: " + elapsedTime / 1 + " ms");
-        System.out.println("Move Count: " + move_count);
+        // long endTime = System.nanoTime();
+
+        // MoveHandler.moveState(board, scoria_move[1], scoria_move[2]);
+
+        // Interface.printBoard(board);
+
+        // long elapsedTime = (endTime - startTime) / 1_000_000;
+
+        // System.out.println("Elapsed time: " + elapsedTime + " ms");
+        // System.out.println("Average time: " + elapsedTime / 1 + " ms");
+        // System.out.println("Move Count: " + move_count);
     }
 
 }

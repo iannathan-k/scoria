@@ -1,8 +1,8 @@
 package pieces.enums;
 
 public enum PieceColor {
-    NULL,
-    EMPTY,
     WHITE,
-    BLACK
+    BLACK,
+    NULL,
+    EMPTY
 }

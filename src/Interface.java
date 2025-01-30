@@ -1,29 +1,20 @@
 package src;
+
 import pieces.Piece;
 import pieces.enums.*;
 
 public abstract class Interface {
 
-    private static String getChar(Piece piece) {
-        PieceType type = piece.getType();
-        switch (type) {
-            case EMPTY:
-                return " ";
-            case PAWN:
-                return "P";
-            case KNIGHT:
-                return "N";
-            case BISHOP:
-                return "B";
-            case ROOK:
-                return "R";
-            case QUEEN:
-                return "Q";
-            case KING:
-                return "K";
-        }
-        
-        throw new UnsupportedOperationException("!! UNSUPPORTED PIECETYPE !!");
+    private static String getChar(PieceType type) {
+        return switch (type) {
+            case EMPTY -> " ";
+            case PAWN -> "P";
+            case KNIGHT -> "N";
+            case BISHOP -> "B";
+            case ROOK -> "R";
+            case QUEEN -> "Q";
+            case KING -> "K";
+        };
     }
 
     public static void printBoard(Piece[][] board) {
@@ -38,7 +29,7 @@ public abstract class Interface {
                 String piece = " ";
                 PieceColor color = col.getColor();
 
-                piece = getChar(col);
+                piece = getChar(col.getType());
 
                 if (color == PieceColor.BLACK) {
                     piece = piece.toLowerCase();

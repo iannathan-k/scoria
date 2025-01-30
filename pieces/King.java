@@ -22,11 +22,15 @@ public class King extends Piece {
         moved_stack.pop();
     }
 
+    public boolean peekMove() {
+        return moved_stack.peek();
+    }
+
     private boolean canCastle(Piece[][] board, int dir) {
         int[] square = new int[] {this.pos[0], this.pos[1] + dir};
 
         while (square[1] > 0 && square[1] < 7) {
-            if (board[square[0]][square[1]].getType() != PieceType.EMPTY) {
+            if (!(board[square[0]][square[1]] instanceof Empty)) {
                 return false;
             }
             if (PieceHandler.underAttack(board, this.color, square)) {
@@ -36,10 +40,10 @@ public class King extends Piece {
             square[1] += dir;
         }
 
-        if (board[square[0]][square[1]].getType() != PieceType.ROOK) {
+        if (!(board[square[0]][square[1]] instanceof Rook)) {
             return false;
         }
-        if (((Rook) board[square[0]][square[1]]).peekMoved()) {
+        if (((Rook) board[square[0]][square[1]]).peekMove()) {
             return false;
         }
 

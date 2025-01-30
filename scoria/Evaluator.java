@@ -52,19 +52,19 @@ public class Evaluator {
 
         for (int i = 0; i < 64; i++) {
             Piece piece = board[i / 8][i % 8];
-            if (piece.getType() == PieceType.EMPTY) {
+            if (piece instanceof Empty) {
                 continue;
             }
             if (piece.getColor() == PieceColor.WHITE) {
                 white_advantage += piece.getPoints();
                 white_advantage += posWeight(piece.getType(), PieceColor.WHITE, piece.getPosition());
-                if (piece.getType() != PieceType.PAWN) {
+                if (!(piece instanceof Pawn)) {
                     white_advantage += mobilityWeight(piece.getType()) * piece.getMoves(board).size();
                 }
             } else {
                 black_advantage += piece.getPoints();
                 black_advantage += posWeight(piece.getType(), PieceColor.BLACK, piece.getPosition());
-                if (piece.getType() != PieceType.PAWN) {
+                if (!(piece instanceof Pawn)) {
                     black_advantage += mobilityWeight(piece.getType()) * piece.getMoves(board).size();
                 }
             }

@@ -33,7 +33,7 @@ public class Queen extends Piece {
                 if (board[move[0]][move[1]].getColor() == this.color) {
                     break;
                 }
-                if (board[move[0]][move[1]].getType() == PieceType.EMPTY) {
+                if (board[move[0]][move[1]] instanceof Empty) {
                     if (!PieceHandler.kingCheck(board, this.pos, move, this.color)) {
                         possible_moves.add(new int[] {move[0], move[1]});
                     }

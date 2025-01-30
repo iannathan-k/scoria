@@ -15,11 +15,11 @@ public class Scoria {
 
         int score = 0;
 
-        if (capture.getType() != PieceType.EMPTY) {
+        if (!(capture instanceof Empty)) {
             score += 3 * capture.getPoints() - piece.getPoints();
         }
 
-        if (piece.getType() == PieceType.PAWN && (target_pos[0] == 0 || target_pos[0] == 7)) {
+        if (piece instanceof Pawn && (target_pos[0] == 0 || target_pos[0] == 7)) {
             score += 800;
         }
 

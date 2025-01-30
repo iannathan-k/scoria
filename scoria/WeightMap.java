@@ -1,6 +1,5 @@
 package scoria;
 
-import java.util.*;
 import pieces.enums.*;
 
 public abstract class WeightMap {
