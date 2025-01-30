@@ -1,6 +1,6 @@
-package scoria;
-import pieces.*;
-import pieces.enums.*;
+package src.scoria;
+import src.pieces.*;
+import src.pieces.enums.*;
 
 public class Evaluator {
 

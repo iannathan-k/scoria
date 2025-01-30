@@ -1,4 +1,4 @@
-package scoria;
+package src.scoria;
 
 import java.util.*;
 
@@ -7,12 +7,10 @@ public class Transposition {
     static class BoardState {
         private int depth;
         private int[][] best_move;
-        private ArrayList<int[][]> possible_moves;
 
-        public BoardState(int depth, int[][] best_move, ArrayList<int[][]> possible_moves) {
+        public BoardState(int depth, int[][] best_move) {
             this.depth = depth;
             this.best_move = best_move;
-            this.possible_moves = possible_moves;
         }
 
         public int getDepth() {
@@ -21,10 +19,6 @@ public class Transposition {
 
         public int[][] getBestMove() {
             return best_move;
-        }
-
-        public ArrayList<int[][]> getPossibleMoves() {
-            return possible_moves;
         }
     }
     

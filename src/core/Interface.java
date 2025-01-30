@@ -1,7 +1,7 @@
-package src;
+package src.core;
 
-import pieces.Piece;
-import pieces.enums.*;
+import src.pieces.Piece;
+import src.pieces.enums.*;
 
 public abstract class Interface {
 

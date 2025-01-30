@@ -1,4 +1,4 @@
-package pieces.enums;
+package src.pieces.enums;
 
 public enum PieceColor {
     WHITE,

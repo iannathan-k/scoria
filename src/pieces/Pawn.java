@@ -1,7 +1,9 @@
-package pieces;
+package src.pieces;
 
 import java.util.*;
-import pieces.enums.*;
+
+import src.core.Game;
+import src.pieces.enums.*;
 
 public class Pawn extends Piece {
 
@@ -48,7 +50,7 @@ public class Pawn extends Piece {
     }
 
     private boolean passantCheck(Piece[][] board, ArrayDeque<Integer> stack, int offset) {
-        if (PieceHandler.currentMoveNumber() != stack.peek()) {
+        if (Game.currentMoveNumber() != stack.peek()) {
             return false;
         }
         if (!PieceHandler.inRange(new int[] {this.pos[0], this.pos[1] + offset})) {

@@ -1,7 +1,8 @@
-package pieces;
+package src.pieces;
 
 import java.util.ArrayList;
-import pieces.enums.*;
+
+import src.pieces.enums.*;
 
 public class Bishop extends Piece {
 

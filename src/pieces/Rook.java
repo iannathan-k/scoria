@@ -1,8 +1,9 @@
-package pieces;
+package src.pieces;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import pieces.enums.*;
+
+import src.pieces.enums.*;
 
 public class Rook extends Piece {
 

@@ -1,10 +1,10 @@
-package src;
+package src.core;
 
-import pieces.*;
+import src.pieces.*;
 
 public class MoveHandler {
     public static Piece[] moveState(Piece[][] board, int[] origin_pos, int[] target_pos) {
-        PieceHandler.nextMoveNumber();
+        Game.nextMoveNumber();
         Piece piece = board[origin_pos[0]][origin_pos[1]];
         Piece captured = board[target_pos[0]][target_pos[1]];
 
@@ -24,10 +24,10 @@ public class MoveHandler {
                 int[] left_pos = {target_pos[0], target_pos[1] - 1};
                 int[] right_pos = {target_pos[0], target_pos[1] + 1};
                 if (PieceHandler.inRange(left_pos) && board[left_pos[0]][left_pos[1]] instanceof Pawn) {
-                    ((Pawn) board[left_pos[0]][left_pos[1]]).pushRight(PieceHandler.currentMoveNumber());
+                    ((Pawn) board[left_pos[0]][left_pos[1]]).pushRight(Game.currentMoveNumber());
                 }
                 if (PieceHandler.inRange(right_pos) && board[right_pos[0]][right_pos[1]] instanceof Pawn) {
-                    ((Pawn) board[right_pos[0]][right_pos[1]]).pushLeft(PieceHandler.currentMoveNumber());
+                    ((Pawn) board[right_pos[0]][right_pos[1]]).pushLeft(Game.currentMoveNumber());
                 }
             }
 
@@ -80,7 +80,7 @@ public class MoveHandler {
     }
 
     public static void undoState(Piece[][] board, int[] origin_pos, int[] target_pos, Piece[] board_info) {
-        PieceHandler.lastMoveNumber();
+        Game.lastMoveNumber();
         Piece piece = board_info[1];
         Piece captured = board_info[0];
 

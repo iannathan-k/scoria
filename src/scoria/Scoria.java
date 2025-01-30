@@ -1,11 +1,29 @@
-package scoria;
+package src.scoria;
 
 import java.util.ArrayList;
-import pieces.*;
-import pieces.enums.*;
-import src.*;
+
+import src.core.Game;
+import src.core.MoveHandler;
+import src.pieces.*;
+import src.pieces.enums.*;
 
 public class Scoria {
+
+    public static long start_time;
+    public static final long MAX_THINK_TIME = Game.THINK_TIME * 1_000_000;
+
+    public static int[][] iterativeDeepener(Piece[][] board, boolean turn) {
+        start_time = System.nanoTime();
+        int[][] bestMove = new int[][]{{}, {}, {}};
+        int depth = 0;
+        while (System.nanoTime() - start_time < MAX_THINK_TIME) {
+            depth++;
+            bestMove = minimax(board, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, turn);
+        }
+        Game.setLastThinkDepth(depth);
+        Game.setLastThinkTime((int) (System.nanoTime() - start_time) / 1_000_000);
+        return bestMove;
+    }
 
     private static int heuristicScore(Piece[][] board, int[][] move, PieceColor color) {
         int[] origin_pos = move[0];
@@ -30,6 +48,10 @@ public class Scoria {
 
     public static int[][] minimax(Piece[][] board, int depth, int alpha, int beta, boolean turn) {
 
+        if (System.nanoTime() - start_time > MAX_THINK_TIME) {
+            return new int[][] {{Evaluator.boardEval(board, turn)}, {}, {}};
+        }
+
         long board_hash = Zobrist.manualHash(board, turn);
         Transposition.BoardState entry = Transposition.getState(board_hash);
         if (entry != null && entry.getDepth() >= depth) {
@@ -37,10 +59,10 @@ public class Scoria {
         }
 
         if (depth == 0) {
-            Main.move_count++;
+            Game.move_count++;
             return new int[][] {{Evaluator.boardEval(board, turn)}, {}, {}};
         }
-        
+
         PieceColor color = turn ? PieceColor.WHITE : PieceColor.BLACK;
         ArrayList<int[][]> possible_moves = PieceHandler.getAllMoves(board, color);
 
@@ -70,8 +92,7 @@ public class Scoria {
                 }
             }
 
-            Transposition.BoardState new_state = new Transposition.BoardState(depth, max_eval, possible_moves);
-            Transposition.addState(board_hash, new_state);
+            Transposition.addState(board_hash, new Transposition.BoardState(depth, max_eval));
 
             return max_eval;
 
@@ -95,8 +116,7 @@ public class Scoria {
                 }
             }
 
-            Transposition.BoardState new_state = new Transposition.BoardState(depth, min_eval, possible_moves);
-            Transposition.addState(board_hash, new_state);
+            Transposition.addState(board_hash, new Transposition.BoardState(depth, min_eval));
 
             return min_eval;
         }

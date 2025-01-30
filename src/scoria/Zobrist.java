@@ -1,8 +1,10 @@
-package scoria;
+package src.scoria;
 
 import java.util.*;
-import pieces.*;
-import pieces.enums.PieceColor;
+
+import src.core.*;
+import src.pieces.*;
+import src.pieces.enums.PieceColor;
 
 public class Zobrist {
     private static long[][][] zobrist_table = new long[8][8][12];
@@ -52,7 +54,7 @@ public class Zobrist {
                     hash ^= castle_table[castle_side];
                     hash ^= castle_table[castle_side + 1];
                 } else if (piece instanceof Pawn) {
-                    int current_move_num = PieceHandler.currentMoveNumber();
+                    int current_move_num = Game.currentMoveNumber();
                     if (((Pawn) piece).peekLeft() != -1 && ((Pawn) piece).peekLeft() == current_move_num) {
                         hash ^= passant_table[j - 1];
                     }

@@ -1,6 +1,6 @@
-package scoria;
+package src.scoria;
 
-import pieces.enums.*;
+import src.pieces.enums.*;
 
 public abstract class WeightMap {
     
