@@ -30,9 +30,9 @@ public class Evaluator {
             case PAWN -> 1;
             case KNIGHT -> 4;
             case BISHOP -> 6;
-            case ROOK   -> 8;
-            case QUEEN  -> 12;
-            case KING   -> 2;
+            case ROOK -> 8;
+            case QUEEN -> 12;
+            case KING -> 2;
             default -> throw new IllegalArgumentException("Unexpected value: " + type);
         };
     }

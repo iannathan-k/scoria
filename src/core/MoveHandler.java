@@ -10,11 +10,8 @@ public class MoveHandler {
 
         // moved logic
         if (piece instanceof Rook) {
-            // Zobrist.updateCastleRights(origin_pos, piece, true);
             ((Rook) piece).pushMove();
         } else if (piece instanceof King) {
-            // Zobrist.updateCastleRights(new int[] {origin_pos[0], 0}, piece, true);
-            // Zobrist.updateCastleRights(new int[] {origin_pos[0], 7}, piece, true);
             ((King) piece).pushMove();
         }
 
@@ -74,7 +71,6 @@ public class MoveHandler {
         board[origin_pos[0]][origin_pos[1]] = new Empty();
         piece.setPosition(target_pos);
         Piece[] board_info = {captured, piece};
-        // Zobrist.normalUpdateHash(origin_pos, target_pos, board_info);
 
         return board_info;
     }
@@ -86,12 +82,9 @@ public class MoveHandler {
 
         // unmoved logic
         if (piece instanceof Rook) {
-            // Zobrist.updateCastleRights(origin_pos, piece, ((Rook) piece).peekMove());
             ((Rook) piece).popMove();
 
         } else if (piece instanceof King) {
-            // Zobrist.updateCastleRights(new int[] {origin_pos[0], 0}, piece, ((King) piece).peekMove());
-            // Zobrist.updateCastleRights(new int[] {origin_pos[0], 7}, piece, ((King) piece).peekMove());
             ((King) piece).popMove();
         }
 
@@ -147,7 +140,6 @@ public class MoveHandler {
 
         board[origin_pos[0]][origin_pos[1]] = piece;
         board[target_pos[0]][target_pos[1]] = captured;
-        // Zobrist.normalUpdateHash(origin_pos, target_pos, board_info);
         piece.setPosition(origin_pos);
     }
 }

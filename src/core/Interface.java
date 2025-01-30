@@ -2,6 +2,7 @@ package src.core;
 
 import src.pieces.Piece;
 import src.pieces.enums.*;
+import src.scoria.Evaluator;
 
 public abstract class Interface {
 
@@ -58,5 +59,30 @@ public abstract class Interface {
 
     public static int[][] uciToMove(String uci) {
         return new int[][] {squareToPos(uci.substring(0, 2)), squareToPos(uci.substring(2, 4))};
+    }
+
+    public static void printEndGame() {
+        PieceColor winner = Evaluator.gameWinner(Game.board, Game.getTurn());
+        switch (winner) {
+            case WHITE -> System.out.println("white won");
+            case BLACK -> System.out.println("black won");
+            case NULL -> System.out.println("stalemate");
+            default -> throw new IllegalArgumentException("Unexpected value: " + winner);
+        }
+    }
+
+    public static void printCLI() {
+        if (Game.getTurn()) {
+            System.out.println("~~~ white to move ~~~");
+        } else {
+            System.out.println("~~~ black to move ~~~");
+        }
+
+        Interface.printBoard(Game.board);
+
+        System.out.println("Eval: " + Evaluator.boardEval(Game.board, Game.getTurn()));
+        System.out.println("Depth: " + Game.getLastThinkDepth());
+        System.out.println("Nodes: " + Game.getMoveCount());
+        System.out.println("Time: " + Game.getLastThinkTime() + " ms");
     }
 }
