@@ -7,7 +7,6 @@ public class GameHandler {
     public static void humanBotCLI() {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("~~~ white to move ~~~");
         int[][] scoria_move = {};
 
         while (!Game.isGameOver()) {

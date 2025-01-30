@@ -21,7 +21,7 @@ public class Scoria {
             bestMove = minimax(board, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, turn);
         }
         Game.setLastThinkDepth(depth);
-        Game.setLastThinkTime((int) (System.nanoTime() - start_time) / 1_000_000);
+        Game.setLastThinkTime( (System.nanoTime() - start_time) / 1_000_000);
         return bestMove;
     }
 

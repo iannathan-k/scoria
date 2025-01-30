@@ -73,16 +73,16 @@ public abstract class Interface {
 
     public static void printCLI() {
         if (Game.getTurn()) {
-            System.out.println("~~~ white to move ~~~");
-        } else {
             System.out.println("~~~ black to move ~~~");
+        } else {
+            System.out.println("~~~ white to move ~~~");
         }
 
         Interface.printBoard(Game.board);
 
-        System.out.println("Eval: " + Evaluator.boardEval(Game.board, Game.getTurn()));
-        System.out.println("Depth: " + Game.getLastThinkDepth());
-        System.out.println("Nodes: " + Game.getMoveCount());
-        System.out.println("Time: " + Game.getLastThinkTime() + " ms");
+        System.out.println("eval: " + Evaluator.boardEval(Game.board, Game.getTurn()));
+        System.out.println("depth: " + Game.getLastThinkDepth());
+        System.out.println("nodes: " + Game.getMoveCount());
+        System.out.println("time: " + Game.getLastThinkTime() + " ms");
     }
 }

@@ -2,8 +2,6 @@ package src.core;
 
 public class Command {
 
-    private static String mode;
-
     public static void parseCommand(String command) {
         String[] commandStream = command.split("\\s", 2);
         boolean auto = (commandStream.length == 1) ? true : false;
@@ -34,7 +32,7 @@ public class Command {
                 };
                 break;
             default:
-                System.out.println("Unknown Command: " + commandStream[0]);
+                System.out.println("unknown command: " + commandStream[0]);
         }
     }
 }
