@@ -3,6 +3,7 @@ package src.scoria;
 import java.util.ArrayList;
 
 import src.core.Game;
+import src.core.Interface;
 import src.core.MoveHandler;
 import src.pieces.*;
 import src.pieces.enums.*;
@@ -15,13 +16,13 @@ public class Scoria {
     public static int[][] iterativeDeepener(Piece[][] board, boolean turn) {
         start_time = System.nanoTime();
         int[][] bestMove = new int[][]{{}, {}, {}};
-        int depth = 0;
+        int depth = 5;
         while (System.nanoTime() - start_time < MAX_THINK_TIME) {
             depth++;
             bestMove = minimax(board, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, turn);
         }
         Game.setLastThinkDepth(depth);
-        Game.setLastThinkTime( (System.nanoTime() - start_time) / 1_000_000);
+        Game.setLastThinkTime((System.nanoTime() - start_time) / 1_000_000);
         return bestMove;
     }
 
@@ -48,9 +49,9 @@ public class Scoria {
 
     public static int[][] minimax(Piece[][] board, int depth, int alpha, int beta, boolean turn) {
 
-        if (System.nanoTime() - start_time > MAX_THINK_TIME) {
-            return new int[][] {{Evaluator.boardEval(board, turn)}, {}, {}};
-        }
+        // if (System.nanoTime() - start_time > MAX_THINK_TIME) {
+        //     return new int[][] {{Evaluator.boardEval(board, turn)}, {}, {}};
+        // }
 
         long board_hash = Zobrist.manualHash(board, turn);
         Transposition.BoardState entry = Transposition.getState(board_hash);
