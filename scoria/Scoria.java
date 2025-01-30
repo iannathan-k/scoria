@@ -30,11 +30,17 @@ public class Scoria {
 
     public static int[][] minimax(Piece[][] board, int depth, int alpha, int beta, boolean turn) {
 
+        long board_hash = Zobrist.manualHash(board, turn);
+        Transposition.BoardState entry = Transposition.getState(board_hash);
+        if (entry != null && entry.getDepth() >= depth) {
+            return entry.getBestMove();
+        }
+
         if (depth == 0) {
             Main.move_count++;
             return new int[][] {{Evaluator.boardEval(board, turn)}, {}, {}};
         }
-
+        
         PieceColor color = turn ? PieceColor.WHITE : PieceColor.BLACK;
         ArrayList<int[][]> possible_moves = PieceHandler.getAllMoves(board, color);
 
@@ -45,7 +51,7 @@ public class Scoria {
         });
 
         if (turn) {
-            int[][] max_eval = {{-Integer.MAX_VALUE}, {}, {}};
+            int[][] max_eval = {{Integer.MIN_VALUE}, {}, {}};
             for (int[][] move : possible_moves) {
                 Piece[] board_info = MoveHandler.moveState(board, move[0], move[1]);
                 int eval = minimax(board, depth - 1, alpha, beta, !turn)[0][0];
@@ -63,6 +69,9 @@ public class Scoria {
                     break;
                 }
             }
+
+            Transposition.BoardState new_state = new Transposition.BoardState(depth, max_eval, possible_moves);
+            Transposition.addState(board_hash, new_state);
 
             return max_eval;
 
@@ -85,6 +94,9 @@ public class Scoria {
                     break;
                 }
             }
+
+            Transposition.BoardState new_state = new Transposition.BoardState(depth, min_eval, possible_moves);
+            Transposition.addState(board_hash, new_state);
 
             return min_eval;
         }

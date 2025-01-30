@@ -1,8 +1,6 @@
 package src;
 
 import pieces.*;
-import pieces.enums.*;
-import scoria.Zobrist;
 
 public class MoveHandler {
     public static Piece[] moveState(Piece[][] board, int[] origin_pos, int[] target_pos) {

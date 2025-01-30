@@ -3,7 +3,6 @@ package scoria;
 import java.util.*;
 import pieces.*;
 import pieces.enums.PieceColor;
-import pieces.enums.PieceType;
 
 public class Zobrist {
     private static long[][][] zobrist_table = new long[8][8][12];
