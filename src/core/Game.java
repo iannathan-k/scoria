@@ -10,7 +10,7 @@ import src.scoria.Zobrist;
 public class Game {
     
     public static Piece[][] board = new Piece[8][8];
-    public final static long THINK_TIME = 10000;
+    public final static long THINK_TIME = 1000;
     public static int move_count;
     private static int move_number;
     private static long last_think_time;

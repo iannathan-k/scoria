@@ -9,20 +9,23 @@ import src.pieces.enums.*;
 
 public class Scoria {
 
-    public static long start_time;
-    public static final long MAX_THINK_TIME = Game.THINK_TIME * 1_000_000;
+    private static long cancel_time;
+    private static final long MAX_THINK_TIME = Game.THINK_TIME * 1_000_000;
+    private static int[][] current_best_move = new int[3][];
+    private static int current_depth = 0;
 
     public static int[][] iterativeDeepener(Piece[][] board, boolean turn) {
-        start_time = System.nanoTime();
-        int[][] bestMove = new int[][]{{}, {}, {}};
-        int depth = 0;
-        while (System.nanoTime() - start_time < MAX_THINK_TIME) {
-            depth++;
-            bestMove = minimax(board, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, turn);
+        current_depth = 0;
+        current_best_move = new int[3][];
+        cancel_time = System.nanoTime() + MAX_THINK_TIME;
+        while (System.nanoTime() < cancel_time) {
+            current_depth++;
+            current_best_move = minimax(board, current_depth, Integer.MIN_VALUE, Integer.MAX_VALUE, turn);
         }
-        Game.setLastThinkDepth(depth);
-        Game.setLastThinkTime( (System.nanoTime() - start_time) / 1_000_000);
-        return bestMove;
+        System.out.println(current_depth);
+        Game.setLastThinkDepth(current_depth);
+        Game.setLastThinkTime((System.nanoTime() - cancel_time + MAX_THINK_TIME) / 1_000_000);
+        return current_best_move;
     }
 
     private static int heuristicScore(Piece[][] board, int[][] move, PieceColor color) {
@@ -47,18 +50,13 @@ public class Scoria {
     }
 
     public static int[][] minimax(Piece[][] board, int depth, int alpha, int beta, boolean turn) {
-
-        if (System.nanoTime() - start_time > MAX_THINK_TIME) {
-            return new int[][] {{Evaluator.boardEval(board, turn)}, {}, {}};
-        }
-
         long board_hash = Zobrist.manualHash(board, turn);
         Transposition.BoardState entry = Transposition.getState(board_hash);
         if (entry != null && entry.getDepth() >= depth) {
             return entry.getBestMove();
         }
 
-        if (depth == 0) {
+        if (depth == 0 || Evaluator.gameWinner(board, turn) != PieceColor.EMPTY) {
             Game.move_count++;
             return new int[][] {{Evaluator.boardEval(board, turn)}, {}, {}};
         }
@@ -71,6 +69,10 @@ public class Scoria {
             int score2 = heuristicScore(board, move2, color);
             return Integer.compare(score2, score1);
         });
+
+        if (depth == current_depth && current_depth > 1) {
+            possible_moves.add(0, new int[][] {current_best_move[1], current_best_move[2]});
+        }
 
         if (turn) {
             int[][] max_eval = {{Integer.MIN_VALUE}, {}, {}};
@@ -89,6 +91,10 @@ public class Scoria {
                 alpha = (eval > alpha) ? eval : alpha;
                 if (beta <= alpha) {
                     break;
+                }
+
+                if (System.nanoTime() > cancel_time) {
+                    return max_eval;
                 }
             }
 
@@ -113,6 +119,10 @@ public class Scoria {
                 beta = (eval < beta) ? eval : beta;
                 if (beta <= alpha) {
                     break;
+                }
+
+                if (System.nanoTime() > cancel_time) {
+                    return min_eval;
                 }
             }
 

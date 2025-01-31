@@ -19,11 +19,11 @@ public abstract class Interface {
     }
 
     public static void printBoard(Piece[][] board) {
-        System.out.println("    0   1   2   3   4   5   6   7");
+        System.out.println("    a   b   c   d   e   f   g   h");
         System.out.println("  +---+---+---+---+---+---+---+---+");
 
         for (int i = 0; i < 8; i++) {
-            String line = i + " | ";
+            String line = (8 - i) + " | ";
 
             for (Piece col : board[i]) {
                 

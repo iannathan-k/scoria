@@ -29,10 +29,10 @@ public class Evaluator {
     public static int mobilityWeight(PieceType type) {
         return switch (type) {
             case PAWN -> 1;
-            case KNIGHT -> 4;
-            case BISHOP -> 6;
-            case ROOK -> 8;
-            case QUEEN -> 12;
+            case KNIGHT -> 2;
+            case BISHOP -> 3;
+            case ROOK -> 3;
+            case QUEEN -> 4;
             case KING -> 2;
             default -> throw new IllegalArgumentException("Unexpected value: " + type);
         };
@@ -57,16 +57,16 @@ public class Evaluator {
                 continue;
             }
             if (piece.getColor() == PieceColor.WHITE) {
-                white_advantage += piece.getPoints();
+                white_advantage += 2 * piece.getPoints();
                 white_advantage += posWeight(piece.getType(), PieceColor.WHITE, piece.getPosition());
                 if (!(piece instanceof Pawn)) {
-                    white_advantage += mobilityWeight(piece.getType()) * piece.getMoves(board).size();
+                    white_advantage += piece.getMoves(board).size();
                 }
             } else {
-                black_advantage += piece.getPoints();
+                black_advantage += 2 * piece.getPoints();
                 black_advantage += posWeight(piece.getType(), PieceColor.BLACK, piece.getPosition());
                 if (!(piece instanceof Pawn)) {
-                    black_advantage += mobilityWeight(piece.getType()) * piece.getMoves(board).size();
+                    black_advantage += piece.getMoves(board).size();
                 }
             }
         }

@@ -37,6 +37,11 @@ public class GameHandler {
             if (Game.getTurn()) {
                 String uci_move = scanner.nextLine();
 
+                while (uci_move.equals("d")) {
+                    Interface.printCLI();
+                    uci_move = scanner.nextLine();
+                }
+
                 int[][] move = Interface.uciToMove(uci_move);
                 MoveHandler.moveState(Game.board, move[0], move[1]);
             } else {
