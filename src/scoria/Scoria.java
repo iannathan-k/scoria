@@ -3,6 +3,7 @@ package src.scoria;
 import java.util.ArrayList;
 
 import src.core.Game;
+import src.core.Interface;
 import src.core.MoveHandler;
 import src.pieces.*;
 import src.pieces.enums.*;

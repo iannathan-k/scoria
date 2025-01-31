@@ -26,19 +26,6 @@ public class Evaluator {
         return (color == PieceColor.WHITE) ? weight_map[pos[0]][pos[1]] : weight_map[7 - pos[0]][pos[1]];
     }
 
-    public static int mobilityWeight(PieceType type) {
-        return switch (type) {
-            case PAWN -> 1;
-            case KNIGHT -> 2;
-            case BISHOP -> 3;
-            case ROOK -> 3;
-            case QUEEN -> 4;
-            case KING -> 2;
-            default -> throw new IllegalArgumentException("Unexpected value: " + type);
-        };
-    }
-
-    // Will Enhance Later
     public static int boardEval(Piece[][] board, boolean turn) {
         PieceColor winner = gameWinner(board, turn);
         switch (winner) {
@@ -59,15 +46,11 @@ public class Evaluator {
             if (piece.getColor() == PieceColor.WHITE) {
                 white_advantage += 2 * piece.getPoints();
                 white_advantage += posWeight(piece.getType(), PieceColor.WHITE, piece.getPosition());
-                if (!(piece instanceof Pawn)) {
-                    white_advantage += piece.getMoves(board).size();
-                }
+                white_advantage += 2 * piece.getMoves(board).size();
             } else {
                 black_advantage += 2 * piece.getPoints();
                 black_advantage += posWeight(piece.getType(), PieceColor.BLACK, piece.getPosition());
-                if (!(piece instanceof Pawn)) {
-                    black_advantage += piece.getMoves(board).size();
-                }
+                black_advantage += 2 * piece.getMoves(board).size();
             }
         }
 
