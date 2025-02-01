@@ -3,7 +3,6 @@ package src.scoria;
 import java.util.ArrayList;
 
 import src.core.Game;
-import src.core.Interface;
 import src.core.MoveHandler;
 import src.pieces.*;
 import src.pieces.enums.*;
@@ -13,7 +12,7 @@ public class Scoria {
     private static long cancel_time;
     private static final long MAX_THINK_TIME = Game.THINK_TIME * 1_000_000;
     private static int[][] current_best_move = new int[3][];
-    private static int current_depth = 0;
+    private static int current_depth;
 
     public static int[][] iterativeDeepener(Piece[][] board, boolean turn) {
         current_depth = 0;
@@ -23,10 +22,19 @@ public class Scoria {
             current_depth++;
             current_best_move = minimax(board, current_depth, Integer.MIN_VALUE, Integer.MAX_VALUE, turn);
         }
-        System.out.println(current_depth);
         Game.setLastThinkDepth(current_depth);
         Game.setLastThinkTime((System.nanoTime() - cancel_time + MAX_THINK_TIME) / 1_000_000);
         return current_best_move;
+    }
+
+    private static int getNodeType(int eval, int alpha, int beta) {
+        if (eval >= beta) {
+            return Transposition.BETA_NODE;
+        }
+        if (eval <= alpha) {
+            return Transposition.ALPHA_NODE;
+        }
+        return Transposition.EXACT_NODE;
     }
 
     private static int heuristicScore(Piece[][] board, int[][] move, PieceColor color) {
@@ -54,7 +62,16 @@ public class Scoria {
         long board_hash = Zobrist.manualHash(board, turn);
         Transposition.BoardState entry = Transposition.getState(board_hash);
         if (entry != null && entry.getDepth() >= depth) {
-            return entry.getBestMove();
+
+            if (entry.isExact()) {
+                return entry.getBestMove();
+            }
+            if (entry.isBeta() && entry.getBestMove()[0][0] >= beta) {
+                return entry.getBestMove();
+            }
+            if (entry.isAlpha() && entry.getBestMove()[0][0] <= alpha) {
+                return entry.getBestMove();
+            }
         }
 
         if (depth == 0 || Evaluator.gameWinner(board, turn) != PieceColor.EMPTY) {
@@ -75,6 +92,9 @@ public class Scoria {
             possible_moves.add(0, new int[][] {current_best_move[1], current_best_move[2]});
         }
 
+        int parent_alpha = alpha;
+        int parent_beta = beta;
+
         if (turn) {
             int[][] max_eval = {{Integer.MIN_VALUE}, {}, {}};
             for (int[][] move : possible_moves) {
@@ -89,8 +109,9 @@ public class Scoria {
                     max_eval[2] = move[1];
                 }
 
-                alpha = (eval > alpha) ? eval : alpha;
+                alpha = Math.max(eval, alpha);
                 if (beta <= alpha) {
+                    Transposition.addState(board_hash, new Transposition.BoardState(depth, max_eval, Transposition.BETA_NODE));
                     break;
                 }
 
@@ -99,7 +120,7 @@ public class Scoria {
                 }
             }
 
-            Transposition.addState(board_hash, new Transposition.BoardState(depth, max_eval));
+            Transposition.addState(board_hash, new Transposition.BoardState(depth, max_eval, getNodeType(max_eval[0][0], parent_alpha, parent_beta)));
 
             return max_eval;
 
@@ -119,6 +140,7 @@ public class Scoria {
 
                 beta = (eval < beta) ? eval : beta;
                 if (beta <= alpha) {
+                    Transposition.addState(board_hash, new Transposition.BoardState(depth, min_eval, Transposition.ALPHA_NODE));
                     break;
                 }
 
@@ -127,7 +149,7 @@ public class Scoria {
                 }
             }
 
-            Transposition.addState(board_hash, new Transposition.BoardState(depth, min_eval));
+            Transposition.addState(board_hash, new Transposition.BoardState(depth, min_eval, getNodeType(min_eval[0][0], parent_alpha, parent_beta)));
 
             return min_eval;
         }
