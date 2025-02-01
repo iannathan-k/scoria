@@ -62,7 +62,6 @@ public class Scoria {
         long board_hash = Zobrist.manualHash(board, turn);
         Transposition.BoardState entry = Transposition.getState(board_hash);
         if (entry != null && entry.getDepth() >= depth) {
-
             if (entry.isExact()) {
                 return entry.getBestMove();
             }
@@ -109,15 +108,16 @@ public class Scoria {
                     max_eval[2] = move[1];
                 }
 
+                if (System.nanoTime() > cancel_time) {
+                    return max_eval;
+                }
+
                 alpha = Math.max(eval, alpha);
                 if (beta <= alpha) {
                     Transposition.addState(board_hash, new Transposition.BoardState(depth, max_eval, Transposition.BETA_NODE));
                     break;
                 }
-
-                if (System.nanoTime() > cancel_time) {
-                    return max_eval;
-                }
+    
             }
 
             Transposition.addState(board_hash, new Transposition.BoardState(depth, max_eval, getNodeType(max_eval[0][0], parent_alpha, parent_beta)));
@@ -138,14 +138,14 @@ public class Scoria {
                     min_eval[2] = move[1];
                 }
 
-                beta = (eval < beta) ? eval : beta;
+                if (System.nanoTime() > cancel_time) {
+                    return min_eval;
+                }
+                
+                beta = Math.min(eval, beta);
                 if (beta <= alpha) {
                     Transposition.addState(board_hash, new Transposition.BoardState(depth, min_eval, Transposition.ALPHA_NODE));
                     break;
-                }
-
-                if (System.nanoTime() > cancel_time) {
-                    return min_eval;
                 }
             }
 
