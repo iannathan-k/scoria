@@ -1,6 +1,10 @@
 # Scoria AI
 
-An *extremely* rudimentary chess bot, designed and programmed completely in Python.
+An *extremely* rudimentary chess bot, designed and programmed completely in Java.
+
+## DISCLAIMER ##
+
+THIS VERSION OF README.md IS NOT UP TO DATE. THE BOT IS CURRENT PROGRAMMED USING JAVA, NO LONGER PYTHON AND MANY CHANGES HAVE BEEN MADE SINCE THEN. AS THE BOT IS STILL UNDER DEVELOPMENT, IF YOU WISH TO USE THE BOT PLEASE CREATE AN ISSUE FOR ME TO RESOLVE.
 
 ## Rating
 
