@@ -5,7 +5,6 @@ Started just after the new year of 2025, introducing Scoria, a rudimentary chess
 ## Table of Contents
 
 - [Disclaimers](#disclaimers)
-    - [Rating](#rating)
     - [Requirements](#requirements)
 - [Operation](#operation)
     - [Compiling](#compiling)
