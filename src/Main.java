@@ -3,22 +3,20 @@ package src;
 import java.util.Scanner;
 
 import src.core.Command;
+import src.core.Game;
 
 public class Main {
 
     public static void main(String args[]) {
         
         System.out.println("starting...");
-        boolean exit = false;
+        Game.initGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
 
         Scanner scanner = new Scanner(System.in);
-        String command;
+        while (true) {
+            String command = scanner.nextLine();
+            if (command.equals("exit")) break;
 
-        while (!exit) {
-            command = scanner.nextLine();
-            if (command == "exit") {
-                exit = true;
-            }
             Command.parseCommand(command);
         }
         scanner.close();

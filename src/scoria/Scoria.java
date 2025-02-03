@@ -40,6 +40,24 @@ public class Scoria {
         return Transposition.EXACT_NODE;
     }
 
+    public static int perftCount(Piece[][] board, int depth, boolean turn) {
+        PieceColor color = turn ? PieceColor.WHITE : PieceColor.BLACK;
+        ArrayList<int[][]> possible_moves = PieceHandler.getAllMoves(board, color);
+
+        if (depth == 0) {
+            return 1;
+        }
+
+        int node_count = 0;
+
+        for (int[][] move : possible_moves) {
+            Piece[] board_info = MoveHandler.moveState(board, move[0], move[1]);
+            node_count += perftCount(board, depth - 1, !turn);
+            MoveHandler.undoState(board, move[0], move[1], board_info);
+        }
+        return node_count;
+    }
+
     private static int heuristicScore(Piece[][] board, int[][] move, PieceColor color) {
         int[] origin_pos = move[0];
         int[] target_pos = move[1];
@@ -64,6 +82,7 @@ public class Scoria {
     public static int[][] minimax(Piece[][] board, int depth, int alpha, int beta, boolean turn) {
         long board_hash = Zobrist.manualHash(board, turn);
         Transposition.BoardState entry = Transposition.getState(board_hash);
+
         if (entry != null && entry.getDepth() >= depth) {
             if (entry.isExact()) {
                 return entry.getBestMove();
@@ -78,6 +97,7 @@ public class Scoria {
 
         if (depth == 0 || Evaluator.gameWinner(board, turn) != PieceColor.EMPTY) {
             Game.move_count++;
+            // return new int[][] {{quiescenceSearch(board, alpha, beta, turn)}, {}, {}};
             return new int[][] {{Evaluator.boardEval(board, turn)}, {}, {}};
         }
 

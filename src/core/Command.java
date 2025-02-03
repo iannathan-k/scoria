@@ -10,14 +10,15 @@ public class Command {
             case "pos":
                 if (auto) {
                     Game.initGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
-                } else {
-                    Game.initGame(commandStream[1]);
+                    break;
                 }
+                Game.initGame(commandStream[1]);
                 break;
 
             case "d":
                 Interface.printBoard(Game.board);
                 break;
+
             case "play":
                 if (auto) {
                     GameHandler.botBotCLI();
@@ -31,8 +32,27 @@ public class Command {
                     case "4" -> GameHandler.botBotUCI();
                 };
                 break;
+
+            case "perft":
+                if (auto) {
+                    GameHandler.perft(5);
+                    break;
+                }
+
+                GameHandler.perft(Integer.parseInt(commandStream[1]));
+                break;
+
+            case "think":;
+                if (auto) {
+                    System.out.println(Game.THINK_TIME + "ms");
+                    break;
+                }
+
+                Game.THINK_TIME = Long.parseLong(commandStream[1]);
+                break;
+                
             default:
                 System.out.println("unknown command: " + commandStream[0]);
         }
     }
-}
+}   

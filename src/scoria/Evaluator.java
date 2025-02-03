@@ -37,7 +37,7 @@ public class Evaluator {
 
         int white_advantage = 0;
         int black_advantage = 0;
-
+    
         for (int i = 0; i < 64; i++) {
             Piece piece = board[i / 8][i % 8];
             if (piece instanceof Empty) {

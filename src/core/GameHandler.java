@@ -1,6 +1,12 @@
 package src.core;
 
+import java.util.ArrayList;
 import java.util.Scanner;
+
+import src.pieces.Piece;
+import src.pieces.PieceHandler;
+import src.pieces.enums.PieceColor;
+import src.scoria.Scoria;
 
 public class GameHandler {
 
@@ -82,5 +88,28 @@ public class GameHandler {
 
         Interface.printEndGame();
 
+    }
+
+    public static void perft(int depth) {
+        PieceColor color = Game.getTurn() ? PieceColor.WHITE : PieceColor.BLACK;
+        ArrayList<int[][]> first_moves = PieceHandler.getAllMoves(Game.board, color);
+
+        int total_nodes = 0;
+
+        long start = System.nanoTime();
+
+        for (int[][] move : first_moves) {
+            Piece[] board_info = MoveHandler.moveState(Game.board, move[0], move[1]);
+            int move_count = Scoria.perftCount(Game.board, depth - 1, !Game.getTurn());
+            MoveHandler.undoState(Game.board, move[0], move[1], board_info);
+
+            total_nodes += move_count;
+            System.out.println(Interface.moveToUci(move[0], move[1]) + ": " + move_count);
+        }
+
+        long run_time = (System.nanoTime() - start) / 1_000_000;
+
+        System.out.println("total nodes: " + total_nodes);
+        System.out.println("total time: " + run_time + "ms");
     }
 }
