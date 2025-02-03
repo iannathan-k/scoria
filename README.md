@@ -182,11 +182,13 @@ public static int[][] minimax(Piece[][] board, int depth, int alpha, int beta, b
         return max_eval;
 
     } else {
+
         int[][] min_eval = {{Integer.MAX_VALUE}, {}, {}};
         for (int[][] move : possible_moves) {
             Piece[] board_info = MoveHandler.moveState(board, move[0], move[1]);
             int eval = minimax(board, depth - 1, alpha, beta, !turn)[0][0];
             MoveHandler.undoState(board, move[0], move[1], board_info);
+            
             if (eval < min_eval[0][0]) {
                 min_eval[0][0] = eval;
                 min_eval[1] = move[0];
