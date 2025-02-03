@@ -25,7 +25,7 @@ public class GameHandler {
                 scoria_move = Game.getScoriaMove(Game.getTurn());
                 MoveHandler.moveState(Game.board, scoria_move[1], scoria_move[2]);
                 Interface.printCLI();
-                System.out.println(Interface.moveToUci(scoria_move[1], scoria_move[2]));
+                System.out.println("move: " + Interface.moveToUci(scoria_move[1], scoria_move[2]));
             }
 
             Game.notTurn();

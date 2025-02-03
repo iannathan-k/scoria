@@ -83,6 +83,6 @@ public abstract class Interface {
         System.out.println("eval: " + Evaluator.boardEval(Game.board, Game.getTurn()));
         System.out.println("depth: " + Game.getLastThinkDepth());
         System.out.println("nodes: " + Game.getMoveCount());
-        System.out.println("time: " + Game.getLastThinkTime() + " ms");
+        System.out.println("time: " + Game.getLastThinkTime() + "ms");
     }
 }
