@@ -88,7 +88,8 @@ public class Game {
     }
 
     public static boolean isGameOver() {
-        if (Evaluator.gameWinner(board, turn) != PieceColor.EMPTY) {
+        long hash = Zobrist.manualHash(board, turn);
+        if (Evaluator.gameWinner(board, turn, hash) != PieceColor.EMPTY) {
             return true;
         } else {
             return false;

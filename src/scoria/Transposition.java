@@ -38,6 +38,10 @@ public class Transposition {
         public boolean isBeta() {
             return this.node_type == BETA_NODE;
         }
+
+        public int getType() {
+            return this.node_type;
+        }
     }
     
     private static HashMap<Long, BoardState> transposition_table = new HashMap<Long, BoardState>();

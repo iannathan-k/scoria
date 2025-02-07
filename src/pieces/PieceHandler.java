@@ -198,11 +198,11 @@ public abstract class PieceHandler {
     }
 
     public static boolean kingCheck(Piece[][] board, int[] origin_pos, int[] target_pos, PieceColor color) {
-        Piece[] board_info = MoveHandler.moveState(board, origin_pos, target_pos);
+        Piece[] board_info = MoveHandler.pseudoMoveState(board, origin_pos, target_pos);
 
         boolean result = underAttack(board, color, getKingPos(color));
 
-        MoveHandler.undoState(board, origin_pos, target_pos, board_info);
+        MoveHandler.pseudoUndoState(board, origin_pos, target_pos, board_info);
 
         return result;
     }

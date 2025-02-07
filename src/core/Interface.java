@@ -2,7 +2,7 @@ package src.core;
 
 import src.pieces.Piece;
 import src.pieces.enums.*;
-import src.scoria.Evaluator;
+import src.scoria.*;
 
 public abstract class Interface {
 
@@ -62,7 +62,8 @@ public abstract class Interface {
     }
 
     public static void printEndGame() {
-        PieceColor winner = Evaluator.gameWinner(Game.board, Game.getTurn());
+        long hash = Zobrist.manualHash(Game.board, Game.getTurn());
+        PieceColor winner = Evaluator.gameWinner(Game.board, Game.getTurn(), hash);
         switch (winner) {
             case WHITE -> System.out.println("white won");
             case BLACK -> System.out.println("black won");
@@ -72,6 +73,7 @@ public abstract class Interface {
     }
 
     public static void printCLI() {
+        long hash = Zobrist.manualHash(Game.board, Game.getTurn());
         if (Game.getTurn()) {
             System.out.println("~~~ black to move ~~~");
         } else {
@@ -80,7 +82,7 @@ public abstract class Interface {
 
         Interface.printBoard(Game.board);
 
-        System.out.println("eval: " + Evaluator.boardEval(Game.board, Game.getTurn()));
+        System.out.println("eval: " + Evaluator.boardEval(Game.board, Game.getTurn(), hash));
         System.out.println("depth: " + Game.getLastThinkDepth());
         System.out.println("nodes: " + Game.getMoveCount());
         System.out.println("time: " + Game.getLastThinkTime() + "ms");

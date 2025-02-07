@@ -1,6 +1,6 @@
 # Scoria AI
 
-Started just after the new year of 2025, introducing Scoria, a rudimentary chess bot, programmed completely in Java. Current with a rating ~1600 on lichess, as it can beat stockfish levels 1-3 with relative ease, but ends up losing by a thin margin to stockfish 4, which is estimated to be rated around 1700.
+Started just after the new year of 2025, introducing Scoria, a rudimentary chess bot, programmed completely in Java. Current with an estimated rating ~1600 on lichess at 10,000ms thinking time, capable of beating Stockfish level 4.
 
 ## Table of Contents
 
@@ -48,13 +48,14 @@ java src/Main
 
 ## Commands
 
-| Field       | Description                                                                                                    | Deafult |
+| Field       | Description                                                                                                    | Default |
 |---------------|----------------------------------------------------------------------------------------------------------------|---------|
-| `pos {fen}`    | Setup the game board based on a fen string                                                                              | start   |
+| `pos {fen}`    | Setup the game board based on a fen string                                                                              |         |
 | `d`             | Display the current board state in the command line                                                            |         |
 | `play {mode}`   | Play from the current position. [See Here](#gamemodes)                                                 | 3       |
-| `perft {depth}` | Run a perft for the number of positions after n moves where depth is n                                         | 5       |
-| `think {time}`  | Set the think time for the bot in milliseconds. If no time is passed in it will display the current think time |         |
+| `perft {depth}` | Run a [perft](#perft) for the number of positions after n moves where depth is n                                         | 5       |
+| `think {time}`  | Set the think time for the bot in milliseconds. If no time is passed in it will display the current think time | 1000    |
+| `eval {depth}` | Run a evaluation for each possible move after n moves where depth is n                                         | 5       |
 | `exit`          | Exit the program                                                                                               |         |
 
 ## Perft
@@ -65,9 +66,23 @@ Perft recursively searches the nodes until the certain depth, where it finds the
 >d3e3: 1810\
 >d3c3: 1810\
 >d3e2: 2414\
->d3c2: 2414
+>d3c2: 2414\
+>total nodes: 10752\
+>total time: 793ms
 
-## Moving
+## Eval
+
+Eval recursively searches the nodes until the certain depth, where it finds the evaluation of the final positions which are possible. It then finds the sequence of best possible moves for either side and sets the evaluation of the top level nodes for each.
+
+>d3d2: -197\
+>d3e2: -197\
+>d3c2: -197\
+>best move: d3d2, -197\
+>total time: 80ms
+
+## Play
+
+In setting up the board, you will use fen notiation which is the universally agreed way to representing chess board states. To learn more [click here](https://www.chess.com/terms/fen-chess)
 
 To move, you will be prompted to enter your move using UCI format. UCI is the universal chess interface, stating the starting square and the final square. For more information [click here](https://en.wikipedia.org/wiki/Universal_Chess_Interface).
 
@@ -188,7 +203,7 @@ public static int[][] minimax(Piece[][] board, int depth, int alpha, int beta, b
             Piece[] board_info = MoveHandler.moveState(board, move[0], move[1]);
             int eval = minimax(board, depth - 1, alpha, beta, !turn)[0][0];
             MoveHandler.undoState(board, move[0], move[1], board_info);
-            
+
             if (eval < min_eval[0][0]) {
                 min_eval[0][0] = eval;
                 min_eval[1] = move[0];

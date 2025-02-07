@@ -12,7 +12,7 @@ public class King extends Piece {
         this.pos = pos;
         this.color = color;
         this.type = PieceType.KING;
-        this.moved_stack.push(false);
+        this.moved_stack.push(true);
     }
 
     public void pushMove() {

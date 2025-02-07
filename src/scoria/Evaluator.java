@@ -1,11 +1,36 @@
 package src.scoria;
+
+import java.util.*;
 import src.pieces.*;
 import src.pieces.enums.*;
 
 public class Evaluator {
 
-    public static PieceColor gameWinner(Piece[][] board, boolean turn) {
+    private static HashMap<Long, Integer> position_table = new HashMap<Long, Integer>();
+
+    public static void incrementPositionTable(long hash) {
+        if (position_table.get(hash) == null) {
+            position_table.put(hash, 1);
+        } else {
+            position_table.put(hash, position_table.get(hash) + 1);
+        }
+    }
+
+    public static void decrementPositionTable(long hash) {
+        position_table.put(hash, position_table.get(hash) - 1);
+    }
+
+    public static PieceColor gameWinner(Piece[][] board, boolean turn, long hash) {
         PieceColor color = turn ? PieceColor.WHITE : PieceColor.BLACK;
+
+        if (position_table.get(hash) == null) {
+            position_table.put(hash, 1);
+        }
+
+        if (position_table.get(hash) >= 3) {
+            // System.out.println("Hi");
+            return PieceColor.NULL;
+        }
 
         if (!PieceHandler.isKingStuck(board, color)) {
             return PieceColor.EMPTY;
@@ -26,8 +51,8 @@ public class Evaluator {
         return (color == PieceColor.WHITE) ? weight_map[pos[0]][pos[1]] : weight_map[7 - pos[0]][pos[1]];
     }
 
-    public static int boardEval(Piece[][] board, boolean turn) {
-        PieceColor winner = gameWinner(board, turn);
+    public static int boardEval(Piece[][] board, boolean turn, long hash) {
+        PieceColor winner = gameWinner(board, turn, hash);
         switch (winner) {
             case WHITE: return 10000;
             case BLACK: return -10000;

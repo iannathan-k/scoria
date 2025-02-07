@@ -42,13 +42,22 @@ public class Command {
                 GameHandler.perft(Integer.parseInt(commandStream[1]));
                 break;
 
-            case "think":;
+            case "think":
                 if (auto) {
                     System.out.println(Game.THINK_TIME + "ms");
                     break;
                 }
 
                 Game.THINK_TIME = Long.parseLong(commandStream[1]);
+                break;
+
+            case "eval":
+                if (auto) {
+                    GameHandler.eval(5);
+                    break;
+                }
+
+                GameHandler.eval(Integer.parseInt(commandStream[1]));
                 break;
                 
             default:

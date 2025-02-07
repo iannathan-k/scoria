@@ -9,10 +9,15 @@ import src.pieces.enums.*;
 
 public class Scoria {
 
+    private static boolean cancel_mode = true;
     private static long cancel_time;
     private static final long MAX_THINK_TIME = Game.THINK_TIME * 1_000_000;
     private static int[][] current_best_move = new int[3][];
     private static int current_depth;
+
+    public static void setCancelMode(boolean mode) {
+        cancel_mode = mode;
+    }
 
     public static int[][] iterativeDeepener(Piece[][] board, boolean turn) {
         current_depth = 0;
@@ -23,6 +28,9 @@ public class Scoria {
             int[][] move = minimax(board, current_depth, Integer.MIN_VALUE, Integer.MAX_VALUE, turn);
             if (move[1][0] != -1) {
                 current_best_move = move;
+            }
+            if (Math.abs(current_best_move[0][0]) == 10000) {
+                break;
             }
         }
         Game.setLastThinkDepth(current_depth);
@@ -51,9 +59,9 @@ public class Scoria {
         int node_count = 0;
 
         for (int[][] move : possible_moves) {
-            Piece[] board_info = MoveHandler.moveState(board, move[0], move[1]);
+            Piece[] board_info = MoveHandler.pseudoMoveState(board, move[0], move[1]);
             node_count += perftCount(board, depth - 1, !turn);
-            MoveHandler.undoState(board, move[0], move[1], board_info);
+            MoveHandler.pseudoUndoState(board, move[0], move[1], board_info);
         }
         return node_count;
     }
@@ -95,10 +103,10 @@ public class Scoria {
             }
         }
 
-        if (depth == 0 || Evaluator.gameWinner(board, turn) != PieceColor.EMPTY) {
+        if (depth == 0 || Evaluator.gameWinner(board, turn, board_hash) != PieceColor.EMPTY) {
             Game.move_count++;
             // return new int[][] {{quiescenceSearch(board, alpha, beta, turn)}, {}, {}};
-            return new int[][] {{Evaluator.boardEval(board, turn)}, {}, {}};
+            return new int[][] {{Evaluator.boardEval(board, turn, board_hash)}, {}, {}};
         }
 
         PieceColor color = turn ? PieceColor.WHITE : PieceColor.BLACK;
@@ -120,9 +128,9 @@ public class Scoria {
         if (turn) {
             int[][] max_eval = {{Integer.MIN_VALUE}, {}, {}};
             for (int[][] move : possible_moves) {
-                Piece[] board_info = MoveHandler.moveState(board, move[0], move[1]);
+                Piece[] board_info = MoveHandler.moveState(board, move[0], move[1], board_hash);
                 int eval = minimax(board, depth - 1, alpha, beta, !turn)[0][0];
-                MoveHandler.undoState(board, move[0], move[1], board_info);
+                MoveHandler.undoState(board, move[0], move[1], board_info, board_hash);
 
                 // Make this section more efficient later
                 if (eval > max_eval[0][0]) {
@@ -137,21 +145,20 @@ public class Scoria {
                     break;
                 }
 
-                if (System.nanoTime() > cancel_time) {
+                if (System.nanoTime() > cancel_time && cancel_mode) {
                     return new int[][] {{-1}, {-1}, {-1}};
                 }
             }
 
             Transposition.addState(board_hash, new Transposition.BoardState(depth, max_eval, getNodeType(max_eval[0][0], parent_alpha, parent_beta)));
-
             return max_eval;
 
         } else {
             int[][] min_eval = {{Integer.MAX_VALUE}, {}, {}};
             for (int[][] move : possible_moves) {
-                Piece[] board_info = MoveHandler.moveState(board, move[0], move[1]);
+                Piece[] board_info = MoveHandler.moveState(board, move[0], move[1], board_hash);
                 int eval = minimax(board, depth - 1, alpha, beta, !turn)[0][0];
-                MoveHandler.undoState(board, move[0], move[1], board_info);
+                MoveHandler.undoState(board, move[0], move[1], board_info, board_hash);
 
                 // Make this section more efficient later
                 if (eval < min_eval[0][0]) {
@@ -166,13 +173,12 @@ public class Scoria {
                     break;
                 }
 
-                if (System.nanoTime() > cancel_time) {
+                if (System.nanoTime() > cancel_time && cancel_mode) {
                     return new int[][] {{-1}, {-1}, {-1}};
                 }
             }
 
             Transposition.addState(board_hash, new Transposition.BoardState(depth, min_eval, getNodeType(min_eval[0][0], parent_alpha, parent_beta)));
-
             return min_eval;
         }
     }
