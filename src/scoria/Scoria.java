@@ -128,9 +128,9 @@ public class Scoria {
         if (turn) {
             int[][] max_eval = {{Integer.MIN_VALUE}, {}, {}};
             for (int[][] move : possible_moves) {
-                Piece[] board_info = MoveHandler.moveState(board, move[0], move[1], board_hash);
+                Piece[] board_info = MoveHandler.deepMoveState(board, move[0], move[1], board_hash);
                 int eval = minimax(board, depth - 1, alpha, beta, !turn)[0][0];
-                MoveHandler.undoState(board, move[0], move[1], board_info, board_hash);
+                MoveHandler.deepUndoState(board, move[0], move[1], board_info, board_hash);
 
                 // Make this section more efficient later
                 if (eval > max_eval[0][0]) {
@@ -156,9 +156,9 @@ public class Scoria {
         } else {
             int[][] min_eval = {{Integer.MAX_VALUE}, {}, {}};
             for (int[][] move : possible_moves) {
-                Piece[] board_info = MoveHandler.moveState(board, move[0], move[1], board_hash);
+                Piece[] board_info = MoveHandler.deepMoveState(board, move[0], move[1], board_hash);
                 int eval = minimax(board, depth - 1, alpha, beta, !turn)[0][0];
-                MoveHandler.undoState(board, move[0], move[1], board_info, board_hash);
+                MoveHandler.deepUndoState(board, move[0], move[1], board_info, board_hash);
 
                 // Make this section more efficient later
                 if (eval < min_eval[0][0]) {

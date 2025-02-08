@@ -21,11 +21,11 @@ public class GameHandler {
             if (Game.getTurn()) {
                 String uci_move = scanner.nextLine();
                 int[][] move = Interface.uciToMove(uci_move);
-                MoveHandler.moveState(Game.board, move[0], move[1], hash);
+                MoveHandler.deepMoveState(Game.board, move[0], move[1], hash);
                 Interface.printCLI();
             } else {
                 scoria_move = Game.getScoriaMove(Game.getTurn());
-                MoveHandler.moveState(Game.board, scoria_move[1], scoria_move[2], hash);
+                MoveHandler.deepMoveState(Game.board, scoria_move[1], scoria_move[2], hash);
                 Interface.printCLI();
                 System.out.println("move: " + Interface.moveToUci(scoria_move[1], scoria_move[2]));
             }
@@ -52,11 +52,11 @@ public class GameHandler {
                 }
 
                 int[][] move = Interface.uciToMove(uci_move);
-                MoveHandler.moveState(Game.board, move[0], move[1], hash);
+                MoveHandler.deepMoveState(Game.board, move[0], move[1], hash);
             } else {
                 int[][] scoria_move = Game.getScoriaMove(Game.getTurn());
                 System.out.println(Interface.moveToUci(scoria_move[1], scoria_move[2]));
-                MoveHandler.moveState(Game.board, scoria_move[1], scoria_move[2], hash);
+                MoveHandler.deepMoveState(Game.board, scoria_move[1], scoria_move[2], hash);
             }
 
             Game.notTurn();
@@ -72,7 +72,7 @@ public class GameHandler {
         while (!Game.isGameOver()) {
             long hash = Zobrist.manualHash(Game.board, Game.getTurn());
             int[][] scoria_move = Game.getScoriaMove(Game.getTurn());
-            MoveHandler.moveState(Game.board, scoria_move[1], scoria_move[2], hash);
+            MoveHandler.deepMoveState(Game.board, scoria_move[1], scoria_move[2], hash);
             Interface.printCLI();
             Game.notTurn();
         }
@@ -86,7 +86,7 @@ public class GameHandler {
         while (!Game.isGameOver()) {
             long hash = Zobrist.manualHash(Game.board, Game.getTurn());
             int[][] scoria_move = Game.getScoriaMove(Game.getTurn());
-            MoveHandler.moveState(Game.board, scoria_move[1], scoria_move[2], hash);
+            MoveHandler.deepMoveState(Game.board, scoria_move[1], scoria_move[2], hash);
             System.out.println(Interface.moveToUci(scoria_move[1], scoria_move[2]));
             Game.notTurn();
         }
@@ -122,6 +122,8 @@ public class GameHandler {
         PieceColor color = Game.getTurn() ? PieceColor.WHITE : PieceColor.BLACK;
         ArrayList<int[][]> first_moves = PieceHandler.getAllMoves(Game.board, color);
 
+        System.out.println("NUMBER OF MOVES: " + first_moves.size());
+
         int best_eval = Integer.MIN_VALUE;
         String best_move = "";
         Scoria.setCancelMode(false);
@@ -129,9 +131,9 @@ public class GameHandler {
 
         for (int[][] move : first_moves) {
             long hash = Zobrist.manualHash(Game.board, Game.getTurn());
-            Piece[] board_info = MoveHandler.moveState(Game.board, move[0], move[1], hash);
+            Piece[] board_info = MoveHandler.deepMoveState(Game.board, move[0], move[1], hash);
             int eval = Scoria.minimax(Game.board, depth - 1, Integer.MIN_VALUE, Integer.MAX_VALUE, !Game.getTurn())[0][0];
-            MoveHandler.undoState(Game.board, move[0], move[1], board_info, hash);
+            MoveHandler.deepUndoState(Game.board, move[0], move[1], board_info, hash);
             System.out.println(Interface.moveToUci(move[0], move[1]) + ": " + eval);
         
             if (eval > best_eval) {
