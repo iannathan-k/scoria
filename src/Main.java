@@ -20,7 +20,6 @@ public class Main {
             Command.parseCommand(command);
         }
         scanner.close();
-
     }
 
 }

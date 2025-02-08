@@ -75,7 +75,6 @@ public class MoveHandler {
             board[target_pos[0]][target_pos[1]] = piece;
             board[origin_pos[0]][origin_pos[1]] = new Empty();
             piece.setPosition(target_pos);
-            ((King) piece).pushMove();
 
             // move rook
             board[origin_pos[0]][rook_col] = new Empty();
@@ -102,7 +101,6 @@ public class MoveHandler {
         // unmoved logic
         if (piece instanceof Rook) {
             ((Rook) piece).popMove();
-
         } else if (piece instanceof King) {
             ((King) piece).popMove();
         }
