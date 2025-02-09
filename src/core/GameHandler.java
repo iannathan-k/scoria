@@ -122,8 +122,6 @@ public class GameHandler {
         PieceColor color = Game.getTurn() ? PieceColor.WHITE : PieceColor.BLACK;
         ArrayList<int[][]> first_moves = PieceHandler.getAllMoves(Game.board, color);
 
-        System.out.println("NUMBER OF MOVES: " + first_moves.size());
-
         int best_eval = Integer.MIN_VALUE;
         String best_move = "";
         Scoria.setCancelMode(false);

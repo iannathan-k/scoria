@@ -28,8 +28,10 @@ public class King extends Piece {
     }
 
     private boolean canCastle(Piece[][] board, int dir) {
+        if (PieceHandler.underAttack(board, this.color, this.pos)) {
+            return false;
+        }
         int[] square = new int[] {this.pos[0], this.pos[1] + dir};
-
         while (square[1] > 0 && square[1] < 7) {
             if (!(board[square[0]][square[1]] instanceof Empty)) {
                 return false;
