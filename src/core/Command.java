@@ -9,7 +9,7 @@ public class Command {
         switch (commandStream[0]) {
             case "pos":
                 if (auto) {
-                    Game.initGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+                    Game.initGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
                     break;
                 }
                 Game.initGame(commandStream[1]);

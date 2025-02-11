@@ -14,11 +14,15 @@ public class Rook extends Piece {
         this.color = color;                                                      
         this.type = PieceType.ROOK;
         this.points = 500;
-        this.moved_stack.push(false);
+        this.moved_stack.push(true);
     }
 
     public void pushMove() {
         moved_stack.push(true);
+    }
+
+    public void pushMovedFalse() {
+        moved_stack.push(false);
     }
 
     public void popMove() {

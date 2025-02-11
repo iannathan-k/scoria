@@ -75,6 +75,10 @@ public class Game {
         turn = !turn;
     }
 
+    public static void setTurn(boolean set_turn) {
+        turn = set_turn;
+    }
+
     public static int getMoveCount() {
         int count = move_count;
         move_count = 0;

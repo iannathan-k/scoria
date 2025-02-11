@@ -36,10 +36,28 @@ public abstract class Setup {
 
         throw new UnsupportedOperationException("!! UNSUPPORTED PIECETYPE !!");
     }
+
+    public static void castleRightsSetup(char right) {
+        if (Character.isUpperCase(right)) {
+            ((King) Game.board[7][4]).pushMovedFalse();
+        } else {
+            ((King) Game.board[0][4]).pushMovedFalse();
+        }
+
+        switch (right) {
+            case 'K' -> ((Rook) Game.board[7][7]).pushMovedFalse();
+            case 'Q' -> ((Rook) Game.board[7][0]).pushMovedFalse();
+            case 'k' -> ((Rook) Game.board[0][7]).pushMovedFalse();
+            case 'q' -> ((Rook) Game.board[0][0]).pushMovedFalse();
+        }
+    }
     
     public static void setUp(Piece[][] board, String fen) {
         int index = 0;
-        for (int i = 0; i < fen.length(); i++) {
+        String[] fen_stream = fen.split("\\s");
+
+        // Board piece locations
+        for (int i = 0; i < fen_stream[0].length(); i++) {
             char piece = fen.charAt(i);
 
             if (piece == '/' || piece == ' ') {
@@ -52,6 +70,19 @@ public abstract class Setup {
 
             board[index / 8][index % 8] = makePieceObj(piece, index);
             index += 1;
+        }
+
+        // Turn
+        boolean turn = (fen_stream[1] == "w")? true : false;
+        Game.setTurn(turn);
+
+        // Castling Rights
+        if (fen_stream.length < 3) {
+            return;
+        }
+        
+        for (int i = 0; i < fen_stream[2].length(); i++) {
+            castleRightsSetup(fen_stream[2].charAt(i));
         }
     }
 }

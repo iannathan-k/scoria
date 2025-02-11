@@ -1,6 +1,6 @@
 # Scoria AI
 
-Started just after the new year of 2025, introducing Scoria, a rudimentary chess bot, programmed completely in Java. Current with an estimated rating ~1500 on lichess at 1,000ms thinking time, capable of beating Stockfish level 4.
+Started just after the new year of 2025, introducing Scoria, a rudimentary chess bot, programmed completely in Java. Current with an estimated rating ~1500 on lichess at 1,000ms thinking time, capable of beating Stockfish level 3 on Lichess.
 
 ## Table of Contents
 

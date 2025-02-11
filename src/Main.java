@@ -10,7 +10,7 @@ public class Main {
     public static void main(String args[]) {
         
         System.out.println("starting...");
-        Game.initGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+        Game.initGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
 
         Scanner scanner = new Scanner(System.in);
         while (true) {
