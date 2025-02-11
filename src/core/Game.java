@@ -25,19 +25,13 @@ public class Game {
             }
         }
 
-        // setup board
         Setup.setUp(board, fen);
-
-        // initialize zobrist
         Zobrist.initTable();
 
-        // initialize game info
         move_count = 0;
         move_number = 0;
         last_think_time = 0;
         last_depth = 0;
-
-        // initialize turn
         turn = true;
     }
 
