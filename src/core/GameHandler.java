@@ -18,7 +18,7 @@ public class GameHandler {
 
         while (!Game.isGameOver()) {
             long hash = Zobrist.manualHash(Game.board, Game.getTurn());
-            if (Game.getTurn()) {
+            if (Game.isHumanTurn()) {
                 String uci_move = scanner.nextLine();
                 int[][] move = Interface.uciToMove(uci_move);
                 MoveHandler.deepMoveState(Game.board, move[0], move[1], hash);
@@ -43,7 +43,7 @@ public class GameHandler {
 
         while (!Game.isGameOver()) {
             long hash = Zobrist.manualHash(Game.board, Game.getTurn());
-            if (Game.getTurn()) {
+            if (Game.isHumanTurn()) {
                 String uci_move = scanner.nextLine();
 
                 while (uci_move.equals("d")) {

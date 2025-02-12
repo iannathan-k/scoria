@@ -16,6 +16,7 @@ public class Game {
     private static long last_think_time;
     private static int last_depth;
     private static boolean turn;
+    private static boolean human_side = true;
 
     public static void initGame(String fen) {
         // initialize board
@@ -92,6 +93,18 @@ public class Game {
         } else {
             return false;
         }
+    }
+
+    public static void setPlayerSide(boolean side) {
+        human_side = side;
+    }
+
+    public static String getPlayerColor() {
+        return human_side ? "white" : "black";
+    }
+
+    public static boolean isHumanTurn() {
+        return (turn == human_side)? true : false;
     }
 
 }

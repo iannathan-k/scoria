@@ -56,6 +56,7 @@ java src/Main
 | `perft {depth}` | Run a [perft](#perft) for the number of positions after n moves where depth is n                                         | 5       |
 | `think {time}`  | Set the think time for the bot in milliseconds. If no time is passed in it will display the current think time | 1000    |
 | `eval {depth}` | Run a evaluation for each possible move after n moves where depth is n                                         | 5       |
+| `side {color}` | Set the color of the human player with 'w' for white. If no color is passed it will display the current color                                         | white       |
 | `exit`          | Exit the program                                                                                               |         |
 
 ## Perft

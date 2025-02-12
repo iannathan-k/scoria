@@ -3,65 +3,46 @@ package src.core;
 public class Command {
 
     public static void parseCommand(String command) {
-        String[] commandStream = command.split("\\s", 2);
-        boolean auto = (commandStream.length == 1) ? true : false;
+        String[] command_stream = command.split("\\s", 2);
+        boolean has_modifier = (command_stream.length == 2) ? true : false;
+        String field = command_stream[0];
+        String modifier = has_modifier ? command_stream[1] : null;
 
-        switch (commandStream[0]) {
-            case "pos":
-                if (auto) {
-                    Game.initGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
-                    break;
+        switch (field) {
+            case "pos" -> Game.initGame(has_modifier ? modifier : "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
+
+            case "d" -> Interface.printBoard(Game.board);
+
+            case "perft" -> GameHandler.perft(has_modifier ? Integer.parseInt(modifier) : 5);
+
+            case "eval" -> GameHandler.eval(has_modifier ? Integer.parseInt(modifier) : 5);
+
+            case "think" -> {
+                if (has_modifier) {
+                    Game.THINK_TIME = Long.parseLong(modifier);
+                } else {
+                    System.out.println(Game.THINK_TIME + "ms");
                 }
-                Game.initGame(commandStream[1]);
-                break;
+            }
 
-            case "d":
-                Interface.printBoard(Game.board);
-                break;
-
-            case "play":
-                if (auto) {
-                    GameHandler.botBotCLI();
-                    break;
-                }
-
-                switch (commandStream[1]) {
+            case "play" -> {
+                switch (modifier) {
                     case "1" -> GameHandler.humanBotCLI();
                     case "2" -> GameHandler.humanBotUCI();
                     case "3" -> GameHandler.botBotCLI();
                     case "4" -> GameHandler.botBotUCI();
                 };
-                break;
+            }
 
-            case "perft":
-                if (auto) {
-                    GameHandler.perft(5);
-                    break;
+            case "side" -> {
+                if (!has_modifier) {
+                    System.out.println(Game.getPlayerColor());
+                } else {
+                    Game.setPlayerSide(modifier == "w" ? true : false);
                 }
-
-                GameHandler.perft(Integer.parseInt(commandStream[1]));
-                break;
-
-            case "think":
-                if (auto) {
-                    System.out.println(Game.THINK_TIME + "ms");
-                    break;
-                }
-
-                Game.THINK_TIME = Long.parseLong(commandStream[1]);
-                break;
-
-            case "eval":
-                if (auto) {
-                    GameHandler.eval(5);
-                    break;
-                }
-
-                GameHandler.eval(Integer.parseInt(commandStream[1]));
-                break;
+            }
                 
-            default:
-                System.out.println("unknown command: " + commandStream[0]);
+            default -> System.out.println("unknown command: " + field);
         }
     }
 }   
