@@ -1,4 +1,4 @@
-package src.pieces.enums;
+package src.pieces.piecedata;
 
 public enum PieceType {
     PAWN,

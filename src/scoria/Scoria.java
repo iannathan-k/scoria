@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import src.core.Game;
 import src.core.MoveHandler;
 import src.pieces.*;
-import src.pieces.enums.*;
+import src.pieces.piecedata.*;
 
 public class Scoria {
 
@@ -117,10 +117,6 @@ public class Scoria {
             int score2 = heuristicScore(board, move2, color);
             return Integer.compare(score2, score1);
         });
-
-        if (depth == current_depth && current_depth > 1) {
-            possible_moves.add(0, new int[][] {current_best_move[1], current_best_move[2]});
-        }
 
         int parent_alpha = alpha;
         int parent_beta = beta;

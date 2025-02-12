@@ -2,7 +2,7 @@ package src.scoria;
 
 import java.util.*;
 import src.pieces.*;
-import src.pieces.enums.*;
+import src.pieces.piecedata.*;
 
 public class Evaluator {
 

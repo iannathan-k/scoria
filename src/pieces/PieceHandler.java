@@ -3,7 +3,7 @@ package src.pieces;
 import java.util.*;
 
 import src.core.MoveHandler;
-import src.pieces.enums.*;
+import src.pieces.piecedata.*;
 
 public abstract class PieceHandler {
     private static King[] king_pieces = new King[2];
@@ -121,31 +121,6 @@ public abstract class PieceHandler {
 
     public static boolean underAttack(Piece[][] board, PieceColor color, int[] pos) {
 
-        int[][] rook_attack = {
-            {1, 0},
-            {-1, 0},
-            {0, 1},
-            {0, -1}
-        };
-
-        int[][] bishop_attack = {
-            {1, 1},
-            {1, -1},
-            {-1, 1},
-            {-1, -1}
-        };
-
-        int[][] knight_attacks = {
-            {pos[0] + 2, pos[1] + 1},
-            {pos[0] + 2, pos[1] - 1},
-            {pos[0] - 2, pos[1] + 1},
-            {pos[0] - 2, pos[1] - 1},
-            {pos[0] + 1, pos[1] - 2},
-            {pos[0] - 1, pos[1] - 2},
-            {pos[0] + 1, pos[1] + 2},
-            {pos[0] - 1, pos[1] + 2}
-        };
-
         int[][] white_pawn_attacks = {
             {pos[0] + 1, pos[1] - 1},
             {pos[0] + 1, pos[1] + 1}
@@ -156,15 +131,16 @@ public abstract class PieceHandler {
             {pos[0] - 1, pos[1] + 1}
         };
 
-        if (slidingPiece(board, pos, rook_attack, new PieceType[] {PieceType.ROOK, PieceType.QUEEN}, color)) {
+        if (slidingPiece(board, pos, Directions.rook_directions, new PieceType[] {PieceType.ROOK, PieceType.QUEEN}, color)) {
             return true;
         }
 
-        if (slidingPiece(board, pos, bishop_attack, new PieceType[] {PieceType.BISHOP, PieceType.QUEEN}, color)) {
+        if (slidingPiece(board, pos, Directions.bishop_directions, new PieceType[] {PieceType.BISHOP, PieceType.QUEEN}, color)) {
             return true;
         }
 
-        for (int[] attack : knight_attacks) {
+        for (int[] dir : Directions.knight_directions) {
+            int[] attack = {pos[0] + dir[0], pos[1] + dir[1]};
             if (!inRange(attack)) {
                 continue;
             }
@@ -187,10 +163,7 @@ public abstract class PieceHandler {
             }
         }
 
-        if (kingPiece(board, pos, rook_attack, color)) {
-            return true;
-        }
-        if (kingPiece(board, pos, bishop_attack, color)) {
+        if (kingPiece(board, pos, Directions.all_directions, color)) {
             return true;
         }
 

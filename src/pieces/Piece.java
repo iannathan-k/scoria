@@ -1,7 +1,7 @@
 package src.pieces;
 import java.util.*;
 
-import src.pieces.enums.*;
+import src.pieces.piecedata.*;
 
 public abstract class Piece {
     protected int[] pos;

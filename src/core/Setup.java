@@ -1,7 +1,7 @@
 package src.core;
 
 import src.pieces.*;
-import src.pieces.enums.*;
+import src.pieces.piecedata.*;
 
 public abstract class Setup {
 

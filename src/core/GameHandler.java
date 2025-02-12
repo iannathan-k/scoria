@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 import src.pieces.Piece;
 import src.pieces.PieceHandler;
-import src.pieces.enums.PieceColor;
+import src.pieces.piecedata.PieceColor;
 import src.scoria.Scoria;
 import src.scoria.Zobrist;
 

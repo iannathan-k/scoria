@@ -2,7 +2,7 @@ package src.pieces;
 
 import java.util.ArrayList;
 
-import src.pieces.enums.*;
+import src.pieces.piecedata.*;
 
 public class Knight extends Piece {
 
@@ -16,19 +16,9 @@ public class Knight extends Piece {
     @Override
     public ArrayList<int[]> getMoves(Piece[][] board) {
         ArrayList<int[]> possible_moves = new ArrayList<int[]>();
-        
-        int[][] moves = {
-            {this.pos[0] + 2, this.pos[1] + 1},
-            {this.pos[0] + 2, this.pos[1] - 1},
-            {this.pos[0] - 2, this.pos[1] + 1},
-            {this.pos[0] - 2, this.pos[1] - 1},
-            {this.pos[0] + 1, this.pos[1] - 2},
-            {this.pos[0] - 1, this.pos[1] - 2},
-            {this.pos[0] + 1, this.pos[1] + 2},
-            {this.pos[0] - 1, this.pos[1] + 2}
-        };
 
-        for (int[] move : moves) {
+        for (int[] direction : Directions.knight_directions) {
+            int[] move = {this.pos[0] + direction[0], this.pos[1] + direction[1]};
             if (!PieceHandler.inRange(move)) {
                 continue;
             }
@@ -36,7 +26,7 @@ public class Knight extends Piece {
                 continue;
             }
             if (!PieceHandler.kingCheck(board, this.pos, move, this.color)) {
-                possible_moves.add(move);
+                possible_moves.add(new int[] {move[0], move[1]});
             }
         }
 

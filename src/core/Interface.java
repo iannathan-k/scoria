@@ -1,7 +1,7 @@
 package src.core;
 
 import src.pieces.Piece;
-import src.pieces.enums.*;
+import src.pieces.piecedata.*;
 import src.scoria.*;
 
 public abstract class Interface {

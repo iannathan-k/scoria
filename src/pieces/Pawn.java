@@ -3,7 +3,7 @@ package src.pieces;
 import java.util.*;
 
 import src.core.Game;
-import src.pieces.enums.*;
+import src.pieces.piecedata.*;
 
 public class Pawn extends Piece {
 

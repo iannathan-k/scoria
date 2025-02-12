@@ -2,7 +2,7 @@ package src.core;
 
 import src.pieces.Empty;
 import src.pieces.Piece;
-import src.pieces.enums.PieceColor;
+import src.pieces.piecedata.PieceColor;
 import src.scoria.Evaluator;
 import src.scoria.Scoria;
 import src.scoria.Zobrist;

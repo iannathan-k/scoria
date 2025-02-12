@@ -1,7 +1,7 @@
 package src.pieces;
 import java.util.ArrayList;
 
-import src.pieces.enums.*;
+import src.pieces.piecedata.*;
 
 public class Empty extends Piece {
 

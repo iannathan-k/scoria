@@ -2,7 +2,7 @@ package src.pieces;
 
 import java.util.ArrayList;
 
-import src.pieces.enums.*;
+import src.pieces.piecedata.*;
 
 public class Bishop extends Piece {
 
@@ -17,14 +17,7 @@ public class Bishop extends Piece {
     public ArrayList<int[]> getMoves(Piece[][] board) {
         ArrayList<int[]> possible_moves = new ArrayList<int[]>();
 
-        int[][] dirs = {
-            {1, 1},
-            {1, -1},
-            {-1, 1},
-            {-1, -1}
-        };
-
-        for (int[] dir : dirs) {
+        for (int[] dir : Directions.bishop_directions) {
             int[] move = {this.pos[0] + dir[0], this.pos[1] + dir[1]};
             while (PieceHandler.inRange(move)) {
                 if (board[move[0]][move[1]].getColor() == this.color) {
