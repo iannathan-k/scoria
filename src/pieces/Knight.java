@@ -17,7 +17,7 @@ public class Knight extends Piece {
     public ArrayList<int[]> getMoves(Piece[][] board) {
         ArrayList<int[]> possible_moves = new ArrayList<int[]>();
 
-        for (int[] direction : Directions.knight_directions) {
+        for (int[] direction : Directions.KNIGHT_DIRECTIONS) {
             int[] move = {this.pos[0] + direction[0], this.pos[1] + direction[1]};
             if (!PieceHandler.inRange(move)) {
                 continue;

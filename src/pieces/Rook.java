@@ -37,7 +37,7 @@ public class Rook extends Piece {
     public ArrayList<int[]> getMoves(Piece[][] board) {
         ArrayList<int[]> possible_moves = new ArrayList<int[]>();
 
-        for (int[] dir : Directions.rook_directions) {
+        for (int[] dir : Directions.ROOK_DIRECTIONS) {
             int[] move = {this.pos[0] + dir[0], this.pos[1] + dir[1]};
             while (PieceHandler.inRange(move)) {
                 if (board[move[0]][move[1]].getColor() == this.color) {

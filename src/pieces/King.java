@@ -61,7 +61,7 @@ public class King extends Piece {
     public ArrayList<int[]> getMoves(Piece[][] board) {
         ArrayList<int[]> possible_moves = new ArrayList<int[]>();
 
-        for (int[] direction : Directions.all_directions) {
+        for (int[] direction : Directions.ALL_DIRECTIONS) {
             int[] move = new int[] {this.pos[0] + direction[0], this.pos[1] + direction[1]};
             if (!PieceHandler.inRange(move)) {
                 continue;

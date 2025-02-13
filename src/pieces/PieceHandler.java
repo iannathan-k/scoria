@@ -131,15 +131,15 @@ public abstract class PieceHandler {
             {pos[0] - 1, pos[1] + 1}
         };
 
-        if (slidingPiece(board, pos, Directions.rook_directions, new PieceType[] {PieceType.ROOK, PieceType.QUEEN}, color)) {
+        if (slidingPiece(board, pos, Directions.ROOK_DIRECTIONS, Directions.ROOK_QUEEN_TYPES, color)) {
             return true;
         }
 
-        if (slidingPiece(board, pos, Directions.bishop_directions, new PieceType[] {PieceType.BISHOP, PieceType.QUEEN}, color)) {
+        if (slidingPiece(board, pos, Directions.BISHOP_DIRECTIONS, Directions.BISHOP_QUEEN_TYPES, color)) {
             return true;
         }
 
-        for (int[] dir : Directions.knight_directions) {
+        for (int[] dir : Directions.KNIGHT_DIRECTIONS) {
             int[] attack = {pos[0] + dir[0], pos[1] + dir[1]};
             if (!inRange(attack)) {
                 continue;
@@ -163,7 +163,7 @@ public abstract class PieceHandler {
             }
         }
 
-        if (kingPiece(board, pos, Directions.all_directions, color)) {
+        if (kingPiece(board, pos, Directions.ALL_DIRECTIONS, color)) {
             return true;
         }
 

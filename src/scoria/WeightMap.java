@@ -4,7 +4,7 @@ import src.pieces.piecedata.*;
 
 public abstract class WeightMap {
     
-    private final static int[][] pawn_weights = {
+    private final static int[][] PAWN_WEIGHTS = {
         {0,    0,  0,  0,  0,  0,  0,  0},
         {50,  50, 50, 50, 50, 50, 50, 50},
         {10,  10, 20, 30, 30, 20, 10, 10},
@@ -15,7 +15,7 @@ public abstract class WeightMap {
         {0,    0,  0,  0,  0,  0,  0,  0}
     };
 
-    private final static int[][] knight_weights = {
+    private final static int[][] KNIGHT_WEIGHTS = {
         {-50,-40,-30,-30,-30,-30,-40,-50},
         {-40,-20,  0,  0,  0,  0,-20,-40},
         {-30,  0, 10, 15, 15, 10,  0,-30},
@@ -26,7 +26,7 @@ public abstract class WeightMap {
         {-50,-40,-30,-30,-30,-30,-40,-50}
     };
 
-    private final static int[][] bishop_weights = {
+    private final static int[][] BISHOP_WEIGHTS = {
         {-20,-10,-10,-10,-10,-10,-10,-20},
         {-10,  0,  0,  0,  0,  0,  0,-10},
         {-10,  0,  5, 10, 10,  5,  0,-10},
@@ -37,7 +37,7 @@ public abstract class WeightMap {
         {-20,-10,-10,-10,-10,-10,-10,-20}
     };
 
-    private final static int[][] rook_weights = {
+    private final static int[][] ROOK_WEIGHTS = {
         {0,    0,  0,  0,  0,  0,  0,  0},
         {5,   10, 10, 10, 10, 10, 10,  5},
         {-5,   0,  0,  0,  0,  0,  0, -5},
@@ -48,7 +48,7 @@ public abstract class WeightMap {
         {0,    0,  0,  5,  5,  0,  0,  0}
     };
 
-    private final static int[][] queen_weights = {
+    private final static int[][] QUEEN_WEIGHTS = {
         {-20,-10,-10, -5, -5,-10,-10,-20},
         {-10,  0,  0,  0,  0,  0,  0,-10},
         {-10,  0,  5,  5,  5,  5,  0,-10},
@@ -59,7 +59,7 @@ public abstract class WeightMap {
         {-20,-10,-10, -5, -5,-10,-10,-20}
     };
 
-    private final static int[][] king_weights = {
+    private final static int[][] KING_WEIGHTS = {
         {-30,-40,-40,-50,-50,-40,-40,-30},
         {-30,-40,-40,-50,-50,-40,-40,-30},
         {-30,-40,-40,-50,-50,-40,-40,-30},
@@ -72,12 +72,12 @@ public abstract class WeightMap {
 
     public static int[][] getMap(PieceType type) {
         return switch (type) {
-            case PAWN -> pawn_weights;
-            case KNIGHT -> knight_weights;
-            case BISHOP -> bishop_weights;
-            case ROOK -> rook_weights;
-            case QUEEN -> queen_weights;
-            case KING -> king_weights;
+            case PAWN -> PAWN_WEIGHTS;
+            case KNIGHT -> KNIGHT_WEIGHTS;
+            case BISHOP -> BISHOP_WEIGHTS;
+            case ROOK -> ROOK_WEIGHTS;
+            case QUEEN -> QUEEN_WEIGHTS;
+            case KING -> KING_WEIGHTS;
             default -> throw new IllegalArgumentException("Unexpected value: " + type);
         };
     }
