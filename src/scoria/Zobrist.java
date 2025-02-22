@@ -4,7 +4,7 @@ import java.util.*;
 
 import src.core.*;
 import src.pieces.*;
-import src.pieces.piecedata.PieceColor;
+import src.pieces.piecedata.*;
 
 public class Zobrist {
     private static long[][][] zobrist_table = new long[8][8][12];

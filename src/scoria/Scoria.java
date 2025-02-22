@@ -105,8 +105,8 @@ public class Scoria {
 
         if (depth == 0 || Evaluator.gameWinner(board, turn, board_hash) != PieceColor.EMPTY) {
             Game.move_count++;
-            // return new int[][] {{quiescenceSearch(board, alpha, beta, turn)}, {}, {}};
-            return new int[][] {{Evaluator.boardEval(board, turn, board_hash)}, {}, {}};
+            int eval = Evaluator.boardEval(board, turn, board_hash);
+            return new int[][] {{eval}, {}, {}};
         }
 
         PieceColor color = turn ? PieceColor.WHITE : PieceColor.BLACK;

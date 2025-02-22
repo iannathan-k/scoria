@@ -6,7 +6,7 @@ import src.core.MoveHandler;
 import src.pieces.piecedata.*;
 
 public abstract class PieceHandler {
-    private static King[] king_pieces = new King[2];
+    private static King[] king_pieces = new King[2]; // {white, black}
 
     public static void setKingPiece(King king, int index) {
         king_pieces[index] = king;

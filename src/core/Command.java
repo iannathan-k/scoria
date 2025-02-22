@@ -38,7 +38,7 @@ public class Command {
                 if (!has_modifier) {
                     System.out.println(Game.getPlayerColor());
                 } else {
-                    Game.setPlayerSide(modifier == "w" ? true : false);
+                    Game.setPlayerSide(modifier == "white" ? true : false);
                 }
             }
                 

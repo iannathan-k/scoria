@@ -104,7 +104,7 @@ public class Game {
     }
 
     public static boolean isHumanTurn() {
-        return (turn == human_side)? true : false;
+        return turn == human_side;
     }
 
 }

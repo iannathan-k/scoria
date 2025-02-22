@@ -28,13 +28,13 @@ public class Evaluator {
         }
 
         if (position_table.get(hash) >= 3) {
-            // System.out.println("Hi");
             return PieceColor.NULL;
         }
 
         if (!PieceHandler.isKingStuck(board, color)) {
             return PieceColor.EMPTY;
         }
+
         if (PieceHandler.getAllMoves(board, color).isEmpty()) {
             if (PieceHandler.underAttack(board, color, PieceHandler.getKingPos(color))) {
                 return turn ? PieceColor.BLACK : PieceColor.WHITE;
@@ -60,25 +60,34 @@ public class Evaluator {
             default: break;
         }
 
-        int white_advantage = 0;
-        int black_advantage = 0;
-    
+        int evaluation = 0;
+        
         for (int i = 0; i < 64; i++) {
             Piece piece = board[i / 8][i % 8];
             if (piece instanceof Empty) {
                 continue;
             }
             if (piece.getColor() == PieceColor.WHITE) {
-                white_advantage += 2 * piece.getPoints();
-                white_advantage += posWeight(piece.getType(), PieceColor.WHITE, piece.getPosition());
-                white_advantage += 2 * piece.getMoves(board).size();
+                evaluation += 2 * piece.getPoints();
+                evaluation += posWeight(piece.getType(), PieceColor.WHITE, piece.getPosition());
+
+                if (piece instanceof Pawn) {
+                    continue;
+                }
+                evaluation += 2 * piece.getMoves(board).size();
+
+
             } else {
-                black_advantage += 2 * piece.getPoints();
-                black_advantage += posWeight(piece.getType(), PieceColor.BLACK, piece.getPosition());
-                black_advantage += 2 * piece.getMoves(board).size();
+                evaluation -= 2 * piece.getPoints();
+                evaluation -= posWeight(piece.getType(), PieceColor.BLACK, piece.getPosition());
+
+                if (piece instanceof Pawn) {
+                    continue;
+                }
+                evaluation -= 2 * piece.getMoves(board).size();
             }
         }
 
-        return white_advantage - black_advantage;
+        return evaluation;
     }
 }
