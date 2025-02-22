@@ -11,7 +11,6 @@ public class Scoria {
 
     private static boolean cancel_mode = true;
     private static long cancel_time;
-    private static final long MAX_THINK_TIME = Game.THINK_TIME * 1_000_000;
     private static int[][] current_best_move = new int[3][];
     private static int current_depth;
 
@@ -22,7 +21,7 @@ public class Scoria {
     public static int[][] iterativeDeepener(Piece[][] board, boolean turn) {
         current_depth = 0;
         current_best_move = new int[3][];
-        cancel_time = System.nanoTime() + MAX_THINK_TIME;
+        cancel_time = System.nanoTime() + Game.THINK_TIME * 1_000_000;;
         while (System.nanoTime() < cancel_time) {
             current_depth++;
             int[][] move = minimax(board, current_depth, Integer.MIN_VALUE, Integer.MAX_VALUE, turn);
@@ -34,7 +33,7 @@ public class Scoria {
             }
         }
         Game.setLastThinkDepth(current_depth);
-        Game.setLastThinkTime((System.nanoTime() - cancel_time + MAX_THINK_TIME) / 1_000_000);
+        Game.setLastThinkTime((System.nanoTime() - cancel_time) / 1_000_000 + Game.THINK_TIME);
         return current_best_move;
     }
 

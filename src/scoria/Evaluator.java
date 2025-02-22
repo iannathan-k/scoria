@@ -35,7 +35,7 @@ public class Evaluator {
             return PieceColor.EMPTY;
         }
 
-        if (PieceHandler.getAllMoves(board, color).isEmpty()) {
+        if (!PieceHandler.hasPossibleMove(board, color)) {
             if (PieceHandler.underAttack(board, color, PieceHandler.getKingPos(color))) {
                 return turn ? PieceColor.BLACK : PieceColor.WHITE;
             }

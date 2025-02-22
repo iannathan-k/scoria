@@ -30,18 +30,18 @@ public abstract class PieceHandler {
         return 0 <= pos[0] && pos[0] <= 7 && 0 <= pos[1] && pos[1] <= 7;
     }
 
-    public static ArrayList<int[][]> getAllNoisyMoves(Piece[][] board, PieceColor color) {
-        ArrayList<int[][]> possible_moves = getAllMoves(board, color);
-        ArrayList<int[][]> noisy_moves = new ArrayList<int[][]>();
-
-        for (int[][] move : possible_moves) {
-            if (board[move[1][0]][move[1][1]] instanceof Empty) {
+    public static boolean hasPossibleMove(Piece[][] board, PieceColor color) {
+        for (int i = 0; i < 64; i++) {
+            Piece piece = board[i / 8][i % 8];
+            if (piece.getColor() != color) {
                 continue;
             }
-            noisy_moves.add(move);
+            if (piece.getMoves(board).size() > 0) {
+                return true;
+            }
         }
 
-        return noisy_moves;
+        return false;
     }
 
     public static ArrayList<int[][]> getAllMoves(Piece[][] board, PieceColor color) {

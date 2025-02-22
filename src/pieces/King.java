@@ -38,15 +38,7 @@ public class King extends Piece {
         if (PieceHandler.underAttack(board, this.color, this.pos)) {
             return false;
         }
-
         int[] square = new int[] {this.pos[0], this.pos[1] + dir};
-
-        if (!(board[square[0]][square[1]] instanceof Rook)) {
-            return false;
-        }
-        if (((Rook) board[square[0]][square[1]]).peekMove()) {
-            return false;
-        }
 
         while (square[1] > 0 && square[1] < 7) {
             if (!(board[square[0]][square[1]] instanceof Empty)) {
@@ -57,6 +49,13 @@ public class King extends Piece {
             }
 
             square[1] += dir;
+        }
+
+        if (!(board[square[0]][square[1]] instanceof Rook)) {
+            return false;
+        }
+        if (((Rook) board[square[0]][square[1]]).peekMove()) {
+            return false;
         }
 
         return true;
