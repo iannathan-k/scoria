@@ -31,19 +31,15 @@ public class Evaluator {
             return PieceColor.NULL;
         }
 
-        if (!PieceHandler.isKingStuck(board, color)) {
+        if (PieceHandler.hasPossibleMove(board, color)) {
             return PieceColor.EMPTY;
         }
 
-        if (!PieceHandler.hasPossibleMove(board, color)) {
-            if (PieceHandler.underAttack(board, color, PieceHandler.getKingPos(color))) {
-                return turn ? PieceColor.BLACK : PieceColor.WHITE;
-            }
-            
-            return PieceColor.NULL;
+        if (PieceHandler.underAttack(board, color, PieceHandler.getKingPos(color))) {
+            return turn ? PieceColor.BLACK : PieceColor.WHITE;
         }
-
-        return PieceColor.EMPTY;
+        
+        return PieceColor.NULL;
     }
 
     public static int posWeight(PieceType type, PieceColor color, int[] pos) {

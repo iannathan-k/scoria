@@ -122,6 +122,8 @@ public class Pawn extends Piece {
         if (passantCheck(board, left_stack, -1)) {
             possible_moves.add(new int[] {this.pos[0] + dir, this.pos[1] - 1});
         }
+
+        // right passant
         if (passantCheck(board, right_stack, 1)) {
             possible_moves.add(new int[] {this.pos[0] + dir, this.pos[1] + 1});
         }

@@ -5,25 +5,67 @@ import src.scoria.Evaluator;
 
 public class MoveHandler {
     public static Piece[] pseudoMoveState(Piece[][] board, int[] origin_pos, int[] target_pos) {
-        return moveState(board, origin_pos, target_pos);
+        Piece piece = board[origin_pos[0]][origin_pos[1]];
+        Piece captured = board[target_pos[0]][target_pos[1]];
+
+        if (piece instanceof Pawn) {
+            if (captured instanceof Empty && origin_pos[1] != target_pos[1]) {
+                // en passant
+                captured = board[origin_pos[0]][target_pos[1]];
+                board[target_pos[0]][target_pos[1]] = piece;
+                board[origin_pos[0]][target_pos[1]] = new Empty();
+                board[origin_pos[0]][origin_pos[1]] = new Empty();
+                piece.setPosition(target_pos);
+                return new Piece[] {captured, piece};
+            }
+
+            if (target_pos[0] == 0 || target_pos[0] == 7) {
+                // promotion logic
+                board[origin_pos[0]][origin_pos[1]] = new Empty();
+                board[target_pos[0]][target_pos[1]] = new Queen(target_pos, piece.getColor());
+                return new Piece[] {captured, piece};
+            }
+        }
+
+        board[target_pos[0]][target_pos[1]] = piece;
+        board[origin_pos[0]][origin_pos[1]] = new Empty();
+        piece.setPosition(target_pos);
+        Piece[] board_info = {captured, piece};
+
+        return board_info;
     }
 
     public static void pseudoUndoState(Piece[][] board, int[] origin_pos, int[] target_pos, Piece[] board_info) {
-        undoState(board, origin_pos, target_pos, board_info);
+        Piece piece = board_info[1];
+        Piece captured = board_info[0];
+
+        if (piece instanceof Pawn) {
+            if (target_pos[0] == 0 || target_pos[0] == 7) {
+                // unpromote logic
+                board[origin_pos[0]][origin_pos[1]] = piece;
+                board[target_pos[0]][target_pos[1]] = captured;
+                return;
+            }
+
+            int dir = ((Pawn) piece).getDirection();
+            if (captured instanceof Pawn && captured.getPosition()[0] == piece.getPosition()[0] - dir) {
+                // unpassant logic
+                board[target_pos[0]][target_pos[1]] = new Empty();
+                board[origin_pos[0]][target_pos[1]] = captured;
+                board[origin_pos[0]][origin_pos[1]] = piece;
+                piece.setPosition(origin_pos);
+                return;
+            }
+        }
+
+        board[origin_pos[0]][origin_pos[1]] = piece;
+        board[target_pos[0]][target_pos[1]] = captured;
+        piece.setPosition(origin_pos);
     }
 
-    public static Piece[] deepMoveState(Piece[][] board, int[] origin_pos, int[] target_pos, long hash) {
-        Evaluator.incrementPositionTable(hash);
-        return moveState(board, origin_pos, target_pos);
-    }
-
-    public static void deepUndoState(Piece[][] board, int[] origin_pos, int[] target_pos, Piece[] board_info, long hash) {
-        Evaluator.decrementPositionTable(hash);
-        undoState(board, origin_pos, target_pos, board_info);
-    }
-
-    private static Piece[] moveState(Piece[][] board, int[] origin_pos, int[] target_pos) {
+    public static Piece[] moveState(Piece[][] board, int[] origin_pos, int[] target_pos, long hash) {
         Game.nextMoveNumber();
+        Evaluator.incrementPositionTable(hash);
         Piece piece = board[origin_pos[0]][origin_pos[1]];
         Piece captured = board[target_pos[0]][target_pos[1]];
 
@@ -93,8 +135,9 @@ public class MoveHandler {
         return board_info;
     }
 
-    private static void undoState(Piece[][] board, int[] origin_pos, int[] target_pos, Piece[] board_info) {
+    public static void undoState(Piece[][] board, int[] origin_pos, int[] target_pos, Piece[] board_info, long hash) {
         Game.lastMoveNumber();
+        Evaluator.decrementPositionTable(hash);
         Piece piece = board_info[1];
         Piece captured = board_info[0];
 

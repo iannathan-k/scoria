@@ -104,8 +104,7 @@ public class Scoria {
 
         if (depth == 0 || Evaluator.gameWinner(board, turn, board_hash) != PieceColor.EMPTY) {
             Game.move_count++;
-            int eval = Evaluator.boardEval(board, turn, board_hash);
-            return new int[][] {{eval}, {}, {}};
+            return new int[][] {{Evaluator.boardEval(board, turn, board_hash)}, {}, {}};
         }
 
         PieceColor color = turn ? PieceColor.WHITE : PieceColor.BLACK;
@@ -123,9 +122,9 @@ public class Scoria {
         if (turn) {
             int[][] max_eval = {{Integer.MIN_VALUE}, {}, {}};
             for (int[][] move : possible_moves) {
-                Piece[] board_info = MoveHandler.deepMoveState(board, move[0], move[1], board_hash);
+                Piece[] board_info = MoveHandler.moveState(board, move[0], move[1], board_hash);
                 int eval = minimax(board, depth - 1, alpha, beta, !turn)[0][0];
-                MoveHandler.deepUndoState(board, move[0], move[1], board_info, board_hash);
+                MoveHandler.undoState(board, move[0], move[1], board_info, board_hash);
 
                 // Make this section more efficient later
                 if (eval > max_eval[0][0]) {
@@ -151,9 +150,9 @@ public class Scoria {
         } else {
             int[][] min_eval = {{Integer.MAX_VALUE}, {}, {}};
             for (int[][] move : possible_moves) {
-                Piece[] board_info = MoveHandler.deepMoveState(board, move[0], move[1], board_hash);
+                Piece[] board_info = MoveHandler.moveState(board, move[0], move[1], board_hash);
                 int eval = minimax(board, depth - 1, alpha, beta, !turn)[0][0];
-                MoveHandler.deepUndoState(board, move[0], move[1], board_info, board_hash);
+                MoveHandler.undoState(board, move[0], move[1], board_info, board_hash);
 
                 // Make this section more efficient later
                 if (eval < min_eval[0][0]) {
