@@ -9,26 +9,26 @@ public class MoveHandler {
         Piece captured = board[target_pos[0]][target_pos[1]];
 
         if (piece instanceof Pawn) {
-            if (captured instanceof Empty && origin_pos[1] != target_pos[1]) {
+            if (captured == null && origin_pos[1] != target_pos[1]) {
                 // en passant
                 captured = board[origin_pos[0]][target_pos[1]];
                 board[target_pos[0]][target_pos[1]] = piece;
-                board[origin_pos[0]][target_pos[1]] = new Empty();
-                board[origin_pos[0]][origin_pos[1]] = new Empty();
+                board[origin_pos[0]][target_pos[1]] = null;
+                board[origin_pos[0]][origin_pos[1]] = null;
                 piece.setPosition(target_pos);
                 return new Piece[] {captured, piece};
             }
 
             if (target_pos[0] == 0 || target_pos[0] == 7) {
                 // promotion logic
-                board[origin_pos[0]][origin_pos[1]] = new Empty();
+                board[origin_pos[0]][origin_pos[1]] = null;
                 board[target_pos[0]][target_pos[1]] = new Queen(target_pos, piece.getColor());
                 return new Piece[] {captured, piece};
             }
         }
 
         board[target_pos[0]][target_pos[1]] = piece;
-        board[origin_pos[0]][origin_pos[1]] = new Empty();
+        board[origin_pos[0]][origin_pos[1]] = null;
         piece.setPosition(target_pos);
         Piece[] board_info = {captured, piece};
 
@@ -50,7 +50,7 @@ public class MoveHandler {
             int dir = ((Pawn) piece).getDirection();
             if (captured instanceof Pawn && captured.getPosition()[0] == piece.getPosition()[0] - dir) {
                 // unpassant logic
-                board[target_pos[0]][target_pos[1]] = new Empty();
+                board[target_pos[0]][target_pos[1]] = null;
                 board[origin_pos[0]][target_pos[1]] = captured;
                 board[origin_pos[0]][origin_pos[1]] = piece;
                 piece.setPosition(origin_pos);
@@ -89,19 +89,19 @@ public class MoveHandler {
                 }
             }
 
-            if (captured instanceof Empty && origin_pos[1] != target_pos[1]) {
+            if (captured == null && origin_pos[1] != target_pos[1]) {
                 // en passant
                 captured = board[origin_pos[0]][target_pos[1]];
                 board[target_pos[0]][target_pos[1]] = piece;
-                board[origin_pos[0]][target_pos[1]] = new Empty();
-                board[origin_pos[0]][origin_pos[1]] = new Empty();
+                board[origin_pos[0]][target_pos[1]] = null;
+                board[origin_pos[0]][origin_pos[1]] = null;
                 piece.setPosition(target_pos);
                 return new Piece[] {captured, piece};
             }
 
             if (target_pos[0] == 0 || target_pos[0] == 7) {
                 // promotion logic
-                board[origin_pos[0]][origin_pos[1]] = new Empty();
+                board[origin_pos[0]][origin_pos[1]] = null;
                 board[target_pos[0]][target_pos[1]] = new Queen(target_pos, piece.getColor());
                 return new Piece[] {captured, piece};
             }
@@ -115,11 +115,11 @@ public class MoveHandler {
 
             // move king
             board[target_pos[0]][target_pos[1]] = piece;
-            board[origin_pos[0]][origin_pos[1]] = new Empty();
+            board[origin_pos[0]][origin_pos[1]] = null;
             piece.setPosition(target_pos);
 
             // move rook
-            board[origin_pos[0]][rook_col] = new Empty();
+            board[origin_pos[0]][rook_col] = null;
             board[target_pos[0]][target_pos[1] + dir] = captured;
             ((Rook) captured).pushMove();
             captured.setPosition(new int[] {target_pos[0], target_pos[1] + dir});
@@ -128,7 +128,7 @@ public class MoveHandler {
         }
 
         board[target_pos[0]][target_pos[1]] = piece;
-        board[origin_pos[0]][origin_pos[1]] = new Empty();
+        board[origin_pos[0]][origin_pos[1]] = null;
         piece.setPosition(target_pos);
         Piece[] board_info = {captured, piece};
 
@@ -171,7 +171,7 @@ public class MoveHandler {
             int dir = ((Pawn) piece).getDirection();
             if (captured instanceof Pawn && captured.getPosition()[0] == piece.getPosition()[0] - dir) {
                 // unpassant logic
-                board[target_pos[0]][target_pos[1]] = new Empty();
+                board[target_pos[0]][target_pos[1]] = null;
                 board[origin_pos[0]][target_pos[1]] = captured;
                 board[origin_pos[0]][origin_pos[1]] = piece;
                 piece.setPosition(origin_pos);
@@ -186,12 +186,12 @@ public class MoveHandler {
 
             // ummove king
             board[origin_pos[0]][origin_pos[1]] = piece;
-            board[target_pos[0]][target_pos[1]] = new Empty();
+            board[target_pos[0]][target_pos[1]] = null;
             piece.setPosition(origin_pos);
 
             // ummove rook
             board[origin_pos[0]][rook_col] = captured;
-            board[target_pos[0]][target_pos[1] + dir] = new Empty();
+            board[target_pos[0]][target_pos[1] + dir] = null;
             ((Rook) captured).popMove();
             captured.setPosition(new int[] {origin_pos[0], rook_col});
 

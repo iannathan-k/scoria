@@ -7,5 +7,4 @@ public enum PieceType {
     ROOK,
     QUEEN,
     KING,
-    EMPTY
 }

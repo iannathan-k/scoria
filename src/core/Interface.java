@@ -5,10 +5,8 @@ import src.pieces.piecedata.*;
 import src.scoria.*;
 
 public abstract class Interface {
-
     private static String getChar(PieceType type) {
         return switch (type) {
-            case EMPTY -> " ";
             case PAWN -> "P";
             case KNIGHT -> "N";
             case BISHOP -> "B";
@@ -26,11 +24,14 @@ public abstract class Interface {
             String line = (8 - i) + " | ";
 
             for (Piece col : board[i]) {
-                
-                String piece = " ";
-                PieceColor color = col.getColor();
 
-                piece = getChar(col.getType());
+                if (col == null) {
+                    line += "  | ";
+                    continue;
+                }
+
+                PieceColor color = col.getColor();
+                String piece = getChar(col.getType());
 
                 if (color == PieceColor.BLACK) {
                     piece = piece.toLowerCase();

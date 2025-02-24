@@ -22,7 +22,7 @@ public class Knight extends Piece {
             if (!PieceHandler.inRange(move)) {
                 continue;
             }
-            if (board[move[0]][move[1]].getColor() == this.color) {
+            if (board[move[0]][move[1]] != null && board[move[0]][move[1]].getColor() == this.color) {
                 continue;
             }
             if (!PieceHandler.kingCheck(board, this.pos, move, this.color)) {

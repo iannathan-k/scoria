@@ -73,7 +73,7 @@ public class Scoria {
 
         int score = 0;
 
-        if (!(capture instanceof Empty)) {
+        if (capture != null) {
             score += 3 * capture.getPoints() - piece.getPoints();
         }
 

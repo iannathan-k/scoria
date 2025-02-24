@@ -41,7 +41,7 @@ public class King extends Piece {
         int[] square = new int[] {this.pos[0], this.pos[1] + dir};
 
         while (square[1] > 0 && square[1] < 7) {
-            if (!(board[square[0]][square[1]] instanceof Empty)) {
+            if (board[square[0]][square[1]] != null) {
                 return false;
             }
             if (PieceHandler.underAttack(board, this.color, square)) {
@@ -70,7 +70,7 @@ public class King extends Piece {
             if (!PieceHandler.inRange(move)) {
                 continue;
             }
-            if (board[move[0]][move[1]].getColor() == this.color) {
+            if (board[move[0]][move[1]] != null && board[move[0]][move[1]].getColor() == this.color) {
                 continue;
             }
             if (!PieceHandler.kingCheck(board, this.pos, move, this.color)) {

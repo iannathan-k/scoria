@@ -1,6 +1,5 @@
 package src.core;
 
-import src.pieces.Empty;
 import src.pieces.Piece;
 import src.pieces.piecedata.PieceColor;
 import src.scoria.Evaluator;
@@ -22,7 +21,7 @@ public class Game {
         // initialize board
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                board[i][j] = new Empty();
+                board[i][j] = null;
             }
         }
 

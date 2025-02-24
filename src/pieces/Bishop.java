@@ -20,13 +20,12 @@ public class Bishop extends Piece {
         for (int[] dir : Directions.BISHOP_DIRECTIONS) {
             int[] move = {this.pos[0] + dir[0], this.pos[1] + dir[1]};
             while (PieceHandler.inRange(move)) {
-                if (board[move[0]][move[1]].getColor() == this.color) {
-                    break;
-                }
-                if (board[move[0]][move[1]] instanceof Empty) {
+                if (board[move[0]][move[1]] == null) {
                     if (!PieceHandler.kingCheck(board, this.pos, move, this.color)) {
                         possible_moves.add(new int[] {move[0], move[1]});
                     }
+                } else if (board[move[0]][move[1]].getColor() == this.color) {
+                    break;
                 } else {
                     if (!PieceHandler.kingCheck(board, this.pos, move, this.color)) {
                         possible_moves.add(new int[] {move[0], move[1]});

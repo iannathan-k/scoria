@@ -33,7 +33,10 @@ public abstract class PieceHandler {
     public static boolean hasPossibleMove(Piece[][] board, PieceColor color) {
         for (int i = 0; i < 64; i++) {
             Piece piece = board[i / 8][i % 8];
-            if (piece.getColor() != color) {
+            if (piece == null) {
+                continue;
+            }
+             if (piece.getColor() != color) {
                 continue;
             }
             if (piece.getMoves(board).size() > 0) {
@@ -49,6 +52,9 @@ public abstract class PieceHandler {
 
         for (int i = 0; i < 64; i++) {
             Piece piece = board[i / 8][i % 8];
+            if (piece == null) {
+                continue;
+            }
             if (piece.getColor() != color) {
                 continue;
             }
@@ -65,7 +71,7 @@ public abstract class PieceHandler {
             int[] attack = {king_pos[0] + dir[0], king_pos[1] + dir[1]};
             while (inRange(attack)) {
                 Piece piece = board[attack[0]][attack[1]];
-                if (piece instanceof Empty) {
+                if (piece == null) {
                     attack[0] += dir[0];
                     attack[1] += dir[1];
                     continue;
@@ -107,6 +113,9 @@ public abstract class PieceHandler {
             int[] attack = {king_pos[0] + dir[0], king_pos[1] + dir[1]};
             if (!inRange(attack)) {
                 continue;
+            } 
+            if (board[attack[0]][attack[1]] == null) {
+                continue;
             }
             if (board[attack[0]][attack[1]].getColor() == color) {
                 continue;
@@ -145,6 +154,9 @@ public abstract class PieceHandler {
                 continue;
             }
             Piece piece = board[attack[0]][attack[1]];
+            if (piece == null) {
+                continue;
+            }
             if (piece.getColor() == color) {
                 continue;
             }
