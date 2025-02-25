@@ -9,11 +9,7 @@ public class Evaluator {
     private static HashMap<Long, Integer> position_table = new HashMap<Long, Integer>();
 
     public static void incrementPositionTable(long hash) {
-        if (position_table.get(hash) == null) {
-            position_table.put(hash, 1);
-        } else {
-            position_table.put(hash, position_table.get(hash) + 1);
-        }
+        position_table.put(hash, position_table.getOrDefault(hash, 0) + 1);
     }
 
     public static void decrementPositionTable(long hash) {
@@ -23,11 +19,7 @@ public class Evaluator {
     public static PieceColor gameWinner(Piece[][] board, boolean turn, long hash) {
         PieceColor color = turn ? PieceColor.WHITE : PieceColor.BLACK;
 
-        if (position_table.get(hash) == null) {
-            position_table.put(hash, 1);
-        }
-
-        if (position_table.get(hash) >= 3) {
+        if (position_table.get(hash) != null && position_table.get(hash) >= 3) {
             return PieceColor.NULL;
         }
 
@@ -54,33 +46,30 @@ public class Evaluator {
             case BLACK: return -10000;
             case NULL: return 0;
             default: break;
-        }
+        };
 
         int evaluation = 0;
         
         for (int i = 0; i < 64; i++) {
-            Piece piece = board[i / 8][i % 8];
+            Piece piece = board[i >> 3][i & 7];
             if (piece == null) {
                 continue;
             }
+
             if (piece.getColor() == PieceColor.WHITE) {
                 evaluation += 2 * piece.getPoints();
-                evaluation += posWeight(piece.getType(), PieceColor.WHITE, piece.getPosition());
+                evaluation += posWeight(piece.getType(), piece.getColor(), piece.getPosition());
 
-                if (piece instanceof Pawn) {
-                    continue;
+                if (!(piece instanceof Pawn)) {
+                    evaluation += 2 * piece.getMoves(board).size();
                 }
-                evaluation += 2 * piece.getMoves(board).size();
-
-
             } else {
                 evaluation -= 2 * piece.getPoints();
-                evaluation -= posWeight(piece.getType(), PieceColor.BLACK, piece.getPosition());
+                evaluation -= posWeight(piece.getType(), piece.getColor(), piece.getPosition());
 
-                if (piece instanceof Pawn) {
-                    continue;
+                if (!(piece instanceof Pawn)) {
+                    evaluation -= 2 * piece.getMoves(board).size();
                 }
-                evaluation -= 2 * piece.getMoves(board).size();
             }
         }
 

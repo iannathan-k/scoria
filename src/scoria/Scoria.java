@@ -21,7 +21,7 @@ public class Scoria {
     public static int[][] iterativeDeepener(Piece[][] board, boolean turn) {
         current_depth = 0;
         current_best_move = new int[3][];
-        cancel_time = System.nanoTime() + Game.THINK_TIME * 1_000_000;;
+        cancel_time = System.nanoTime() + Game.THINK_TIME * 1_000_000L;
         while (System.nanoTime() < cancel_time) {
             current_depth++;
             int[][] move = minimax(board, current_depth, Integer.MIN_VALUE, Integer.MAX_VALUE, turn);
@@ -48,19 +48,17 @@ public class Scoria {
     }
 
     public static int perftCount(Piece[][] board, int depth, boolean turn) {
+        if (depth == 0) return 1;
+
         PieceColor color = turn ? PieceColor.WHITE : PieceColor.BLACK;
         ArrayList<int[][]> possible_moves = PieceHandler.getAllMoves(board, color);
-
-        if (depth == 0) {
-            return 1;
-        }
 
         int node_count = 0;
 
         for (int[][] move : possible_moves) {
-            Piece[] board_info = MoveHandler.pseudoMoveState(board, move[0], move[1]);
+            Piece[] board_info = MoveHandler.moveState(board, move[0], move[1], -1);
             node_count += perftCount(board, depth - 1, !turn);
-            MoveHandler.pseudoUndoState(board, move[0], move[1], board_info);
+            MoveHandler.undoState(board, move[0], move[1], board_info, -1);
         }
         return node_count;
     }
@@ -110,11 +108,10 @@ public class Scoria {
         PieceColor color = turn ? PieceColor.WHITE : PieceColor.BLACK;
         ArrayList<int[][]> possible_moves = PieceHandler.getAllMoves(board, color);
 
-        possible_moves.sort((move1, move2) -> {
-            int score1 = heuristicScore(board, move1, color);
-            int score2 = heuristicScore(board, move2, color);
-            return Integer.compare(score2, score1);
-        });
+        possible_moves.sort((move1, move2) -> Integer.compare(
+            heuristicScore(board, move2, color), 
+            heuristicScore(board, move1, color)
+        ));
 
         int parent_alpha = alpha;
         int parent_beta = beta;

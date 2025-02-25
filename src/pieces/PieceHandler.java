@@ -17,22 +17,21 @@ public abstract class PieceHandler {
     }
 
     public static boolean isKingStuck(Piece[][] board, PieceColor color) {
-        int king_index = (color == PieceColor.WHITE) ? 0 : 1;
-        return king_pieces[king_index].getMoves(board).isEmpty();
+        return king_pieces[color.ordinal()].getMoves(board).isEmpty();
     }
 
     public static int[] getKingPos(PieceColor color) {
-        int king_index = (color == PieceColor.WHITE) ? 0 : 1;
-        return king_pieces[king_index].getPosition();
+        return king_pieces[color.ordinal()].getPosition();
     }
 
     public static boolean inRange(int[] pos) {
-        return 0 <= pos[0] && pos[0] <= 7 && 0 <= pos[1] && pos[1] <= 7;
+        // Review this again
+        return (pos[0] | pos[1]) >= 0 && pos[0] < 8 && pos[1] < 8;
     }
 
     public static boolean hasPossibleMove(Piece[][] board, PieceColor color) {
         for (int i = 0; i < 64; i++) {
-            Piece piece = board[i / 8][i % 8];
+            Piece piece = board[i >> 3][i & 7];
             if (piece == null) {
                 continue;
             }
@@ -51,7 +50,7 @@ public abstract class PieceHandler {
         ArrayList<int[][]> possible_moves = new ArrayList<int[][]>();
 
         for (int i = 0; i < 64; i++) {
-            Piece piece = board[i / 8][i % 8];
+            Piece piece = board[i >> 3][i & 7];
             if (piece == null) {
                 continue;
             }
@@ -59,7 +58,7 @@ public abstract class PieceHandler {
                 continue;
             }
             for (int[] move : piece.getMoves(board)) {
-                possible_moves.add(new int[][] {{i / 8, i % 8}, move});
+                possible_moves.add(new int[][] {{i >> 3, i & 7}, move});
             }
         }
 
