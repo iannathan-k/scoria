@@ -122,7 +122,7 @@ public class GameHandler {
         PieceColor color = Game.getTurn() ? PieceColor.WHITE : PieceColor.BLACK;
         ArrayList<int[][]> first_moves = PieceHandler.getAllMoves(Game.board, color);
 
-        int best_eval = Integer.MIN_VALUE;
+        int best_eval = (Game.getTurn()) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         String best_move = "";
         Scoria.setCancelMode(false);
         long start = System.nanoTime();
@@ -134,7 +134,10 @@ public class GameHandler {
             MoveHandler.undoState(Game.board, move[0], move[1], board_info, hash);
             System.out.println(Interface.moveToUci(move[0], move[1]) + ": " + eval);
         
-            if (eval > best_eval) {
+            if (Game.getTurn() && eval > best_eval) {
+                best_eval = eval;
+                best_move = Interface.moveToUci(move[0], move[1]);
+            } else if (!Game.getTurn() && eval < best_eval) {
                 best_eval = eval;
                 best_move = Interface.moveToUci(move[0], move[1]);
             }

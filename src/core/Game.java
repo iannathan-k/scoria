@@ -32,7 +32,6 @@ public class Game {
         move_number = 0;
         last_think_time = 0;
         last_depth = 0;
-        turn = true;
     }
 
     public static void nextMoveNumber() {

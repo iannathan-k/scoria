@@ -30,9 +30,7 @@ public class MoveHandler {
         board[target_pos[0]][target_pos[1]] = piece;
         board[origin_pos[0]][origin_pos[1]] = null;
         piece.setPosition(target_pos);
-        Piece[] board_info = {captured, piece};
-
-        return board_info;
+        return new Piece[] {captured, piece};
     }
 
     public static void pseudoUndoState(Piece[][] board, int[] origin_pos, int[] target_pos, Piece[] board_info) {
@@ -130,9 +128,7 @@ public class MoveHandler {
         board[target_pos[0]][target_pos[1]] = piece;
         board[origin_pos[0]][origin_pos[1]] = null;
         piece.setPosition(target_pos);
-        Piece[] board_info = {captured, piece};
-
-        return board_info;
+        return new Piece[] {captured, piece};
     }
 
     public static void undoState(Piece[][] board, int[] origin_pos, int[] target_pos, Piece[] board_info, long hash) {

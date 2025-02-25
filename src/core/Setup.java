@@ -73,8 +73,7 @@ public abstract class Setup {
         }
 
         // Turn
-        boolean turn = (fen_stream[1] == "w")? true : false;
-        Game.setTurn(turn);
+        Game.setTurn(fen_stream[1].equals("w"));
 
         // Castling Rights
         if (fen_stream.length < 3) {
