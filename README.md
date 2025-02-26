@@ -57,7 +57,7 @@ java src/Main
 | `think {time}`  | Set the think time for the bot in milliseconds. If no time is passed in it will display the current think time | 1000    |
 | `eval {depth}`  | Run a evaluation for each possible move after n moves where depth is n                                         | 5       |
 | `side {color}`  | Set the color of the human player with 'w' for white. If no color is passed it will display the current color                                                                                                                              | white   |
-| `version`       | Output the currrent version of the scoria                                                                      | white   |
+| `version`       | Output the currrent version of the scoria                                                                      |         |
 | `exit`          | Exit the program                                                                                               |         |
 
 ## Perft
