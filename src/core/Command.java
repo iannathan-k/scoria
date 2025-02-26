@@ -17,6 +17,8 @@ public class Command {
 
             case "eval" -> GameHandler.eval(has_modifier ? Integer.parseInt(modifier) : 5);
 
+            case "version" -> System.out.println("Scoria v2.6.17");
+
             case "think" -> {
                 if (has_modifier) {
                     Game.THINK_TIME = Long.parseLong(modifier);
@@ -38,7 +40,7 @@ public class Command {
                 if (!has_modifier) {
                     System.out.println(Game.getPlayerColor());
                 } else {
-                    Game.setPlayerSide(modifier == "white" ? true : false);
+                    Game.setPlayerSide(modifier == "white");
                 }
             }
                 
