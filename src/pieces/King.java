@@ -2,36 +2,9 @@ package src.pieces;
 
 import java.util.*;
 
-import src.pieces.piecedata.*;
+public abstract class King {
 
-public class King extends Piece {
-
-    private ArrayDeque<Boolean> moved_stack = new ArrayDeque<Boolean>();
-
-    public King(int[] pos, PieceColor color) {
-        this.pos = pos;
-        this.color = color;
-        this.type = PieceType.KING;
-        this.moved_stack.push(true);
-    }
-
-    public void pushMove() {
-        moved_stack.push(true);
-    }
-
-    public void pushMovedFalse() {
-        moved_stack.push(false);
-    }
-
-    public void popMove() {
-        moved_stack.pop();
-    }
-
-    public boolean peekMove() {
-        return moved_stack.peek();
-    }
-
-    public boolean canCastle(Piece[][] board, int dir) {
+    public static boolean canCastle(Piece[][] board, int dir) {
         if (moved_stack.peek()) {
             return false;
         }
@@ -61,11 +34,10 @@ public class King extends Piece {
         return true;
     }
 
-    @Override
-    public ArrayList<int[]> getMoves(Piece[][] board) {
+    public static ArrayList<int[]> getMoves(Piece[][] board) {
         ArrayList<int[]> possible_moves = new ArrayList<int[]>();
 
-        for (int[] direction : Directions.ALL_DIRECTIONS) {
+        for (int[] direction : PieceDatra.ALL_DIRECTIONS) {
             int[] move = new int[] {this.pos[0] + direction[0], this.pos[1] + direction[1]};
             if (!PieceHandler.inRange(move)) {
                 continue;

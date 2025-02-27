@@ -2,31 +2,24 @@ package src.pieces;
 
 import java.util.ArrayList;
 
-import src.pieces.piecedata.*;
+public abstract class Knight {
 
-public class Knight extends Piece {
+    public static ArrayList<Integer> getMoves(byte[] board, int pos) {
+        ArrayList<Integer> possible_moves = new ArrayList<Integer>();
 
-    public Knight(int[] pos, PieceColor color) {
-        this.pos = pos;
-        this.color = color;                                                      
-        this.type = PieceType.KNIGHT;
-        this.points = 320;
-    }
-
-    @Override
-    public ArrayList<int[]> getMoves(Piece[][] board) {
-        ArrayList<int[]> possible_moves = new ArrayList<int[]>();
-
-        for (int[] direction : Directions.KNIGHT_DIRECTIONS) {
-            int[] move = {this.pos[0] + direction[0], this.pos[1] + direction[1]};
-            if (!PieceHandler.inRange(move)) {
+        for (int[] dir : PieceData.KNIGHT_DIRECTIONS) {
+            int row = (pos >> 3) + dir[0];
+            int col = (pos & 7) + dir[1];
+            if (!PieceHandler.inRange(row, col)) {
                 continue;
             }
-            if (board[move[0]][move[1]] != null && board[move[0]][move[1]].getColor() == this.color) {
+
+            int target = row << 3 | col;
+            if ((board[target] & PieceData.COLOR_MASK) == (board[pos] & PieceData.COLOR_MASK)) {
                 continue;
             }
-            if (!PieceHandler.kingCheck(board, this.pos, move, this.color)) {
-                possible_moves.add(new int[] {move[0], move[1]});
+            if (!PieceHandler.kingCheck(board, pos, target)) {
+                possible_moves.add(pos << 8 | target);
             }
         }
 

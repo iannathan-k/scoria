@@ -1,14 +1,12 @@
 package src.core;
 
-import src.pieces.Piece;
-import src.pieces.piecedata.PieceColor;
 import src.scoria.Evaluator;
 import src.scoria.Scoria;
 import src.scoria.Zobrist;
 
 public class Game {
     
-    public static Piece[][] board = new Piece[8][8];
+    public static byte[] board = new byte[64];
     public static long THINK_TIME = 1000;
     public static int move_count;
     private static int move_number;
@@ -19,10 +17,8 @@ public class Game {
 
     public static void initGame(String fen) {
         // initialize board
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                board[i][j] = null;
-            }
+        for (int i = 0; i < 64; i++) {
+            board[i] = 0b0000_0000;
         }
 
         Setup.setUp(board, fen);

@@ -3,58 +3,33 @@ package src.pieces;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 
-import src.pieces.piecedata.*;
-
-public class Rook extends Piece {
+public abstract class Rook {
 
     public ArrayDeque<Boolean> moved_stack = new ArrayDeque<Boolean>();
 
-    public Rook(int[] pos, PieceColor color) {
-        this.pos = pos;
-        this.color = color;                                                      
-        this.type = PieceType.ROOK;
-        this.points = 500;
-        this.moved_stack.push(true);
-    }
+    public static ArrayList<Integer> getMoves(byte[] board, int pos) {
+        ArrayList<Integer> possible_moves = new ArrayList<Integer>();
 
-    public void pushMove() {
-        moved_stack.push(true);
-    }
-
-    public void pushMovedFalse() {
-        moved_stack.push(false);
-    }
-
-    public void popMove() {
-        moved_stack.pop();
-    }
-
-    public boolean peekMove() {
-        return moved_stack.peek();
-    }
-
-    @Override
-    public ArrayList<int[]> getMoves(Piece[][] board) {
-        ArrayList<int[]> possible_moves = new ArrayList<int[]>();
-
-        for (int[] dir : Directions.ROOK_DIRECTIONS) {
-            int[] move = {this.pos[0] + dir[0], this.pos[1] + dir[1]};
-            while (PieceHandler.inRange(move)) {
-                if (board[move[0]][move[1]] == null) {
-                    if (!PieceHandler.kingCheck(board, this.pos, move, this.color)) {
-                        possible_moves.add(new int[] {move[0], move[1]});
+        for (int[] dir : PieceData.ROOK_DIRECTIONS) {
+            int row = (pos >> 3) + dir[0];
+            int col = (pos & 7) + dir[1];
+            while (PieceHandler.inRange(row, col)) {
+                int target = row << 3 | col;
+                if (board[target] == PieceData.EMPTY) {
+                    if (!PieceHandler.kingCheck(board, pos, target)) {
+                        possible_moves.add(pos << 8 | target);
                     }
-                } else if (board[move[0]][move[1]].getColor() == this.color) {
+                } else if ((board[target] & PieceData.COLOR_MASK) == (board[pos] & PieceData.COLOR_MASK)) {
                     break;
                 } else {
-                    if (!PieceHandler.kingCheck(board, this.pos, move, this.color)) {
-                        possible_moves.add(new int[] {move[0], move[1]});
+                    if (!PieceHandler.kingCheck(board, pos, target)) {
+                        possible_moves.add(pos << 8 | target);
                     }
                     break;
                 }
 
-                move[0] += dir[0];
-                move[1] += dir[1];
+                row += dir[0];
+                col += dir[1];
             }
         }
 

@@ -3,9 +3,7 @@ package src.core;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import src.pieces.Piece;
 import src.pieces.PieceHandler;
-import src.pieces.piecedata.PieceColor;
 import src.scoria.Scoria;
 import src.scoria.Zobrist;
 

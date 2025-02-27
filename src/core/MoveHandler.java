@@ -4,198 +4,192 @@ import src.pieces.*;
 import src.scoria.Evaluator;
 
 public class MoveHandler {
-    public static Piece[] pseudoMoveState(Piece[][] board, int[] origin_pos, int[] target_pos) {
-        Piece piece = board[origin_pos[0]][origin_pos[1]];
-        Piece captured = board[target_pos[0]][target_pos[1]];
+    /* 
+     * Move
+     * 00000000 00000000 00000000 00000000
+     *          flags    origin   target
+     * 
+     * flags --> double move, promotion, castle, passant
+     */
 
-        if (piece instanceof Pawn) {
-            if (captured == null && origin_pos[1] != target_pos[1]) {
-                // en passant
-                captured = board[origin_pos[0]][target_pos[1]];
-                board[target_pos[0]][target_pos[1]] = piece;
-                board[origin_pos[0]][target_pos[1]] = null;
-                board[origin_pos[0]][origin_pos[1]] = null;
-                piece.setPosition(target_pos);
-                return new Piece[] {captured, piece};
-            }
+    public static final int POS_MASK     = 0b00111111;
+    public static final int PASSANT_MASK = 0b0001 << 16;
+    public static final int CASTLE_MASK  = 0b0010 << 16;
+    public static final int PROMO_MASK   = 0b0100 << 16;
+    public static final int DOUBLE_MASK  = 0b1000 << 16;
 
-            if (target_pos[0] == 0 || target_pos[0] == 7) {
-                // promotion logic
-                board[origin_pos[0]][origin_pos[1]] = null;
-                board[target_pos[0]][target_pos[1]] = new Queen(target_pos, piece.getColor());
-                return new Piece[] {captured, piece};
-            }
+    public static final int ROW_MASK = 0b00111000;
+
+    public static byte pseudoMoveState(byte[] board, int move) {
+        int origin_pos = (move >> 8) & POS_MASK;
+        int target_pos = move & POS_MASK;
+        byte piece = board[origin_pos];
+        byte captured = board[target_pos];
+
+        if ((move & PASSANT_MASK) != 0) {
+            // en passant
+            int passant_pos = target_pos + ((piece & PieceData.COLOR_MASK) == PieceData.WHITE ? -8 : 8);
+            captured = board[passant_pos];
+            board[passant_pos] = PieceData.EMPTY;
         }
 
-        board[target_pos[0]][target_pos[1]] = piece;
-        board[origin_pos[0]][origin_pos[1]] = null;
-        piece.setPosition(target_pos);
-        return new Piece[] {captured, piece};
+        if ((move & PROMO_MASK) != 0) {
+            // promotion logic
+            board[origin_pos] = PieceData.EMPTY;
+            board[target_pos] = (byte) (PieceData.QUEEN | (piece & PieceData.COLOR_MASK));
+            return captured;
+        }
+
+        board[target_pos] = piece;
+        board[origin_pos] = PieceData.EMPTY;
+        return captured;
     }
 
-    public static void pseudoUndoState(Piece[][] board, int[] origin_pos, int[] target_pos, Piece[] board_info) {
-        Piece piece = board_info[1];
-        Piece captured = board_info[0];
+    public static void pseudoUndoState(byte[] board, int move, byte captured) {
+        int origin_pos = (move >> 8) & POS_MASK;
+        int target_pos = move & POS_MASK;
+        byte piece = board[target_pos];
 
-        if (piece instanceof Pawn) {
-            if (target_pos[0] == 0 || target_pos[0] == 7) {
-                // unpromote logic
-                board[origin_pos[0]][origin_pos[1]] = piece;
-                board[target_pos[0]][target_pos[1]] = captured;
-                return;
-            }
-
-            int dir = ((Pawn) piece).getDirection();
-            if (captured instanceof Pawn && captured.getPosition()[0] == piece.getPosition()[0] - dir) {
-                // unpassant logic
-                board[target_pos[0]][target_pos[1]] = null;
-                board[origin_pos[0]][target_pos[1]] = captured;
-                board[origin_pos[0]][origin_pos[1]] = piece;
-                piece.setPosition(origin_pos);
-                return;
-            }
+        if ((move & PASSANT_MASK) != 0) {
+            // unpassant logic
+            int passant_pos = target_pos + ((piece & PieceData.COLOR_MASK) == PieceData.WHITE ? -8 : 8);
+            board[passant_pos] = captured;
+            captured = PieceData.EMPTY;
         }
 
-        board[origin_pos[0]][origin_pos[1]] = piece;
-        board[target_pos[0]][target_pos[1]] = captured;
-        piece.setPosition(origin_pos);
-    }
-
-    public static Piece[] moveState(Piece[][] board, int[] origin_pos, int[] target_pos, long hash) {
-        Game.nextMoveNumber();
-        Evaluator.incrementPositionTable(hash);
-        Piece piece = board[origin_pos[0]][origin_pos[1]];
-        Piece captured = board[target_pos[0]][target_pos[1]];
-
-        // moved logic
-        if (piece instanceof Rook) {
-            ((Rook) piece).pushMove();
-        } else if (piece instanceof King) {
-            ((King) piece).pushMove();
-        }
-
-        if (piece instanceof Pawn) {
-            // pawn double move
-            if (Math.abs(origin_pos[0] - target_pos[0]) > 1) {
-                int[] left_pos = {target_pos[0], target_pos[1] - 1};
-                int[] right_pos = {target_pos[0], target_pos[1] + 1};
-                if (PieceHandler.inRange(left_pos) && board[left_pos[0]][left_pos[1]] instanceof Pawn) {
-                    ((Pawn) board[left_pos[0]][left_pos[1]]).pushRight(Game.currentMoveNumber());
-                }
-                if (PieceHandler.inRange(right_pos) && board[right_pos[0]][right_pos[1]] instanceof Pawn) {
-                    ((Pawn) board[right_pos[0]][right_pos[1]]).pushLeft(Game.currentMoveNumber());
-                }
-            }
-
-            if (captured == null && origin_pos[1] != target_pos[1]) {
-                // en passant
-                captured = board[origin_pos[0]][target_pos[1]];
-                board[target_pos[0]][target_pos[1]] = piece;
-                board[origin_pos[0]][target_pos[1]] = null;
-                board[origin_pos[0]][origin_pos[1]] = null;
-                piece.setPosition(target_pos);
-                return new Piece[] {captured, piece};
-            }
-
-            if (target_pos[0] == 0 || target_pos[0] == 7) {
-                // promotion logic
-                board[origin_pos[0]][origin_pos[1]] = null;
-                board[target_pos[0]][target_pos[1]] = new Queen(target_pos, piece.getColor());
-                return new Piece[] {captured, piece};
-            }
-        }
-
-        if (piece instanceof King && Math.abs(target_pos[1] - origin_pos[1]) > 1) {
-            // castle logic
-            int rook_col = (target_pos[1] == 6) ? 7 : 0;
-            int dir = (origin_pos[1] - target_pos[1]) / 2;
-            captured = board[target_pos[0]][rook_col];
-
-            // move king
-            board[target_pos[0]][target_pos[1]] = piece;
-            board[origin_pos[0]][origin_pos[1]] = null;
-            piece.setPosition(target_pos);
-
-            // move rook
-            board[origin_pos[0]][rook_col] = null;
-            board[target_pos[0]][target_pos[1] + dir] = captured;
-            ((Rook) captured).pushMove();
-            captured.setPosition(new int[] {target_pos[0], target_pos[1] + dir});
-
-            return new Piece[] {captured, piece};
-        }
-
-        board[target_pos[0]][target_pos[1]] = piece;
-        board[origin_pos[0]][origin_pos[1]] = null;
-        piece.setPosition(target_pos);
-        return new Piece[] {captured, piece};
-    }
-
-    public static void undoState(Piece[][] board, int[] origin_pos, int[] target_pos, Piece[] board_info, long hash) {
-        Game.lastMoveNumber();
-        Evaluator.decrementPositionTable(hash);
-        Piece piece = board_info[1];
-        Piece captured = board_info[0];
-
-        // unmoved logic
-        if (piece instanceof Rook) {
-            ((Rook) piece).popMove();
-        } else if (piece instanceof King) {
-            ((King) piece).popMove();
-        }
-
-        if (piece instanceof Pawn) {
-            if (Math.abs(origin_pos[0] - target_pos[0]) > 1) {
-                // double move
-                int[] left_pos = {target_pos[0], target_pos[1] - 1};
-                int[] right_pos = {target_pos[0], target_pos[1] + 1};
-                if (PieceHandler.inRange(left_pos) && board[left_pos[0]][left_pos[1]] instanceof Pawn) {
-                    ((Pawn) board[left_pos[0]][left_pos[1]]).popRight();
-                }
-                if (PieceHandler.inRange(right_pos) && board[right_pos[0]][right_pos[1]] instanceof Pawn) {
-                    ((Pawn) board[right_pos[0]][right_pos[1]]).popLeft();
-                }
-            }
-
-            if (target_pos[0] == 0 || target_pos[0] == 7) {
-                // unpromote logic
-                board[origin_pos[0]][origin_pos[1]] = piece;
-                board[target_pos[0]][target_pos[1]] = captured;
-                return;
-            }
-
-            int dir = ((Pawn) piece).getDirection();
-            if (captured instanceof Pawn && captured.getPosition()[0] == piece.getPosition()[0] - dir) {
-                // unpassant logic
-                board[target_pos[0]][target_pos[1]] = null;
-                board[origin_pos[0]][target_pos[1]] = captured;
-                board[origin_pos[0]][origin_pos[1]] = piece;
-                piece.setPosition(origin_pos);
-                return;
-            }
-        }
-
-        if (piece instanceof King && Math.abs(target_pos[1] - origin_pos[1]) > 1) {
-            // uncastle logic
-            int rook_col = (target_pos[1] == 6) ? 7 : 0;
-            int dir = (origin_pos[1] - target_pos[1]) / 2;
-
-            // ummove king
-            board[origin_pos[0]][origin_pos[1]] = piece;
-            board[target_pos[0]][target_pos[1]] = null;
-            piece.setPosition(origin_pos);
-
-            // ummove rook
-            board[origin_pos[0]][rook_col] = captured;
-            board[target_pos[0]][target_pos[1] + dir] = null;
-            ((Rook) captured).popMove();
-            captured.setPosition(new int[] {origin_pos[0], rook_col});
-
+        if ((move & PROMO_MASK) != 0) {
+            // promotion logic
+            board[target_pos] = captured;
+            board[origin_pos] = (byte) (PieceData.PAWN | (piece & PieceData.COLOR_MASK));
             return;
         }
 
-        board[origin_pos[0]][origin_pos[1]] = piece;
-        board[target_pos[0]][target_pos[1]] = captured;
-        piece.setPosition(origin_pos);
+        board[origin_pos] = piece;
+        board[target_pos] = captured;
+    }
+
+    public static byte moveState(byte[] board, int move, long hash) {
+        Game.nextMoveNumber();
+        Evaluator.incrementPositionTable(hash);
+
+        // add a line to automatically push an empty on the passant 
+
+        int origin_pos = (move >> 8) & POS_MASK;
+        int target_pos = move & POS_MASK;
+        byte piece = board[origin_pos];
+        byte captured = board[target_pos];
+
+        // Note to self, recheck whether these conditions can be used as such.
+        // moved logic
+        if ((piece & PieceData.TYPE_MASK) == PieceData.ROOK) {
+            int side = (origin_pos & 7) % 2;
+            int offset = ((piece & PieceData.COLOR_MASK) == PieceData.WHITE) ? 0 : 2;
+            PieceHandler.setCastleRights(side + offset);
+        } else if ((piece & PieceData.TYPE_MASK) == PieceData.KING) {
+            int offset = ((piece & PieceData.COLOR_MASK) == PieceData.WHITE) ? 0 : 2;
+            PieceHandler.setCastleRights(offset);
+            PieceHandler.setCastleRights(1 + offset);
+        }
+
+        if ((move & DOUBLE_MASK) != 0) {
+            // double move
+            PieceHandler.setPassantRights(target_pos & 7);
+        }
+
+        if ((move & PASSANT_MASK) != 0) {
+            // en passant
+            int passant_pos = target_pos + ((piece & PieceData.COLOR_MASK) == PieceData.WHITE ? -8 : 8);
+            captured = board[passant_pos];
+            board[passant_pos] = PieceData.EMPTY;
+        }
+
+        if ((move & PROMO_MASK) != 0) {
+            // promotion logic
+            board[origin_pos] = PieceData.EMPTY;
+            board[target_pos] = (byte) (PieceData.QUEEN | (piece & PieceData.COLOR_MASK));
+            return captured;
+        }
+
+        if ((move & CASTLE_MASK) != 0) {
+            // castle logic
+            int rook_col = (target_pos > origin_pos) ? 7 : 0;
+            int rook_pos = (origin_pos & ROW_MASK) | rook_col; // recheck this part as well
+            captured = board[rook_pos];
+
+            // move rook
+            int rook_offset = (target_pos > origin_pos) ? -1 : 1; // and this part
+            board[rook_pos] = PieceData.EMPTY;
+            board[(origin_pos & ROW_MASK) + rook_offset] = captured;
+
+            // Update Rights
+            int side = (origin_pos & 7) % 2;
+            int offset = ((piece & PieceData.COLOR_MASK) == PieceData.WHITE) ? 0 : 2;
+            PieceHandler.setCastleRights(side + offset);
+        }
+
+        board[target_pos] = piece;
+        board[origin_pos] = PieceData.EMPTY;
+        return captured;
+    }
+
+    public static void undoState(byte[] board, int move, byte captured, long hash) {
+        Game.lastMoveNumber();
+        Evaluator.decrementPositionTable(hash);
+
+        // add a line to automatically pop the empty from passant
+
+        int origin_pos = (move >> 8) & POS_MASK;
+        int target_pos = move & POS_MASK;
+        byte piece = board[target_pos];
+
+        // unmoved logic
+        // definitely go over this
+        if ((piece & PieceData.TYPE_MASK) == PieceData.ROOK) {
+            int side = (origin_pos & 7) % 2;
+            int offset = ((piece & PieceData.COLOR_MASK) == PieceData.WHITE) ? 0 : 2;
+            PieceHandler.removeCastleRights(side + offset);
+        } else if ((piece & PieceData.TYPE_MASK) == PieceData.KING) {
+            int offset = ((piece & PieceData.COLOR_MASK) == PieceData.WHITE) ? 0 : 2;
+            PieceHandler.removeCastleRights(offset);
+            PieceHandler.removeCastleRights(1 + offset);
+        }
+
+        if ((move & DOUBLE_MASK) != 0) {
+            // double move
+            PieceHandler.popPassantRights();
+        }
+
+        if ((move & PROMO_MASK) != 0) {
+            // promotion logic
+            board[target_pos] = captured;
+            board[origin_pos] = (byte) (PieceData.PAWN | (piece & PieceData.COLOR_MASK));
+            return;
+        }
+
+        if ((move & PASSANT_MASK) != 0) {
+            // unpassant logic
+            int passant_pos = target_pos + ((piece & PieceData.COLOR_MASK) == PieceData.WHITE ? -8 : 8);
+            board[passant_pos] = captured;
+            captured = PieceData.EMPTY;
+        }
+
+        if ((move & CASTLE_MASK) != 0) {
+            int rook_col = (target_pos > origin_pos) ? 7 : 0;
+            int rook_pos = (origin_pos & ROW_MASK) | rook_col; // recheck this part as well
+
+            // unmove rook
+            int rook_offset = (target_pos > origin_pos) ? -1 : 1; // and this part
+            board[rook_pos] = captured;
+            board[(origin_pos & ROW_MASK) + rook_offset] = PieceData.EMPTY;
+            captured = PieceData.EMPTY;
+
+            // Update Rights
+            int side = (origin_pos & 7) % 2;
+            int offset = ((piece & PieceData.COLOR_MASK) == PieceData.WHITE) ? 0 : 2;
+            PieceHandler.removeCastleRights(side + offset); // and definitely this
+        }
+
+        board[origin_pos] = piece;
+        board[target_pos] = captured;
     }
 }

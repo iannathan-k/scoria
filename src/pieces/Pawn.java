@@ -2,54 +2,9 @@ package src.pieces;
 
 import java.util.*;
 
-import src.core.Game;
-import src.pieces.piecedata.*;
+public abstract class Pawn{
 
-public class Pawn extends Piece {
-
-    private int dir;
-    private ArrayDeque<Integer> left_stack = new ArrayDeque<Integer>();
-    private ArrayDeque<Integer> right_stack = new ArrayDeque<Integer>();
-
-    public Pawn(int[] pos, PieceColor color, int dir) {
-        this.pos = pos;
-        this.color = color;                                                      
-        this.type = PieceType.PAWN;
-        this.points = 100;
-        this.dir = dir;
-        this.left_stack.push(-1);
-        this.right_stack.push(-1);
-    }
-
-    public int getDirection() {
-        return this.dir;
-    }
-
-    public void pushLeft(int move_count) {
-        this.left_stack.push(move_count);
-    }
-
-    public void pushRight(int move_count) {
-        this.right_stack.push(move_count);
-    }
-
-    public void popLeft() {
-        this.left_stack.pop();
-    }
-
-    public void popRight() {
-        this.right_stack.pop();
-    }
-
-    public int peekLeft() {
-        return this.left_stack.peek();
-    }
-
-    public int peekRight() {
-        return this.right_stack.peek();
-    }
-
-    private boolean passantCheck(Piece[][] board, ArrayDeque<Integer> stack, int offset) {
+    private static boolean passantCheck(Piece[][] board, ArrayDeque<Integer> stack, int offset) {
         if (Game.currentMoveNumber() != stack.peek()) {
             return false;
         }
@@ -69,8 +24,7 @@ public class Pawn extends Piece {
         return true;
     }
 
-    @Override
-    public ArrayList<int[]> getMoves(Piece[][] board) {
+    public static ArrayList<int[]> getMoves(Piece[][] board) {
         ArrayList<int[]> possible_moves = new ArrayList<int[]>();
 
         int[][] moves = {
