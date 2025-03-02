@@ -6,6 +6,7 @@ import src.core.Command;
 import src.core.Game;
 import src.pieces.PieceData;
 import src.pieces.PieceHandler;
+import src.scoria.Scoria;
 
 public class Main {
 
@@ -13,8 +14,6 @@ public class Main {
         
         System.out.println("starting...");
         Game.initGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
-
-        // System.out.println(PieceHandler.generateMoves(Game.board, PieceData.KNIGHT, 3));
 
         Scanner scanner = new Scanner(System.in);
         while (true) {

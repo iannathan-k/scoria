@@ -68,7 +68,6 @@ public abstract class Interface {
             case PieceData.WHITE -> System.out.println("white won");
             case PieceData.BLACK -> System.out.println("black won");
             case PieceData.NULL -> System.out.println("stalemate");
-            default -> throw new IllegalArgumentException("Unexpected value: " + winner);
         }
     }
 

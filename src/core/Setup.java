@@ -49,8 +49,8 @@ public abstract class Setup {
                 index += Character.getNumericValue(piece);
                 continue;
             }
-            // if (piece == 'K') PieceHandler.setKingPosition(i, PieceData.WHITE);
-            // if (piece == 'k') PieceHandler.setKingPosition(i, PieceData.BLACK);
+            if (piece == 'K') PieceHandler.setKingPosition(index, PieceData.WHITE);
+            if (piece == 'k') PieceHandler.setKingPosition(index, PieceData.BLACK);
 
             board[index] = (byte) getPiece(piece);
             index += 1;

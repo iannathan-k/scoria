@@ -83,7 +83,7 @@ public class Game {
 
     public static boolean isGameOver() {
         long hash = Zobrist.manualHash(board, turn);
-        return Evaluator.gameWinner(board, turn, hash) != PieceData.EMPTY;
+        return Evaluator.gameWinner(board, turn, hash) != -1;
     }
 
     public static void setPlayerSide(boolean side) {

@@ -26,7 +26,7 @@ public class Evaluator {
 
         // If can still move
         if (PieceHandler.hasPossibleMove(board, color)) {
-            return PieceData.EMPTY;
+            return -1;
         }
 
         // If king in check
@@ -40,7 +40,7 @@ public class Evaluator {
 
     public static int posWeight(int type, int color, int pos) {
         int[] weight_map = WeightMap.getMap(type);
-        return (color == PieceData.WHITE) ? weight_map[pos] : weight_map[64 - pos]; // check the black condition here
+        return (color == PieceData.WHITE) ? weight_map[pos] : weight_map[63 - pos]; // check the black condition here
     }
 
     public static int piecePoints(int type) {
@@ -50,6 +50,7 @@ public class Evaluator {
             case PieceData.BISHOP -> 330;
             case PieceData.ROOK -> 500;
             case PieceData.QUEEN -> 900;
+            case PieceData.KING -> 0;
             default -> throw new IllegalArgumentException("Invalid Piece " + type);
         };
     }

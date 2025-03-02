@@ -47,12 +47,14 @@ public abstract class King {
             int target = row << 3 | col;
             int move = pos << 8 | target;
 
-            // this will fail if it is white and empty
-            if ((board[target] & PieceData.COLOR_MASK) == (board[pos] & PieceData.COLOR_MASK)) {
-                continue;
-            }
-            if (!PieceHandler.kingCheck(board, move, board[target] & PieceData.COLOR_MASK)) {
-                possible_moves.add(move);
+            if (board[target] == PieceData.EMPTY) {
+                if (!PieceHandler.kingCheck(board, move, board[pos] & PieceData.COLOR_MASK)) {
+                    possible_moves.add(move);
+                }
+            } else if ((board[target] & PieceData.COLOR_MASK) != (board[pos] & PieceData.COLOR_MASK)) {
+                if (!PieceHandler.kingCheck(board, move, board[pos] & PieceData.COLOR_MASK)) {
+                    possible_moves.add(move);
+                }
             }
         }
 

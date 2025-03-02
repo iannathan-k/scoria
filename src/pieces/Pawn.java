@@ -48,7 +48,7 @@ public abstract class Pawn{
             if (piece != PieceData.EMPTY) {
                 continue;
             }
-            if (PieceHandler.kingCheck(board, target, piece & PieceData.COLOR_MASK)) {
+            if (PieceHandler.kingCheck(board, pos << 8 | target, board[pos] & PieceData.COLOR_MASK)) {
                 continue;
             }
 
@@ -80,7 +80,7 @@ public abstract class Pawn{
             if ((piece & PieceData.COLOR_MASK) == (board[pos] & PieceData.COLOR_MASK)) {
                 continue;
             }
-            if (!PieceHandler.kingCheck(board, pos << 8 | target, piece & PieceData.COLOR_MASK)) {
+            if (!PieceHandler.kingCheck(board, pos << 8 | target, board[pos] & PieceData.COLOR_MASK)) {
                 possible_moves.add(pos << 8 | target);
             }
         }

@@ -110,8 +110,6 @@ public abstract class PieceHandler {
     }
 
     private static boolean slidingPiece(byte[] board, int pos, int[][] dirs, int attacker, int color) {
-        // System.out.println(color == 0 ? "WHITE" : "BLACK");
-        // System.out.println(pos);
         for (int[] dir : dirs) {
             int row = (pos >> 3) + dir[0];
             int col = (pos & 7) + dir[1];
@@ -198,6 +196,7 @@ public abstract class PieceHandler {
             }
         }
 
+        // king
         for (int[] dir : PieceData.ALL_DIRECTIONS) {
             int row = (pos >> 3) + dir[0];
             int col = (pos & 7) + dir[1];

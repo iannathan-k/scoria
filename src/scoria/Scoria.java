@@ -96,7 +96,7 @@ public class Scoria {
             }
         }
 
-        if (depth == 0 || Evaluator.gameWinner(board, turn, board_hash) != PieceData.EMPTY) {
+        if (depth == 0 || Evaluator.gameWinner(board, turn, board_hash) != -1) {
             Game.move_count++;
             return new int[] {Evaluator.boardEval(board, turn, board_hash), -1};
         }

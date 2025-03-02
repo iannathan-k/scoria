@@ -18,11 +18,11 @@ public abstract class Knight {
             int move = pos << 8 | target;
 
             if (board[target] == PieceData.EMPTY) {
-                if (!PieceHandler.kingCheck(board, move, board[target] & PieceData.COLOR_MASK)) {
+                if (!PieceHandler.kingCheck(board, move, board[pos] & PieceData.COLOR_MASK)) {
                     possible_moves.add(move);
                 }
             } else if ((board[target] & PieceData.COLOR_MASK) != (board[pos] & PieceData.COLOR_MASK)) {
-                if (!PieceHandler.kingCheck(board, move, board[target] & PieceData.COLOR_MASK)) {
+                if (!PieceHandler.kingCheck(board, move, board[pos] & PieceData.COLOR_MASK)) {
                     possible_moves.add(move);
                 }
             }
