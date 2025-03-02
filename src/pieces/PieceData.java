@@ -11,6 +11,9 @@ public class PieceData {
 
     public final static byte BLACK  = 0b00001000;
     public final static byte WHITE  = 0b00000000;
+    public final static byte NULL   = 0b00010000;
+
+    // if more than piece > PieceData.BLACK then it is guaranteed to be black, otherwise it is white or empty.
 
     public static final byte TYPE_MASK   = 0b00000111;
     public static final byte COLOR_MASK  = 0b00001000;

@@ -15,59 +15,75 @@ public class Evaluator {
         position_table.put(hash, position_table.get(hash) - 1);
     }
 
-    public static PieceColor gameWinner(Piece[][] board, boolean turn, long hash) {
-        PieceColor color = turn ? PieceColor.WHITE : PieceColor.BLACK;
+    // this definitely has to be updated
+    public static int gameWinner(byte[] board, boolean turn, long hash) {
+        int color = turn ? PieceData.WHITE : PieceData.BLACK;
 
+        // threefold repetition
         if (position_table.get(hash) != null && position_table.get(hash) >= 3) {
-            return PieceColor.NULL;
+            return PieceData.NULL;
         }
 
+        // If can still move
         if (PieceHandler.hasPossibleMove(board, color)) {
-            return PieceColor.EMPTY;
+            return PieceData.EMPTY;
         }
 
+        // If king in check
         if (PieceHandler.underAttack(board, color, PieceHandler.getKingPos(color))) {
-            return turn ? PieceColor.BLACK : PieceColor.WHITE;
+            return turn ? PieceData.BLACK : PieceData.WHITE;
         }
         
-        return PieceColor.NULL;
+        // Stalemate
+        return PieceData.NULL;
     }
 
-    public static int posWeight(PieceType type, PieceColor color, int[] pos) {
-        int[][] weight_map = WeightMap.getMap(type);
-        return (color == PieceColor.WHITE) ? weight_map[pos[0]][pos[1]] : weight_map[7 - pos[0]][pos[1]];
+    public static int posWeight(int type, int color, int pos) {
+        int[] weight_map = WeightMap.getMap(type);
+        return (color == PieceData.WHITE) ? weight_map[pos] : weight_map[64 - pos]; // check the black condition here
     }
 
-    public static int boardEval(Piece[][] board, boolean turn, long hash) {
-        PieceColor winner = gameWinner(board, turn, hash);
+    public static int piecePoints(int type) {
+        return switch (type) {
+            case PieceData.PAWN -> 100;
+            case PieceData.KNIGHT -> 330;
+            case PieceData.BISHOP -> 330;
+            case PieceData.ROOK -> 500;
+            case PieceData.QUEEN -> 900;
+            default -> throw new IllegalArgumentException("Invalid Piece " + type);
+        };
+    }
+
+    public static int boardEval(byte[] board, boolean turn, long hash) {
+        int winner = gameWinner(board, turn, hash);
         switch (winner) {
-            case WHITE: return 10000;
-            case BLACK: return -10000;
-            case NULL: return 0;
+            case PieceData.WHITE: return 10000;
+            case PieceData.BLACK: return -10000;
+            case PieceData.NULL: return 0;
             default: break;
         };
 
         int evaluation = 0;
         
         for (int i = 0; i < 64; i++) {
-            Piece piece = board[i >> 3][i & 7];
-            if (piece == null) {
+            int piece = board[i];
+            if (piece == PieceData.EMPTY) {
                 continue;
             }
 
-            if (piece.getColor() == PieceColor.WHITE) {
-                evaluation += 2 * piece.getPoints();
-                evaluation += posWeight(piece.getType(), piece.getColor(), piece.getPosition());
+            if ((piece & PieceData.COLOR_MASK) == PieceData.WHITE) {
+                evaluation += 2 * piecePoints(piece & PieceData.TYPE_MASK);
+                evaluation += posWeight(piece & PieceData.TYPE_MASK, PieceData.WHITE, i);
 
-                if (!(piece instanceof Pawn)) {
-                    evaluation += 2 * piece.getMoves(board).size();
+                if ((piece & PieceData.TYPE_MASK) != PieceData.PAWN) {
+                    evaluation += 2 * PieceHandler.generateMoves(board, piece & PieceData.TYPE_MASK, i).size();
                 }
             } else {
-                evaluation -= 2 * piece.getPoints();
-                evaluation -= posWeight(piece.getType(), piece.getColor(), piece.getPosition());
+                evaluation -= 2 * piecePoints(piece & PieceData.TYPE_MASK);
+                evaluation -= posWeight(piece & PieceData.TYPE_MASK, PieceData.BLACK, i);
 
-                if (!(piece instanceof Pawn)) {
-                    evaluation -= 2 * piece.getMoves(board).size();
+                if ((piece & PieceData.TYPE_MASK) != PieceData.PAWN) {
+                    evaluation -= 2 * PieceHandler.generateMoves(board, piece & PieceData.TYPE_MASK, i).size();
                 }
             }
         }

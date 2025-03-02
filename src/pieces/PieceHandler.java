@@ -8,31 +8,45 @@ public abstract class PieceHandler {
     private static int[] king_positions = new int[2]; // {white, black}
 
     private static ArrayDeque<Integer> castle_rights = new ArrayDeque<Integer>();
-    private static ArrayDeque<Integer> passant_rights = new ArrayDeque<Integer>();
+    private static ArrayDeque<Integer> passant_rights = new ArrayDeque<Integer>(); // you also need for black and white so just << 8 for then the blacks
 
-    // This will cause problems
-    public static void setPassantRights(int col) {
-        passant_rights.push(passant_rights.pop() | (1 << col));
+    /*
+     * Passant Rights
+     * 00000000 00000000
+     * black    white
+     * 
+     * Castle Rights
+     * 0000
+     * KQkq
+     */
+
+    public static void setPassantRights(int col, int color) {
+        passant_rights.push(1 << (col + color));
+        // pushing looks good actually
     }
 
     public static void clearPassantRights() {
         passant_rights.push(0);
+        // clearing looks good
     }
 
     public static void popPassantRights() {
         passant_rights.pop();
+        // popping obviously no problem
     }
 
     public static int peekPassantRights() {
         return passant_rights.peek();
+        // peaking has no problem obviously
     }
 
-    public static void setCastleRights() {
-
+    public static void setCastleRights(int index) {
+        // should just push based on the previous so peek then push
+        castle_rights.push(castle_rights.peek() & (1 ^ (1 << index)));
     }
 
-    public static void removeCastleRights() {
-
+    public static void removeCastleRights(int index) {
+        // same as peek then push but with true instead.
     }
 
     public static void setKingPosition(int pos, int color) {
@@ -48,7 +62,7 @@ public abstract class PieceHandler {
     }
 
     public static boolean inRange(int row, int col) {
-        return (row | col) >= 0 && row <= 8 && col <= 8;
+        return (row | col) > -1 && row < 8 && col < 8;
     }
 
     public static ArrayList<Integer> generateMoves(byte[] board, int type, int pos) {
@@ -64,14 +78,15 @@ public abstract class PieceHandler {
     }
 
     public static boolean hasPossibleMove(byte[] board, int color) {
-        for (byte piece : board) {
+        for (int i = 0; i < 64; i++) {
+            int piece = board[i];
             if (piece == PieceData.EMPTY) {
                 continue;
             }
             if ((piece & PieceData.COLOR_MASK) != color) {
                 continue;
             }
-            if (generateMoves(board, piece, color).size() > 0) {
+            if (generateMoves(board, piece & PieceData.TYPE_MASK, i).size() > 0) {
                 return true;
             }
         }
@@ -81,20 +96,22 @@ public abstract class PieceHandler {
     public static ArrayList<Integer> getAllMoves(byte[] board, int color) {
         ArrayList<Integer> possible_moves = new ArrayList<Integer>();
 
-        for (byte piece : board) {
+        for (int i = 0; i < 64; i++) {
+            int piece = board[i];
             if (piece == PieceData.EMPTY) {
                 continue;
             }
             if ((piece & PieceData.COLOR_MASK) != color) {
                 continue;
             }
-            possible_moves.addAll(generateMoves(board, piece, color));
+            possible_moves.addAll(generateMoves(board, piece & PieceData.TYPE_MASK, i));
         }
-
         return possible_moves;
     }
 
     private static boolean slidingPiece(byte[] board, int pos, int[][] dirs, int attacker, int color) {
+        // System.out.println(color == 0 ? "WHITE" : "BLACK");
+        // System.out.println(pos);
         for (int[] dir : dirs) {
             int row = (pos >> 3) + dir[0];
             int col = (pos & 7) + dir[1];

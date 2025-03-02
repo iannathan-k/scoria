@@ -1,44 +1,42 @@
 package src.core;
 
-import src.pieces.Piece;
-import src.pieces.piecedata.*;
+import src.pieces.PieceData;
 import src.scoria.*;
 
 public abstract class Interface {
-    private static String getChar(PieceType type) {
+    private static String getChar(int type) {
         return switch (type) {
-            case PAWN -> "P";
-            case KNIGHT -> "N";
-            case BISHOP -> "B";
-            case ROOK -> "R";
-            case QUEEN -> "Q";
-            case KING -> "K";
+            case PieceData.PAWN -> "P";
+            case PieceData.KNIGHT -> "N";
+            case PieceData.BISHOP -> "B";
+            case PieceData.ROOK -> "R";
+            case PieceData.QUEEN -> "Q";
+            case PieceData.KING -> "K";
+            default -> throw new IllegalArgumentException("Invalid Char " + type);
         };
     }
 
-    public static void printBoard(Piece[][] board) {
+    public static void printBoard(byte[] board) {
         System.out.println("    a   b   c   d   e   f   g   h");
         System.out.println("  +---+---+---+---+---+---+---+---+");
 
         for (int i = 0; i < 8; i++) {
             String line = (8 - i) + " | ";
 
-            for (Piece col : board[i]) {
+            for (int j = 0; j < 8; j++) {
+                byte piece = board[i << 3 | j];
 
-                if (col == null) {
+                if (piece == PieceData.EMPTY) {
                     line += "  | ";
                     continue;
                 }
 
-                PieceColor color = col.getColor();
-                String piece = getChar(col.getType());
-
-                if (color == PieceColor.BLACK) {
-                    piece = piece.toLowerCase();
+                String piece_char = getChar(piece & PieceData.TYPE_MASK);
+                if ((piece & PieceData.COLOR_MASK) == PieceData.BLACK) {
+                    piece_char = piece_char.toLowerCase();
                 }
 
-                line += piece + " | ";
-
+                line += piece_char + " | ";
             }
 
             System.out.println(line);
@@ -46,29 +44,30 @@ public abstract class Interface {
         }
     }
 
-    public static String posToSquare(int[] pos) {
-        return (char) (97 + pos[1]) + Integer.toString(8 - pos[0]);
+    public static String posToSquare(int pos) {
+        return (char) (97 + (pos & 7)) + Integer.toString(8 - (pos >> 3));
     }
 
-    public static int[] squareToPos(String square) {
-        return new int[] {8 - (square.charAt(1) - '0'), square.charAt(0) - 'a'};
+    public static int squareToPos(String square) {
+        return (8 - (square.charAt(1) - '0')) * 8 + square.charAt(0) - 'a';
     }
 
-    public static String moveToUci(int[] origin_pos, int[] target_pos) {
-        return posToSquare(origin_pos) + posToSquare(target_pos);
+    public static String moveToUci(int move) {
+        return posToSquare((move >> 8) & MoveHandler.POS_MASK) + posToSquare(move & MoveHandler.POS_MASK);
     }
 
-    public static int[][] uciToMove(String uci) {
-        return new int[][] {squareToPos(uci.substring(0, 2)), squareToPos(uci.substring(2, 4))};
+    public static int uciToMove(String uci) {
+        // this one does not set flags yet
+        return (squareToPos(uci.substring(0, 2)) << 8) | squareToPos(uci.substring(2, 4));
     }
 
     public static void printEndGame() {
         long hash = Zobrist.manualHash(Game.board, Game.getTurn());
-        PieceColor winner = Evaluator.gameWinner(Game.board, Game.getTurn(), hash);
+        int winner = Evaluator.gameWinner(Game.board, Game.getTurn(), hash);
         switch (winner) {
-            case WHITE -> System.out.println("white won");
-            case BLACK -> System.out.println("black won");
-            case NULL -> System.out.println("stalemate");
+            case PieceData.WHITE -> System.out.println("white won");
+            case PieceData.BLACK -> System.out.println("black won");
+            case PieceData.NULL -> System.out.println("stalemate");
             default -> throw new IllegalArgumentException("Unexpected value: " + winner);
         }
     }

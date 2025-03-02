@@ -1,5 +1,6 @@
 package src.core;
 
+import src.pieces.PieceData;
 import src.scoria.Evaluator;
 import src.scoria.Scoria;
 import src.scoria.Zobrist;
@@ -58,7 +59,7 @@ public class Game {
         return last_depth;
     }
 
-    public static int[][] getScoriaMove(boolean turn) {
+    public static int[] getScoriaMove(boolean turn) {
         return Scoria.iterativeDeepener(board, turn);
     }
 
@@ -82,7 +83,7 @@ public class Game {
 
     public static boolean isGameOver() {
         long hash = Zobrist.manualHash(board, turn);
-        return Evaluator.gameWinner(board, turn, hash) != PieceColor.EMPTY;
+        return Evaluator.gameWinner(board, turn, hash) != PieceData.EMPTY;
     }
 
     public static void setPlayerSide(boolean side) {

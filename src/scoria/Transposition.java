@@ -10,10 +10,10 @@ public class Transposition {
 
     static class BoardState {
         private int depth;
-        private int[][] best_move;
+        private int[] best_move;
         private int node_type;
 
-        public BoardState(int depth, int[][] best_move, int node_type) {
+        public BoardState(int depth, int[] best_move, int node_type) {
             this.depth = depth;
             this.best_move = best_move;
             this.node_type = node_type;
@@ -23,7 +23,7 @@ public class Transposition {
             return depth;
         }
 
-        public int[][] getBestMove() {
+        public int[] getBestMove() {
             return best_move;
         }
 

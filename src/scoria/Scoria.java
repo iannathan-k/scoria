@@ -5,30 +5,29 @@ import java.util.ArrayList;
 import src.core.Game;
 import src.core.MoveHandler;
 import src.pieces.*;
-import src.pieces.piecedata.*;
 
 public class Scoria {
 
     private static boolean cancel_mode = true;
     private static long cancel_time;
-    private static int[][] current_best_move = new int[3][];
+    private static int[] current_best_move = new int[2];
     private static int current_depth;
 
     public static void setCancelMode(boolean mode) {
         cancel_mode = mode;
     }
 
-    public static int[][] iterativeDeepener(Piece[][] board, boolean turn) {
+    public static int[] iterativeDeepener(byte[] board, boolean turn) {
         current_depth = 0;
-        current_best_move = new int[3][];
+        current_best_move = new int[2];
         cancel_time = System.nanoTime() + Game.THINK_TIME * 1_000_000L;
         while (System.nanoTime() < cancel_time) {
             current_depth++;
-            int[][] move = minimax(board, current_depth, Integer.MIN_VALUE, Integer.MAX_VALUE, turn);
-            if (move[1][0] != -1) {
+            int[] move = minimax(board, current_depth, Integer.MIN_VALUE, Integer.MAX_VALUE, turn);
+            if (move[0] != -1) {
                 current_best_move = move;
             }
-            if (Math.abs(current_best_move[0][0]) == 10000) {
+            if (Math.abs(move[0]) == 10000) {
                 break;
             }
         }
@@ -38,53 +37,50 @@ public class Scoria {
     }
 
     private static int getNodeType(int eval, int alpha, int beta) {
-        if (eval >= beta) {
-            return Transposition.BETA_NODE;
-        }
-        if (eval <= alpha) {
-            return Transposition.ALPHA_NODE;
-        }
+        if (eval >= beta) return Transposition.BETA_NODE;
+        if (eval <= alpha) return Transposition.ALPHA_NODE;
         return Transposition.EXACT_NODE;
     }
 
-    public static int perftCount(Piece[][] board, int depth, boolean turn) {
+    public static int perftCount(byte[] board, int depth, boolean turn) {
         if (depth == 0) return 1;
 
-        PieceColor color = turn ? PieceColor.WHITE : PieceColor.BLACK;
-        ArrayList<int[][]> possible_moves = PieceHandler.getAllMoves(board, color);
+        int color = turn ? PieceData.WHITE : PieceData.BLACK;
+        ArrayList<Integer> possible_moves = PieceHandler.getAllMoves(board, color);
 
         int node_count = 0;
 
-        for (int[][] move : possible_moves) {
-            Piece[] board_info = MoveHandler.moveState(board, move[0], move[1], -1);
+        for (int move : possible_moves) {
+            byte captured = MoveHandler.moveState(board, move, -1);
             node_count += perftCount(board, depth - 1, !turn);
-            MoveHandler.undoState(board, move[0], move[1], board_info, -1);
+            MoveHandler.undoState(board, move, captured, -1);
         }
         return node_count;
     }
 
-    private static int heuristicScore(Piece[][] board, int[][] move, PieceColor color) {
-        int[] origin_pos = move[0];
-        int[] target_pos = move[1];
-        Piece piece = board[origin_pos[0]][origin_pos[1]];
-        Piece capture = board[target_pos[0]][target_pos[1]];
+    private static int heuristicScore(byte[] board, int move, int color) {
+        int origin_pos = (move >> 8) & MoveHandler.POS_MASK;
+        int target_pos = move & MoveHandler.POS_MASK;
+        byte piece = board[origin_pos];
+        byte captured = board[target_pos];
 
         int score = 0;
 
-        if (capture != null) {
-            score += 3 * capture.getPoints() - piece.getPoints();
+        if (captured != PieceData.EMPTY) {
+            score += 3 * Evaluator.piecePoints(captured & PieceData.TYPE_MASK);
+            score -= Evaluator.piecePoints(piece & PieceData.TYPE_MASK);
         }
 
-        if (piece instanceof Pawn && (target_pos[0] == 0 || target_pos[0] == 7)) {
-            score += 800;
+        if ((move & MoveHandler.PROMO_MASK) != 0) {
+            score += 500;
         }
 
-        score += 3 * Evaluator.posWeight(piece.getType(), color, target_pos);
+        score += 3 * Evaluator.posWeight(piece & PieceData.TYPE_MASK, color, target_pos);
 
         return score;
     }
 
-    public static int[][] minimax(Piece[][] board, int depth, int alpha, int beta, boolean turn) {
+    public static int[] minimax(byte[] board, int depth, int alpha, int beta, boolean turn) {
         long board_hash = Zobrist.manualHash(board, turn);
         Transposition.BoardState entry = Transposition.getState(board_hash);
 
@@ -92,21 +88,21 @@ public class Scoria {
             if (entry.isExact()) {
                 return entry.getBestMove();
             }
-            if (entry.isBeta() && entry.getBestMove()[0][0] >= beta) {
+            if (entry.isBeta() && entry.getBestMove()[0] >= beta) {
                 return entry.getBestMove();
             }
-            if (entry.isAlpha() && entry.getBestMove()[0][0] <= alpha) {
+            if (entry.isAlpha() && entry.getBestMove()[0] <= alpha) {
                 return entry.getBestMove();
             }
         }
 
-        if (depth == 0 || Evaluator.gameWinner(board, turn, board_hash) != PieceColor.EMPTY) {
+        if (depth == 0 || Evaluator.gameWinner(board, turn, board_hash) != PieceData.EMPTY) {
             Game.move_count++;
-            return new int[][] {{Evaluator.boardEval(board, turn, board_hash)}, {}, {}};
+            return new int[] {Evaluator.boardEval(board, turn, board_hash), -1};
         }
 
-        PieceColor color = turn ? PieceColor.WHITE : PieceColor.BLACK;
-        ArrayList<int[][]> possible_moves = PieceHandler.getAllMoves(board, color);
+        int color = turn ? PieceData.WHITE : PieceData.BLACK;
+        ArrayList<Integer> possible_moves = PieceHandler.getAllMoves(board, color);
 
         possible_moves.sort((move1, move2) -> Integer.compare(
             heuristicScore(board, move2, color), 
@@ -117,17 +113,15 @@ public class Scoria {
         int parent_beta = beta;
 
         if (turn) {
-            int[][] max_eval = {{Integer.MIN_VALUE}, {}, {}};
-            for (int[][] move : possible_moves) {
-                Piece[] board_info = MoveHandler.moveState(board, move[0], move[1], board_hash);
-                int eval = minimax(board, depth - 1, alpha, beta, !turn)[0][0];
-                MoveHandler.undoState(board, move[0], move[1], board_info, board_hash);
-
-                // Make this section more efficient later
-                if (eval > max_eval[0][0]) {
-                    max_eval[0][0] = eval;
-                    max_eval[1] = move[0];
-                    max_eval[2] = move[1];
+            int[] max_eval = {Integer.MIN_VALUE, -1};
+            for (int move : possible_moves) {
+                byte captured = MoveHandler.moveState(board, move, board_hash);
+                int eval = minimax(board, depth - 1, alpha, beta, !turn)[0];
+                MoveHandler.undoState(board, move, captured, board_hash);
+                
+                if (eval > max_eval[0]) {
+                    max_eval[0] = eval;
+                    max_eval[1] = move;
                 }
 
                 alpha = Math.max(eval, alpha);
@@ -137,25 +131,23 @@ public class Scoria {
                 }
 
                 if (System.nanoTime() > cancel_time && cancel_mode) {
-                    return new int[][] {{-1}, {-1}, {-1}};
+                    return new int[] {-1};
                 }
             }
 
-            Transposition.addState(board_hash, new Transposition.BoardState(depth, max_eval, getNodeType(max_eval[0][0], parent_alpha, parent_beta)));
+            Transposition.addState(board_hash, new Transposition.BoardState(depth, max_eval, getNodeType(max_eval[0], parent_alpha, parent_beta)));
             return max_eval;
 
         } else {
-            int[][] min_eval = {{Integer.MAX_VALUE}, {}, {}};
-            for (int[][] move : possible_moves) {
-                Piece[] board_info = MoveHandler.moveState(board, move[0], move[1], board_hash);
-                int eval = minimax(board, depth - 1, alpha, beta, !turn)[0][0];
-                MoveHandler.undoState(board, move[0], move[1], board_info, board_hash);
+            int[] min_eval = {Integer.MAX_VALUE, -1};
+            for (int move : possible_moves) {
+                byte captured = MoveHandler.moveState(board, move, board_hash);
+                int eval = minimax(board, depth - 1, alpha, beta, !turn)[0];
+                MoveHandler.undoState(board, move, captured, board_hash);
 
-                // Make this section more efficient later
-                if (eval < min_eval[0][0]) {
-                    min_eval[0][0] = eval;
-                    min_eval[1] = move[0];
-                    min_eval[2] = move[1];
+                if (eval < min_eval[0]) {
+                    min_eval[0] = eval;
+                    min_eval[1] = move;
                 }
                 
                 beta = Math.min(eval, beta);
@@ -165,11 +157,11 @@ public class Scoria {
                 }
 
                 if (System.nanoTime() > cancel_time && cancel_mode) {
-                    return new int[][] {{-1}, {-1}, {-1}};
+                    return new int[] {-1};
                 }
             }
 
-            Transposition.addState(board_hash, new Transposition.BoardState(depth, min_eval, getNodeType(min_eval[0][0], parent_alpha, parent_beta)));
+            Transposition.addState(board_hash, new Transposition.BoardState(depth, min_eval, getNodeType(min_eval[0], parent_alpha, parent_beta)));
             return min_eval;
         }
     }

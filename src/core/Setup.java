@@ -1,74 +1,58 @@
 package src.core;
 
 import src.pieces.*;
-import src.pieces.piecedata.*;
 
 public abstract class Setup {
 
-    public static Piece makePieceObj(char piece, int index) {
+    public static int getPiece(char piece_char) {
+        // requires a way to deal with king positions
+        int piece = 0;
 
-        PieceColor color = PieceColor.WHITE;
-        int dir = -1;
-        int king_index = 0;
-
-        if (Character.isLowerCase(piece)) {
-            color = PieceColor.BLACK;
-            dir = 1;
-            piece = Character.toUpperCase(piece);
-            king_index = 1;
+        if (Character.isLowerCase(piece_char)) {
+            piece |= PieceData.BLACK;
+            piece_char = Character.toUpperCase(piece_char);
         }
 
-        switch (piece) {
-            case 'P':
-                return new Pawn(new int[] {index / 8, index % 8}, color, dir);
-            case 'N':
-                return new Knight(new int[] {index / 8, index % 8}, color);
-            case 'B':
-                return new Bishop(new int[] {index / 8, index % 8}, color);
-            case 'R':
-                return new Rook(new int[] {index / 8, index % 8}, color);
-            case 'Q':
-                return new Queen(new int[] {index / 8, index % 8}, color);
-            case 'K':
-                PieceHandler.setKingPiece(new King(new int[] {index / 8, index % 8}, color), king_index); 
-                return PieceHandler.getKingPiece(king_index);
-        }
-
-        throw new UnsupportedOperationException("!! UNSUPPORTED PIECETYPE !!");
+        return switch (piece_char) {
+            case 'P' -> piece | PieceData.PAWN;
+            case 'N' -> piece | PieceData.KNIGHT;
+            case 'B' -> piece | PieceData.BISHOP;
+            case 'R' -> piece | PieceData.ROOK;
+            case 'Q' -> piece | PieceData.QUEEN;
+            case 'K' -> piece | PieceData.KING;
+            default -> throw new IllegalArgumentException("Illegal Piece " + piece_char);
+        };
     }
 
     public static void castleRightsSetup(char right) {
-        if (Character.isUpperCase(right)) {
-            ((King) Game.board[7][4]).pushMovedFalse();
-        } else {
-            ((King) Game.board[0][4]).pushMovedFalse();
-        }
-
         switch (right) {
-            case 'K' -> ((Rook) Game.board[7][7]).pushMovedFalse();
-            case 'Q' -> ((Rook) Game.board[7][0]).pushMovedFalse();
-            case 'k' -> ((Rook) Game.board[0][7]).pushMovedFalse();
-            case 'q' -> ((Rook) Game.board[0][0]).pushMovedFalse();
+            case 'K' -> PieceHandler.setCastleRights(0);
+            case 'Q' -> PieceHandler.setCastleRights(1);
+            case 'k' -> PieceHandler.setCastleRights(2);
+            case 'q' -> PieceHandler.setCastleRights(3);
         }
     }
     
-    public static void setUp(Piece[][] board, String fen) {
-        int index = 0;
+    public static void setUp(byte[] board, String fen) {
         String[] fen_stream = fen.split("\\s");
 
         // Board piece locations
-        for (int i = 0; i < fen_stream[0].length(); i++) {
-            char piece = fen.charAt(i);
+        int index = 0;
 
-            if (piece == '/' || piece == ' ') {
+        for (int i = 0; i < fen_stream[0].length(); i++) {
+            char piece = fen_stream[0].charAt(i);
+
+            if (piece == '/') {
                 continue;
             }
             if (Character.isDigit(piece)) {
                 index += Character.getNumericValue(piece);
                 continue;
             }
+            // if (piece == 'K') PieceHandler.setKingPosition(i, PieceData.WHITE);
+            // if (piece == 'k') PieceHandler.setKingPosition(i, PieceData.BLACK);
 
-            board[index / 8][index % 8] = makePieceObj(piece, index);
+            board[index] = (byte) getPiece(piece);
             index += 1;
         }
 
@@ -80,8 +64,8 @@ public abstract class Setup {
             return;
         }
         
-        for (int i = 0; i < fen_stream[2].length(); i++) {
-            castleRightsSetup(fen_stream[2].charAt(i));
-        }
+        // for (int i = 0; i < fen_stream[2].length(); i++) {
+        //     castleRightsSetup(fen_stream[2].charAt(i));
+        // }
     }
 }

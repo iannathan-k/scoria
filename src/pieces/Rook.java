@@ -1,11 +1,8 @@
 package src.pieces;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 
 public abstract class Rook {
-
-    public ArrayDeque<Boolean> moved_stack = new ArrayDeque<Boolean>();
 
     public static ArrayList<Integer> getMoves(byte[] board, int pos) {
         ArrayList<Integer> possible_moves = new ArrayList<Integer>();
@@ -15,15 +12,16 @@ public abstract class Rook {
             int col = (pos & 7) + dir[1];
             while (PieceHandler.inRange(row, col)) {
                 int target = row << 3 | col;
+                int move = pos << 8 | target;
                 if (board[target] == PieceData.EMPTY) {
-                    if (!PieceHandler.kingCheck(board, pos, target)) {
-                        possible_moves.add(pos << 8 | target);
+                    if (!PieceHandler.kingCheck(board, move, board[pos] & PieceData.COLOR_MASK)) {
+                        possible_moves.add(move);
                     }
                 } else if ((board[target] & PieceData.COLOR_MASK) == (board[pos] & PieceData.COLOR_MASK)) {
                     break;
                 } else {
-                    if (!PieceHandler.kingCheck(board, pos, target)) {
-                        possible_moves.add(pos << 8 | target);
+                    if (!PieceHandler.kingCheck(board, move, board[pos] & PieceData.COLOR_MASK)) {
+                        possible_moves.add(move);
                     }
                     break;
                 }
