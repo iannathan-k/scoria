@@ -4,9 +4,6 @@ import java.util.Scanner;
 
 import src.core.Command;
 import src.core.Game;
-import src.pieces.PieceData;
-import src.pieces.PieceHandler;
-import src.scoria.Scoria;
 
 public class Main {
 

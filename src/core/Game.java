@@ -19,7 +19,7 @@ public class Game {
     public static void initGame(String fen) {
         // initialize board
         for (int i = 0; i < 64; i++) {
-            board[i] = 0b0000_0000;
+            board[i] = PieceData.EMPTY;
         }
 
         Setup.setUp(board, fen);

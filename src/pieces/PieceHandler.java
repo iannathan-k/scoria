@@ -79,7 +79,7 @@ public abstract class PieceHandler {
 
     public static boolean hasPossibleMove(byte[] board, int color) {
         for (int i = 0; i < 64; i++) {
-            int piece = board[i];
+            byte piece = board[i];
             if (piece == PieceData.EMPTY) {
                 continue;
             }
@@ -97,7 +97,7 @@ public abstract class PieceHandler {
         ArrayList<Integer> possible_moves = new ArrayList<Integer>();
 
         for (int i = 0; i < 64; i++) {
-            int piece = board[i];
+            byte piece = board[i];
             if (piece == PieceData.EMPTY) {
                 continue;
             }
@@ -109,24 +109,25 @@ public abstract class PieceHandler {
         return possible_moves;
     }
 
-    private static boolean slidingPiece(byte[] board, int pos, int[][] dirs, int attacker, int color) {
+    private static boolean slidingPiece(byte[] board, int row, int col, int[][] dirs, int attacker, int color) {
         for (int[] dir : dirs) {
-            int row = (pos >> 3) + dir[0];
-            int col = (pos & 7) + dir[1];
-            while (inRange(row, col)) {
-                int piece = board[row << 3 | col];
+            int new_row = row + dir[0];
+            int new_col = col + dir[1];
+            while (inRange(new_row, new_col)) {
+                int target = new_row << 3 | new_col;
+                byte piece = board[target];
+
                 if (piece == PieceData.EMPTY) {
-                    row += dir[0];
-                    col += dir[1];
+                    new_row += dir[0];
+                    new_col += dir[1];
                     continue;
                 }
                 if ((piece & PieceData.COLOR_MASK) == color) {
                     break;
                 }
-                if ((piece & PieceData.TYPE_MASK) == attacker) {
-                    return true;
-                }
-                if ((piece & PieceData.TYPE_MASK) == PieceData.QUEEN) {
+
+                int type = piece & PieceData.TYPE_MASK;
+                if (type == attacker || type == PieceData.QUEEN) {
                     return true;
                 }
                 break;
@@ -136,46 +137,26 @@ public abstract class PieceHandler {
         return false;
     }
 
-    private static boolean pawnPiece(byte[] board, int pos, int[][] dirs, int color) {
-        for (int[] dir : dirs) {
-            int row = (pos >> 3) + dir[0];
-            int col = (pos & 7) + dir[1];
-            if (!inRange(row, col)) {
-                continue;
-            }
-
-            byte piece = board[row << 3 | col];
-            if ((piece & PieceData.TYPE_MASK) != PieceData.PAWN) {
-                continue;
-            }
-            if ((piece & PieceData.COLOR_MASK) == color) {
-                continue;
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
     public static boolean underAttack(byte[] board, int color, int pos) {
+        int row = pos >> 3;
+        int col = pos & 7;
 
-        if (slidingPiece(board, pos, PieceData.BISHOP_DIRECTIONS, PieceData.BISHOP, color)) {
+        if (slidingPiece(board, row, col, PieceData.BISHOP_DIRECTIONS, PieceData.BISHOP, color)) {
             return true;
         }
 
-        if (slidingPiece(board, pos, PieceData.ROOK_DIRECTIONS, PieceData.ROOK, color)) {
+        if (slidingPiece(board, row, col, PieceData.ROOK_DIRECTIONS, PieceData.ROOK, color)) {
             return true;
         }
 
         for (int[] dir : PieceData.KNIGHT_DIRECTIONS) {
-            int row = (pos >> 3) + dir[0];
-            int col = (pos & 7) + dir[1];
-            if (!inRange(row, col)) {
+            int new_row = row + dir[0];
+            int new_col = col + dir[1];
+            if (!inRange(new_row, new_col)) {
                 continue;
             }
 
-            byte piece = board[row << 3 | col];
+            byte piece = board[new_row << 3 | new_col];
             if ((piece & PieceData.TYPE_MASK) != PieceData.KNIGHT) {
                 continue;
             }
@@ -186,25 +167,34 @@ public abstract class PieceHandler {
             return true;
         }
 
-        if (color == PieceData.WHITE) {
-            if (pawnPiece(board, pos, PieceData.BLACK_PAWN_DIRECTIONS, color)) {
-                return true;
+        int[][] dirs = (color == PieceData.WHITE) ? PieceData.BLACK_PAWN_DIRECTIONS : PieceData.WHITE_PAWN_DIRECTIONS;
+        for (int[] dir : dirs) {
+            int new_row = row + dir[0];
+            int new_col = col + dir[1];
+            if (!inRange(new_row, new_col)) {
+                continue;
             }
-        } else {
-            if (pawnPiece(board, pos, PieceData.WHITE_PAWN_DIRECTIONS, color)) {
-                return true;
+
+            byte piece = board[new_row << 3 | new_col];
+            if ((piece & PieceData.TYPE_MASK) != PieceData.PAWN) {
+                continue;
             }
+            if ((piece & PieceData.COLOR_MASK) == color) {
+                continue;
+            }
+
+            return true;
         }
 
         // king
         for (int[] dir : PieceData.ALL_DIRECTIONS) {
-            int row = (pos >> 3) + dir[0];
-            int col = (pos & 7) + dir[1];
-            if (!inRange(row, col)) {
+            int new_row = row + dir[0];
+            int new_col = col + dir[1];
+            if (!inRange(new_row, new_col)) {
                 continue;
             } 
 
-            byte piece = board[row << 3 | col];
+            byte piece = board[new_row << 3 | new_col];
             if ((piece & PieceData.TYPE_MASK) != PieceData.KING) {
                 continue;
             }
