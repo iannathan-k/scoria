@@ -6,7 +6,7 @@ import src.pieces.*;
 public class Zobrist {
     private static long[][] zobrist_table = new long[64][12];
     private static long[] castle_table = new long[4]; // KQkq
-    private static long[] passant_table = new long[16];
+    private static long[] passant_table = new long[17];
     private static long turn_table = 0;
 
     public static void initTable() {
@@ -22,7 +22,7 @@ public class Zobrist {
             castle_table[i] = random.nextLong();
         }
 
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < 17; i++) {
             passant_table[i] = random.nextLong();
         }
 
@@ -52,27 +52,17 @@ public class Zobrist {
             //     hash ^= castle_table[castle_side];
             //     hash ^= castle_table[castle_side + 1];
 
-            // // En Passant
-            // } else if (piece instanceof Pawn) {
-            //     int current_move_num = Game.currentMoveNumber();
-            //     int left = ((Pawn) piece).peekLeft();
-            //     int right = ((Pawn) piece).peekRight();
-            //     if (left != -1 && left == current_move_num) {
-            //         hash ^= passant_table[j - 1];
-            //     }
-            //     if (right != -1 && right== current_move_num) {
-            //         hash ^= passant_table[j + 1];
-            //     }
-            // }
-
             // Normal Pieces
             int offset = type - 1;
             offset += (color == PieceData.WHITE) ? 0 : 6;
             hash ^= zobrist_table[i][offset];
         }
 
-            // Turn
-            hash ^= turn ? turn_table : 0;
+        // Turn
+        hash ^= turn ? turn_table : 0;
+
+        // en passant
+        hash ^= passant_table[PieceHandler.peekPassantRights()];
 
         return hash;
     }

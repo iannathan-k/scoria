@@ -18,26 +18,36 @@ public abstract class PieceHandler {
      * Castle Rights
      * 0000
      * KQkq
+     * 
+     * int offset = color / 4 + side
+     * // White becomes 0 and black becomes 2
+     * 
+     * if (castle_rights == 0) {
+     *      continue;
+     * }
+     * 
+     * if (castle_rights >> offset != 0) {
+     *      enter castle logic check here
+     * }
+     * 
      */
 
     public static void setPassantRights(int col, int color) {
-        passant_rights.push(1 << (col + color));
-        // pushing looks good actually
+        passant_rights.push(8 - color + col);
+        // invert color
     }
 
     public static void clearPassantRights() {
-        passant_rights.push(0);
-        // clearing looks good
+        // 16 is unreachable value
+        passant_rights.push(16);
     }
 
     public static void popPassantRights() {
         passant_rights.pop();
-        // popping obviously no problem
     }
 
     public static int peekPassantRights() {
         return passant_rights.peek();
-        // peaking has no problem obviously
     }
 
     public static void setCastleRights(int index) {

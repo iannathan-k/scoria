@@ -39,6 +39,14 @@ public abstract class Setup {
         // Board piece locations
         int index = 0;
 
+        // Reset Logic
+        for (int i = 0; i < 64; i++) {
+            board[i] = PieceData.EMPTY;
+        }
+
+        PieceHandler.clearPassantRights();
+
+        // Piece Placement
         for (int i = 0; i < fen_stream[0].length(); i++) {
             char piece = fen_stream[0].charAt(i);
 
@@ -59,13 +67,16 @@ public abstract class Setup {
         // Turn
         Game.setTurn(fen_stream[1].equals("w"));
 
-        // Castling Rights
-        if (fen_stream.length < 3) {
-            return;
-        }
-        
-        // for (int i = 0; i < fen_stream[2].length(); i++) {
-        //     castleRightsSetup(fen_stream[2].charAt(i));
+        // // Castling Rights
+        // if (fen_stream.length < 3) {
+        //     return;
         // }
+
+        // En Passant Rights
+        if (fen_stream.length >= 4 && fen_stream[3].length() > 1) {
+            int col = fen_stream[3].charAt(0) - 'a';
+            int color = fen_stream[3].charAt(1) == '6' ? PieceData.BLACK : PieceData.WHITE;
+            PieceHandler.setPassantRights(col, color);
+        }
     }
 }

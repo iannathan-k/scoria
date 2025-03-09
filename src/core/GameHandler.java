@@ -103,9 +103,9 @@ public class GameHandler {
         long start = System.nanoTime();
 
         for (int move : first_moves) {
-            byte captured = MoveHandler.pseudoMoveState(Game.board, move);
+            byte captured = MoveHandler.moveState(Game.board, move, -1);
             int move_count = Scoria.perftCount(Game.board, depth - 1, !Game.getTurn());
-            MoveHandler.pseudoUndoState(Game.board, move, captured);
+            MoveHandler.undoState(Game.board, move, captured, -1);
 
             total_nodes += move_count;
             System.out.println(Interface.moveToUci(move) + ": " + move_count);

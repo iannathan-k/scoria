@@ -6,25 +6,31 @@ import src.core.MoveHandler;
 
 public abstract class Pawn{
 
-    // private static boolean passantCheck(Piece[][] board, ArrayDeque<Integer> stack, int offset) {
-    //     if (Game.currentMoveNumber() != stack.peek()) {
-    //         return false;
-    //     }
-    //     if (!PieceHandler.inRange(new int[] {this.pos[0], this.pos[1] + offset})) {
-    //         return false;
-    //     }
-    //     if (!(board[this.pos[0]][this.pos[1] + offset] instanceof Pawn)) {
-    //         return false;
-    //     }
-    //     if (board[this.pos[0] + dir][this.pos[1] + offset] != null) {
-    //         return false;
-    //     }
-    //     if (PieceHandler.kingCheck(board, this.pos, new int[] {this.pos[0] + dir, this.pos[1] + offset}, color)) {
-    //         return false;
-    //     }
+    private static boolean passantCheck(byte[] board, int color, int row, int new_row, int new_col, int passant_rights, int pos) {
+        if (passant_rights != new_col + color) {
+            return false;
+        }
 
-    //     return true;
-    // }
+        int capture = row << 3 | new_col;
+        if ((board[capture] & PieceData.TYPE_MASK) != PieceData.PAWN) {
+            return false;
+        }
+        if ((board[capture] & PieceData.COLOR_MASK) == color) {
+            return false;
+        }
+        
+        int target = new_row << 3 | new_col;
+        if (board[target] != PieceData.EMPTY) {
+            return false;
+        }
+        
+        int move = (pos << 8 | target) | MoveHandler.PASSANT_MASK;
+        if (PieceHandler.kingCheck(board, move, color)) {
+            return false;
+        }
+
+        return true;
+    }
 
     public static ArrayList<Integer> getMoves(byte[] board, int pos) {
         ArrayList<Integer> possible_moves = new ArrayList<Integer>();
@@ -68,7 +74,8 @@ public abstract class Pawn{
             }
         }
 
-        // capture moves
+        // capture moves & passant
+        int passant_rights = PieceHandler.peekPassantRights();
         int new_row = row + dir;
 
         // -1 for left, 1 for right
@@ -78,8 +85,14 @@ public abstract class Pawn{
                 continue;
             }
 
+            // sneaky passant
             int target = new_row << 3 | new_col;
             int move = pos << 8 | target;
+            if (passantCheck(board, color, row, new_row, new_col, passant_rights, pos)) {
+                possible_moves.add(move | MoveHandler.PASSANT_MASK);
+                continue;
+            }
+
             byte piece = board[target];
             if (piece == PieceData.EMPTY) {
                 continue;
@@ -91,16 +104,6 @@ public abstract class Pawn{
                 possible_moves.add(move);
             }
         }
-
-        // // left passant
-        // if (passantCheck(board, left_stack, -1)) {
-        //     possible_moves.add(new int[] {this.pos[0] + dir, this.pos[1] - 1});
-        // }
-
-        // // right passant
-        // if (passantCheck(board, right_stack, 1)) {
-        //     possible_moves.add(new int[] {this.pos[0] + dir, this.pos[1] + 1});
-        // }
 
         return possible_moves;
     }

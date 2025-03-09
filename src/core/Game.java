@@ -1,6 +1,5 @@
 package src.core;
 
-import src.pieces.PieceData;
 import src.scoria.Evaluator;
 import src.scoria.Scoria;
 import src.scoria.Zobrist;
@@ -17,11 +16,6 @@ public class Game {
     private static boolean human_side = true;
 
     public static void initGame(String fen) {
-        // initialize board
-        for (int i = 0; i < 64; i++) {
-            board[i] = PieceData.EMPTY;
-        }
-
         Setup.setUp(board, fen);
         Zobrist.initTable();
 
