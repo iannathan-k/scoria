@@ -48,15 +48,15 @@ java src/Main
 
 ## Commands
 
-| Field       | Description                                                                                                    | Default |
+| Field           | Description                                                                                                    | Default |
 |-----------------|----------------------------------------------------------------------------------------------------------------|---------|
-| `pos {fen}`     | Setup the game board based on a fen string                                                                                                                             |         |
+| `pos {fen}`     | Setup the game board based on a fen string                                                                     |         |
 | `d`             | Display the current board state in the command line                                                            |         |
-| `play {mode}`   | Play from the current position. [See Here](#gamemodes)                                                         | 3       |
+| `play {mode}`   | Play from the current position. [See Here](#gamemodes)                                                         |         |
 | `perft {depth}` | Run a [perft](#perft) for the number of positions after n moves where depth is n                               | 5       |
 | `think {time}`  | Set the think time for the bot in milliseconds. If no time is passed in it will display the current think time | 1000    |
 | `eval {depth}`  | Run a evaluation for each possible move after n moves where depth is n                                         | 5       |
-| `side {color}`  | Set the color of the human player with 'w' for white. If no color is passed it will display the current color                                                                                                                              | white   |
+| `side {color}`  | Set the color of the human player with 'w' for white. If no color is passed it will display the current color  | white   |
 | `version`       | Output the currrent version of the scoria                                                                      |         |
 | `exit`          | Exit the program                                                                                               |         |
 

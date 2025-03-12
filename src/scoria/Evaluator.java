@@ -72,19 +72,21 @@ public class Evaluator {
                 continue;
             }
 
-            if ((piece & PieceData.COLOR_MASK) == PieceData.WHITE) {
-                evaluation += 2 * piecePoints(piece & PieceData.TYPE_MASK);
-                evaluation += posWeight(piece & PieceData.TYPE_MASK, PieceData.WHITE, i);
+            int type = piece & PieceData.TYPE_MASK;
 
-                if ((piece & PieceData.TYPE_MASK) != PieceData.PAWN) {
-                    evaluation += 2 * PieceHandler.generateMoves(board, piece & PieceData.TYPE_MASK, i).size();
+            if ((piece & PieceData.COLOR_MASK) == PieceData.WHITE) {
+                evaluation += 2 * piecePoints(type);
+                evaluation += posWeight(type, PieceData.WHITE, i);
+
+                if (type != PieceData.PAWN) {
+                    evaluation += 2 * PieceHandler.generateMoves(board, type, i).size();
                 }
             } else {
-                evaluation -= 2 * piecePoints(piece & PieceData.TYPE_MASK);
-                evaluation -= posWeight(piece & PieceData.TYPE_MASK, PieceData.BLACK, i);
+                evaluation -= 2 * piecePoints(type);
+                evaluation -= posWeight(type, PieceData.BLACK, i);
 
-                if ((piece & PieceData.TYPE_MASK) != PieceData.PAWN) {
-                    evaluation -= 2 * PieceHandler.generateMoves(board, piece & PieceData.TYPE_MASK, i).size();
+                if (type != PieceData.PAWN) {
+                    evaluation -= 2 * PieceHandler.generateMoves(board, type, i).size();
                 }
             }
         }

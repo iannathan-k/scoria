@@ -1,13 +1,13 @@
 package src.pieces;
 
 public class PieceData {
-    public final static byte EMPTY  = 0b00000000;
-    public final static byte PAWN   = 0b00000001;
-    public final static byte KNIGHT = 0b00000010;
-    public final static byte BISHOP = 0b00000011;
-    public final static byte ROOK   = 0b00000100;
-    public final static byte QUEEN  = 0b00000101;
-    public final static byte KING   = 0b00000110;
+    public static final byte EMPTY  = 0b00000000;
+    public static final byte PAWN   = 0b00000001;
+    public static final byte KNIGHT = 0b00000010;
+    public static final byte BISHOP = 0b00000011;
+    public static final byte ROOK   = 0b00000100;
+    public static final byte QUEEN  = 0b00000101;
+    public static final byte KING   = 0b00000110;
 
     public final static byte BLACK  = 0b00001000;
     public final static byte WHITE  = 0b00000000;
@@ -17,6 +17,10 @@ public class PieceData {
 
     public static final byte TYPE_MASK   = 0b00000111;
     public static final byte COLOR_MASK  = 0b00001000;
+
+    // Castling Masks
+
+    public static final byte KING_RIGHTS_MASK = 0b11;
 
     public final static int[][] KNIGHT_DIRECTIONS = {
         {2, 1},

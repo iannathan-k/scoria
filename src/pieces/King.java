@@ -2,37 +2,37 @@ package src.pieces;
 
 import java.util.*;
 
+import src.core.MoveHandler;
+
 public abstract class King {
 
-    // public static boolean canCastle(Piece[][] board, int dir) {
-    //     if (moved_stack.peek()) {
-    //         return false;
-    //     }
-    //     if (PieceHandler.underAttack(board, this.color, this.pos)) {
-    //         return false;
-    //     }
-    //     int[] square = new int[] {this.pos[0], this.pos[1] + dir};
+    public static boolean canCastle(byte[] board, int side, int color, int pos, int dir) {
+        int offset = (color == PieceData.WHITE) ? 2 : 0;
 
-    //     while (square[1] > 0 && square[1] < 7) {
-    //         if (board[square[0]][square[1]] != null) {
-    //             return false;
-    //         }
-    //         if (PieceHandler.underAttack(board, this.color, square)) {
-    //             return false;
-    //         }
+        if ((PieceHandler.peekCastleRights() & (side << offset)) == 0) {
+            return false;
+        }
 
-    //         square[1] += dir;
-    //     }
+        int row = pos & 0b111000;
+        int col = (pos & 7) + dir;
 
-    //     if (!(board[square[0]][square[1]] instanceof Rook)) {
-    //         return false;
-    //     }
-    //     if (((Rook) board[square[0]][square[1]]).peekMove()) {
-    //         return false;
-    //     }
+        while (col > 0 && col < 7) {
+            if (board[row | col] != PieceData.EMPTY) {
+                return false;
+            }
+            if (PieceHandler.underAttack(board, color, row | col) && col != 1) {
+                return false;
+            }
+            col += dir;
+        }
 
-    //     return true;
-    // }
+        if ((board[row | col] & PieceData.TYPE_MASK) != PieceData.ROOK) {
+            return false;
+        }
+
+        return true;
+
+    }
 
     public static ArrayList<Integer> getMoves(byte[] board, int pos) {
         ArrayList<Integer> possible_moves = new ArrayList<Integer>();
@@ -60,12 +60,14 @@ public abstract class King {
             }
         }
 
-        // if (canCastle(board, -1)) { // Leftside castle
-        //     possible_moves.add(new int[] {this.pos[0], this.pos[1] - 2});
-        // }
-        // if (canCastle(board, 1)) { // Rightside castle
-        //     possible_moves.add(new int[] {this.pos[0], this.pos[1] + 2});
-        // }
+        if (!PieceHandler.underAttack(board, color, pos)) {
+            if (canCastle(board, 0b01, color, pos, -1)) {
+                possible_moves.add((pos << 8) | (pos - 2) | MoveHandler.CASTLE_MASK);
+            }
+            if (canCastle(board, 0b10, color, pos, 1)) {
+                possible_moves.add((pos << 8) | (pos + 2) | MoveHandler.CASTLE_MASK);
+            }
+        }
 
         return possible_moves;
     }

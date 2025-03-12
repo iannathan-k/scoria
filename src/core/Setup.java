@@ -26,10 +26,10 @@ public abstract class Setup {
 
     public static void castleRightsSetup(char right) {
         switch (right) {
-            case 'K' -> PieceHandler.setCastleRights(0);
-            case 'Q' -> PieceHandler.setCastleRights(1);
-            case 'k' -> PieceHandler.setCastleRights(2);
-            case 'q' -> PieceHandler.setCastleRights(3);
+            case 'K' -> PieceHandler.setCastleRights(0b1000);
+            case 'Q' -> PieceHandler.setCastleRights(0b0100);
+            case 'k' -> PieceHandler.setCastleRights(0b0010);
+            case 'q' -> PieceHandler.setCastleRights(0b0001);
         }
     }
     
@@ -45,6 +45,7 @@ public abstract class Setup {
         }
 
         PieceHandler.clearPassantRights();
+        PieceHandler.clearCastleRights();
 
         // Piece Placement
         for (int i = 0; i < fen_stream[0].length(); i++) {
@@ -67,13 +68,15 @@ public abstract class Setup {
         // Turn
         Game.setTurn(fen_stream[1].equals("w"));
 
-        // // Castling Rights
-        // if (fen_stream.length < 3) {
-        //     return;
-        // }
+        // Castling Rights
+        if (fen_stream.length >= 3 && !fen_stream[2].equals("-")) {
+            for (int i = 0; i < fen_stream[2].length(); i++) {
+                castleRightsSetup(fen_stream[2].charAt(i));
+            }
+        }
 
         // En Passant Rights
-        if (fen_stream.length >= 4 && fen_stream[3].length() > 1) {
+        if (fen_stream.length >= 4 && !fen_stream[3].equals("-")) {
             int col = fen_stream[3].charAt(0) - 'a';
             int color = fen_stream[3].charAt(1) == '6' ? PieceData.BLACK : PieceData.WHITE;
             PieceHandler.setPassantRights(col, color);

@@ -57,8 +57,35 @@ public abstract class Interface {
     }
 
     public static int uciToMove(String uci) {
-        // this one does not set flags yet
-        return (squareToPos(uci.substring(0, 2)) << 8) | squareToPos(uci.substring(2, 4));
+        int origin_pos = squareToPos(uci.substring(0, 2));
+        int target_pos = squareToPos(uci.substring(2, 4));
+
+        int move = origin_pos << 8 | target_pos;
+        byte piece = Game.board[origin_pos];
+        byte captured = Game.board[target_pos];
+
+        // Castle Flag
+        if ((piece & PieceData.TYPE_MASK) == PieceData.KING) {
+            if (Math.abs((origin_pos & 7) - (target_pos & 7)) == 2) {
+                move |= MoveHandler.CASTLE_MASK;
+            }
+        }
+
+        // Passant Flag
+        if ((piece & PieceData.TYPE_MASK) == PieceData.PAWN && captured == PieceData.EMPTY) {
+            if ((origin_pos & 7) != (target_pos & 7)) {
+                move |= MoveHandler.PASSANT_MASK;
+            }
+        }
+
+        // Promotion Flag
+        if ((piece & PieceData.TYPE_MASK) == PieceData.PAWN) {
+            if ((target_pos >> 3) == 7 || (target_pos >> 3) == 0) {
+                move |= MoveHandler.PROMO_MASK;
+            }
+        }
+
+        return move;
     }
 
     public static void printEndGame() {

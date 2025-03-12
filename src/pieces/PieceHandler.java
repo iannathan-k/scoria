@@ -18,18 +18,6 @@ public abstract class PieceHandler {
      * Castle Rights
      * 0000
      * KQkq
-     * 
-     * int offset = color / 4 + side
-     * // White becomes 0 and black becomes 2
-     * 
-     * if (castle_rights == 0) {
-     *      continue;
-     * }
-     * 
-     * if (castle_rights >> offset != 0) {
-     *      enter castle logic check here
-     * }
-     * 
      */
 
     public static void setPassantRights(int col, int color) {
@@ -50,13 +38,25 @@ public abstract class PieceHandler {
         return passant_rights.peek();
     }
 
-    public static void setCastleRights(int index) {
-        // should just push based on the previous so peek then push
-        castle_rights.push(castle_rights.peek() & (1 ^ (1 << index)));
+    public static void clearCastleRights() {
+        castle_rights.push(0b0000);
     }
 
-    public static void removeCastleRights(int index) {
-        // same as peek then push but with true instead.
+    public static void setCastleRights(int mask) {
+        castle_rights.push(castle_rights.peek() | mask);
+    }
+
+    public static void maskCastleRights(int mask, int color) {
+        int offset = (color == PieceData.WHITE) ? 0 : 2;
+        castle_rights.push(castle_rights.peek() & (mask << offset));
+    }
+
+    public static void popCastleRights() {
+        castle_rights.pop();
+    }
+
+    public static int peekCastleRights() {
+        return castle_rights.peek();
     }
 
     public static void setKingPosition(int pos, int color) {

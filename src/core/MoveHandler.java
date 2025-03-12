@@ -98,9 +98,15 @@ public class MoveHandler {
         // Note to self, recheck whether these conditions can be used as such.
         // moved logic
         if (type == PieceData.ROOK) {
-
+            switch (origin_pos) {
+                case 0 -> PieceHandler.maskCastleRights(0b1110, 0);
+                case 7 -> PieceHandler.maskCastleRights(0b1101, 0);
+                case 56 -> PieceHandler.maskCastleRights(0b1011, 0);
+                case 63 -> PieceHandler.maskCastleRights(0b0111, 0);
+            }
         } else if (type == PieceData.KING) {
             PieceHandler.setKingPosition(target_pos, color);
+            PieceHandler.maskCastleRights(PieceData.KING_RIGHTS_MASK, color);
         }
         
         if (type == PieceData.PAWN) {
@@ -129,12 +135,7 @@ public class MoveHandler {
             // move rook
             int rook_offset = (target_pos > origin_pos) ? -1 : 1; // and this part
             board[rook_pos] = PieceData.EMPTY;
-            board[(origin_pos & ROW_MASK) + rook_offset] = captured;
-
-            // Update Rights
-            int side = (origin_pos & 7) % 2;
-            int offset = (color == PieceData.WHITE) ? 0 : 2;
-            PieceHandler.setCastleRights(side + offset);
+            board[target_pos + rook_offset] = captured;
         }
 
         board[target_pos] = piece;
@@ -159,9 +160,12 @@ public class MoveHandler {
         // unmoved logic for castling rights
         // definitely go over this
         if (type == PieceData.ROOK) {
-
+            if (origin_pos == 0 || origin_pos == 7 || origin_pos == 56 || origin_pos == 63) {
+                PieceHandler.popCastleRights();
+            }
         } else if (type == PieceData.KING) {
             PieceHandler.setKingPosition(origin_pos, color);
+            PieceHandler.popCastleRights();
         }
         
         if ((move & PASSANT_MASK) != 0) {
@@ -175,20 +179,16 @@ public class MoveHandler {
             board[target_pos] = captured;
             return;
         } else if ((move & CASTLE_MASK) != 0) {
-            // uncastle logic
+            // castle logic
             int rook_col = (target_pos > origin_pos) ? 7 : 0;
             int rook_pos = (origin_pos & ROW_MASK) | rook_col; // recheck this part as well
 
-            // unmove rook
+            // move rook
             int rook_offset = (target_pos > origin_pos) ? -1 : 1; // and this part
             board[rook_pos] = captured;
-            board[(origin_pos & ROW_MASK) + rook_offset] = PieceData.EMPTY;
-            captured = PieceData.EMPTY;
+            board[target_pos + rook_offset] = PieceData.EMPTY;
 
-            // Update Rights
-            int side = (origin_pos & 7) % 2;
-            int offset = (color == PieceData.WHITE) ? 0 : 2;
-            PieceHandler.removeCastleRights(side + offset); // and definitely this
+            captured = PieceData.EMPTY;
         }
 
         board[origin_pos] = piece;
