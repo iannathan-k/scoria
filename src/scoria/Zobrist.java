@@ -5,7 +5,7 @@ import src.pieces.*;
 
 public class Zobrist {
     private static long[][] zobrist_table = new long[64][12];
-    private static long[] castle_table = new long[4]; // KQkq
+    private static long[] castle_table = new long[16];
     private static long[] passant_table = new long[17];
     private static long turn_table = 0;
 
@@ -50,6 +50,9 @@ public class Zobrist {
 
         // en passant
         hash ^= passant_table[PieceHandler.peekPassantRights()];
+
+        // castling
+        hash ^= castle_table[PieceHandler.peekCastleRights()];
 
         return hash;
     }
