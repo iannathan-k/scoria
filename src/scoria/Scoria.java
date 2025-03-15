@@ -67,8 +67,8 @@ public class Scoria {
         int score = 0;
 
         if (captured != PieceData.EMPTY) {
-            score += 3 * Evaluator.piecePoints(captured & PieceData.TYPE_MASK);
-            score -= Evaluator.piecePoints(piece & PieceData.TYPE_MASK);
+            score += 3 * Evaluator.piece_points[captured & PieceData.TYPE_MASK];
+            score -= Evaluator.piece_points[piece & PieceData.TYPE_MASK];
         }
 
         if ((move & MoveHandler.PROMO_MASK) != 0) {
@@ -96,7 +96,7 @@ public class Scoria {
             }
         }
 
-        if (depth == 0 || Evaluator.gameWinner(board, turn, board_hash) != -1) {
+        if (depth == 0 || Evaluator.gameWinner(board, turn, board_hash) != Evaluator.NOT_OVER) {
             Game.move_count++;
             return new int[] {Evaluator.boardEval(board, turn, board_hash), -1};
         }

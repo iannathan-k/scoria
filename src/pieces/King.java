@@ -13,7 +13,7 @@ public abstract class King {
             return false;
         }
 
-        int row = pos & 0b111000;
+        int row = pos & MoveHandler.ROW_MASK;
         int col = (pos & 7) + dir;
 
         while (col > 0 && col < 7) {
@@ -38,14 +38,7 @@ public abstract class King {
         ArrayList<Integer> possible_moves = new ArrayList<Integer>();
         int color = board[pos] & PieceData.COLOR_MASK;
 
-        for (int[] dir : PieceData.ALL_DIRECTIONS) {
-            int row = (pos >> 3) + dir[0];
-            int col = (pos & 7) + dir[1];
-            if (!PieceHandler.inRange(row, col)) {
-                continue;
-            }
-
-            int target = row << 3 | col;
+        for (int target : PreComputer.KING_PREMOVES[pos]) {
             int move = pos << 8 | target;
             byte target_piece = board[target];
 
@@ -59,6 +52,28 @@ public abstract class King {
                 }
             }
         }
+
+        // for (int[] dir : PieceData.ALL_DIRECTIONS) {
+        //     int row = (pos >> 3) + dir[0];
+        //     int col = (pos & 7) + dir[1];
+        //     if (!PieceHandler.inRange(row, col)) {
+        //         continue;
+        //     }
+
+        //     int target = row << 3 | col;
+        //     int move = pos << 8 | target;
+        //     byte target_piece = board[target];
+
+        //     if (target_piece == PieceData.EMPTY) {
+        //         if (!PieceHandler.kingCheck(board, move, color)) {
+        //             possible_moves.add(move);
+        //         }
+        //     } else if ((target_piece & PieceData.COLOR_MASK) != color) {
+        //         if (!PieceHandler.kingCheck(board, move, color)) {
+        //             possible_moves.add(move);
+        //         }
+        //     }
+        // }
 
         if (!PieceHandler.underAttack(board, color, pos)) {
             if (canCastle(board, 0b01, color, pos, -1)) {

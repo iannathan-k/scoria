@@ -4,6 +4,7 @@ import java.util.Scanner;
 
 import src.core.Command;
 import src.core.Game;
+import src.pieces.PreComputer;
 
 public class Main {
 
@@ -11,6 +12,7 @@ public class Main {
         
         System.out.println("starting...");
         Game.initGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
+        PreComputer.initializePremoves();
 
         Scanner scanner = new Scanner(System.in);
         while (true) {

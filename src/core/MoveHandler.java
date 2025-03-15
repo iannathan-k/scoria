@@ -29,10 +29,6 @@ public class MoveHandler {
         int type = piece & PieceData.TYPE_MASK;
         int color = piece & PieceData.COLOR_MASK;
 
-        if (type == PieceData.KING) {
-            PieceHandler.setKingPosition(target_pos, color);
-        }
-
         if (type == PieceData.PAWN) {
             if ((move & PASSANT_MASK) != 0) {
                 // en passant
@@ -45,7 +41,9 @@ public class MoveHandler {
                 board[origin_pos] = PieceData.EMPTY;
                 return captured;
             }    
-        }
+        } else if (type == PieceData.KING) {
+            PieceHandler.setKingPosition(target_pos, color);
+        } 
 
         board[target_pos] = piece;
         board[origin_pos] = PieceData.EMPTY;
@@ -62,9 +60,7 @@ public class MoveHandler {
 
         if (type == PieceData.KING) {
             PieceHandler.setKingPosition(origin_pos, color);
-        }
-
-        if ((move & PASSANT_MASK) != 0) {
+        } else if ((move & PASSANT_MASK) != 0) {
             // unpassant logic
             int passant_pos = target_pos + (color == PieceData.WHITE ? 8 : -8);
             board[passant_pos] = captured;
@@ -95,7 +91,7 @@ public class MoveHandler {
         int type = piece & PieceData.TYPE_MASK;
         int color = piece & PieceData.COLOR_MASK;
 
-        // Note to self, recheck whether these conditions can be used as such.
+        // This can be re-arranged to put pawn in front for more efficiency
         // moved logic
         if (type == PieceData.ROOK) {
             switch (origin_pos) {
@@ -107,9 +103,19 @@ public class MoveHandler {
         } else if (type == PieceData.KING) {
             PieceHandler.setKingPosition(target_pos, color);
             PieceHandler.maskCastleRights(PieceData.KING_RIGHTS_MASK, color);
-        }
-        
-        if (type == PieceData.PAWN) {
+
+            if ((move & CASTLE_MASK) != 0) {
+                // castle logic
+                int rook_col = (target_pos > origin_pos) ? 7 : 0;
+                int rook_pos = (origin_pos & ROW_MASK) | rook_col; // recheck this part as well
+                captured = board[rook_pos];
+    
+                // move rook
+                int rook_offset = (target_pos > origin_pos) ? -1 : 1; // and this part
+                board[rook_pos] = PieceData.EMPTY;
+                board[target_pos + rook_offset] = captured;
+            }
+        } else if (type == PieceData.PAWN) {
             if ((move & DOUBLE_MASK) != 0 ) {
                 // passant setting logic
                 PieceHandler.popPassantRights();
@@ -125,17 +131,6 @@ public class MoveHandler {
                 board[origin_pos] = PieceData.EMPTY;
                 return captured;
             }
-
-        } else if ((move & CASTLE_MASK) != 0) {
-            // castle logic
-            int rook_col = (target_pos > origin_pos) ? 7 : 0;
-            int rook_pos = (origin_pos & ROW_MASK) | rook_col; // recheck this part as well
-            captured = board[rook_pos];
-
-            // move rook
-            int rook_offset = (target_pos > origin_pos) ? -1 : 1; // and this part
-            board[rook_pos] = PieceData.EMPTY;
-            board[target_pos + rook_offset] = captured;
         }
 
         board[target_pos] = piece;
@@ -166,9 +161,20 @@ public class MoveHandler {
         } else if (type == PieceData.KING) {
             PieceHandler.setKingPosition(origin_pos, color);
             PieceHandler.popCastleRights();
-        }
-        
-        if ((move & PASSANT_MASK) != 0) {
+
+            if ((move & CASTLE_MASK) != 0) {
+                // castle logic
+                int rook_col = (target_pos > origin_pos) ? 7 : 0;
+                int rook_pos = (origin_pos & ROW_MASK) | rook_col; // recheck this part as well
+    
+                // move rook
+                int rook_offset = (target_pos > origin_pos) ? -1 : 1; // and this part
+                board[rook_pos] = captured;
+                board[target_pos + rook_offset] = PieceData.EMPTY;
+    
+                captured = PieceData.EMPTY;
+            }
+        } else if ((move & PASSANT_MASK) != 0) {
             // unpassant logic
             int passant_pos = target_pos + (color == PieceData.WHITE ? 8 : -8);
             board[passant_pos] = captured;
@@ -178,17 +184,6 @@ public class MoveHandler {
             board[origin_pos] = (byte) (PieceData.PAWN | color);
             board[target_pos] = captured;
             return;
-        } else if ((move & CASTLE_MASK) != 0) {
-            // castle logic
-            int rook_col = (target_pos > origin_pos) ? 7 : 0;
-            int rook_pos = (origin_pos & ROW_MASK) | rook_col; // recheck this part as well
-
-            // move rook
-            int rook_offset = (target_pos > origin_pos) ? -1 : 1; // and this part
-            board[rook_pos] = captured;
-            board[target_pos + rook_offset] = PieceData.EMPTY;
-
-            captured = PieceData.EMPTY;
         }
 
         board[origin_pos] = piece;

@@ -42,7 +42,7 @@ public abstract class Pawn{
 
         for (int i = 1; i < 3; i++) {
             int new_row = row + dir * i;
-            if (!PieceHandler.inRange(new_row, col)) {
+            if (new_row > 7 || new_row < 0) {
                 continue;
             }
 
