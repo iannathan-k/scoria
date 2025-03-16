@@ -17,7 +17,7 @@ public class Command {
 
             case "eval" -> GameHandler.eval(has_modifier ? Integer.parseInt(modifier) : 5);
 
-            case "version" -> System.out.println("Scoria v3.2.6");
+            case "version" -> System.out.println("Scoria v3.3.6");
 
             case "think" -> {
                 if (has_modifier) {

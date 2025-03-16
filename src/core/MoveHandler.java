@@ -81,8 +81,6 @@ public class MoveHandler {
         Evaluator.incrementPositionTable(hash);
         PieceHandler.clearPassantRights();
 
-        // add a line to automatically push an empty on the passant 
-
         int origin_pos = (move >> 8) & POS_MASK;
         int target_pos = move & POS_MASK;
         byte piece = board[origin_pos];
@@ -95,23 +93,23 @@ public class MoveHandler {
         // moved logic
         if (type == PieceData.ROOK) {
             switch (origin_pos) {
-                case 0 -> PieceHandler.maskCastleRights(0b1110, 0);
-                case 7 -> PieceHandler.maskCastleRights(0b1101, 0);
-                case 56 -> PieceHandler.maskCastleRights(0b1011, 0);
-                case 63 -> PieceHandler.maskCastleRights(0b0111, 0);
+                case 0 -> PieceHandler.maskCastleRights(PieceData.BLACK_QUEEN_ROOK);
+                case 7 -> PieceHandler.maskCastleRights(PieceData.BLACK_KING_ROOK);
+                case 56 -> PieceHandler.maskCastleRights(PieceData.WHITE_QUEEN_ROOK);
+                case 63 -> PieceHandler.maskCastleRights(PieceData.WHITE_KING_ROOK);
             }
         } else if (type == PieceData.KING) {
             PieceHandler.setKingPosition(target_pos, color);
-            PieceHandler.maskCastleRights(PieceData.KING_RIGHTS_MASK, color);
+            PieceHandler.maskCastleRights(PieceData.KING_RIGHTS_MASK << (color >> 2));
 
             if ((move & CASTLE_MASK) != 0) {
                 // castle logic
                 int rook_col = (target_pos > origin_pos) ? 7 : 0;
-                int rook_pos = (origin_pos & ROW_MASK) | rook_col; // recheck this part as well
+                int rook_pos = (origin_pos & ROW_MASK) | rook_col;
                 captured = board[rook_pos];
     
                 // move rook
-                int rook_offset = (target_pos > origin_pos) ? -1 : 1; // and this part
+                int rook_offset = (target_pos > origin_pos) ? -1 : 1;
                 board[rook_pos] = PieceData.EMPTY;
                 board[target_pos + rook_offset] = captured;
             }
@@ -143,8 +141,6 @@ public class MoveHandler {
         Evaluator.decrementPositionTable(hash);
         PieceHandler.popPassantRights();
 
-        // add a line to automatically pop the empty from passant
-
         int origin_pos = (move >> 8) & POS_MASK;
         int target_pos = move & POS_MASK;
         byte piece = board[target_pos];
@@ -153,7 +149,6 @@ public class MoveHandler {
         int color = piece & PieceData.COLOR_MASK;
 
         // unmoved logic for castling rights
-        // definitely go over this
         if (type == PieceData.ROOK) {
             if (origin_pos == 0 || origin_pos == 7 || origin_pos == 56 || origin_pos == 63) {
                 PieceHandler.popCastleRights();
@@ -165,10 +160,10 @@ public class MoveHandler {
             if ((move & CASTLE_MASK) != 0) {
                 // castle logic
                 int rook_col = (target_pos > origin_pos) ? 7 : 0;
-                int rook_pos = (origin_pos & ROW_MASK) | rook_col; // recheck this part as well
+                int rook_pos = (origin_pos & ROW_MASK) | rook_col;
     
                 // move rook
-                int rook_offset = (target_pos > origin_pos) ? -1 : 1; // and this part
+                int rook_offset = (target_pos > origin_pos) ? -1 : 1;
                 board[rook_pos] = captured;
                 board[target_pos + rook_offset] = PieceData.EMPTY;
     

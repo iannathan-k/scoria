@@ -4,8 +4,9 @@ import src.pieces.*;
 
 public abstract class Setup {
 
+    private static final byte CASTLE_INVERT = 0b1111;
+
     public static int getPiece(char piece_char) {
-        // requires a way to deal with king positions
         int piece = 0;
 
         if (Character.isLowerCase(piece_char)) {
@@ -26,10 +27,10 @@ public abstract class Setup {
 
     public static void castleRightsSetup(char right) {
         switch (right) {
-            case 'K' -> PieceHandler.setCastleRights(0b1000);
-            case 'Q' -> PieceHandler.setCastleRights(0b0100);
-            case 'k' -> PieceHandler.setCastleRights(0b0010);
-            case 'q' -> PieceHandler.setCastleRights(0b0001);
+            case 'K' -> PieceHandler.setCastleRights(PieceData.WHITE_KING_ROOK ^ CASTLE_INVERT);
+            case 'Q' -> PieceHandler.setCastleRights(PieceData.WHITE_QUEEN_ROOK ^ CASTLE_INVERT);
+            case 'k' -> PieceHandler.setCastleRights(PieceData.BLACK_KING_ROOK ^ CASTLE_INVERT);
+            case 'q' -> PieceHandler.setCastleRights(PieceData.BLACK_QUEEN_ROOK ^ CASTLE_INVERT);
         }
     }
     

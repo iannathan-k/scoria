@@ -34,9 +34,8 @@ public abstract class King {
 
     }
 
-    public static ArrayList<Integer> getMoves(byte[] board, int pos) {
+    public static ArrayList<Integer> getMoves(byte[] board, int pos, int color) {
         ArrayList<Integer> possible_moves = new ArrayList<Integer>();
-        int color = board[pos] & PieceData.COLOR_MASK;
 
         for (int target : PreComputer.KING_PREMOVES[pos]) {
             int move = pos << 8 | target;
@@ -52,28 +51,6 @@ public abstract class King {
                 }
             }
         }
-
-        // for (int[] dir : PieceData.ALL_DIRECTIONS) {
-        //     int row = (pos >> 3) + dir[0];
-        //     int col = (pos & 7) + dir[1];
-        //     if (!PieceHandler.inRange(row, col)) {
-        //         continue;
-        //     }
-
-        //     int target = row << 3 | col;
-        //     int move = pos << 8 | target;
-        //     byte target_piece = board[target];
-
-        //     if (target_piece == PieceData.EMPTY) {
-        //         if (!PieceHandler.kingCheck(board, move, color)) {
-        //             possible_moves.add(move);
-        //         }
-        //     } else if ((target_piece & PieceData.COLOR_MASK) != color) {
-        //         if (!PieceHandler.kingCheck(board, move, color)) {
-        //             possible_moves.add(move);
-        //         }
-        //     }
-        // }
 
         if (!PieceHandler.underAttack(board, color, pos)) {
             if (canCastle(board, 0b01, color, pos, -1)) {

@@ -20,7 +20,11 @@ public class PieceData {
 
     // Castling Masks
 
-    public static final byte KING_RIGHTS_MASK = 0b11;
+    public static final byte KING_RIGHTS_MASK = 0b0011;
+    public static final byte BLACK_QUEEN_ROOK = 0b1110;
+    public static final byte BLACK_KING_ROOK  = 0b1101;
+    public static final byte WHITE_QUEEN_ROOK = 0b1011;
+    public static final byte WHITE_KING_ROOK  = 0b0111;
 
     public final static int[][] KNIGHT_DIRECTIONS = {
         {2, 1},

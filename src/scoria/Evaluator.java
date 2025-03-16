@@ -18,7 +18,6 @@ public class Evaluator {
         position_table.put(hash, position_table.get(hash) - 1);
     }
 
-    // this definitely has to be updated
     public static int gameWinner(byte[] board, boolean turn, long hash) {
         int color = turn ? PieceData.WHITE : PieceData.BLACK;
 
@@ -27,17 +26,17 @@ public class Evaluator {
             return PieceData.NULL;
         }
 
-        // If can still move
+        // any legal moves
         if (PieceHandler.hasPossibleMove(board, color)) {
             return -1;
         }
 
-        // If king in check
+        // if king in check
         if (PieceHandler.underAttack(board, color, PieceHandler.getKingPos(color))) {
             return turn ? PieceData.BLACK : PieceData.WHITE;
         }
         
-        // Stalemate
+        // stalemate
         return PieceData.NULL;
     }
 
@@ -70,14 +69,14 @@ public class Evaluator {
                 evaluation += Evaluator.posWeight(type, PieceData.WHITE, i);
 
                 if (type != PieceData.PAWN) {
-                    evaluation += 2 * PieceHandler.generateMoves(board, type, i).size();
+                    evaluation += 2 * PieceHandler.generateMoves(board, type, PieceData.WHITE, i).size();
                 }
             } else {
                 evaluation -= 2 * piece_points[type];
                 evaluation -= posWeight(type, PieceData.BLACK, i);
 
                 if (type != PieceData.PAWN) {
-                    evaluation -= 2 * PieceHandler.generateMoves(board, type, i).size();
+                    evaluation -= 2 * PieceHandler.generateMoves(board, type, PieceData.BLACK, i).size();
                 }
             }
         }

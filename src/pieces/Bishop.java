@@ -4,9 +4,8 @@ import java.util.ArrayList;
 
 public abstract class Bishop {
 
-    public static ArrayList<Integer> getMoves(byte[] board, int pos) {
+    public static ArrayList<Integer> getMoves(byte[] board, int pos, int color) {
         ArrayList<Integer> possible_moves = new ArrayList<Integer>();
-        int color = board[pos] & PieceData.COLOR_MASK;
 
         for (int[] dir : PreComputer.BISHOP_PREMOVES[pos]) {
             for (int target : dir) {

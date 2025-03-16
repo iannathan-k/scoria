@@ -32,12 +32,11 @@ public abstract class Pawn{
         return true;
     }
 
-    public static ArrayList<Integer> getMoves(byte[] board, int pos) {
+    public static ArrayList<Integer> getMoves(byte[] board, int pos, int color) {
         ArrayList<Integer> possible_moves = new ArrayList<Integer>();
 
         int row = pos >> 3;
         int col = pos & 7;
-        int color = board[pos] & PieceData.COLOR_MASK;
         int dir = (color == PieceData.WHITE) ? -1 : 1;
 
         for (int i = 1; i < 3; i++) {
