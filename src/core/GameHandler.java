@@ -98,7 +98,7 @@ public class GameHandler {
         int color = Game.getTurn() ? PieceData.WHITE : PieceData.BLACK;
         ArrayList<Integer> first_moves = PieceHandler.getAllMoves(Game.board, color);
 
-        int total_nodes = 0;
+        long total_nodes = 0;
 
         long start = System.nanoTime();
 

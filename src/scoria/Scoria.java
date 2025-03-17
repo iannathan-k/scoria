@@ -24,7 +24,8 @@ public class Scoria {
         while (System.nanoTime() < cancel_time) {
             current_depth++;
             int[] move = minimax(board, current_depth, Integer.MIN_VALUE, Integer.MAX_VALUE, turn);
-            if (move[0] != -1) {
+            
+            if (move[0] != Integer.MIN_VALUE) {
                 current_best_move = move;
             }
             if (Math.abs(move[0]) == 10000) {
@@ -98,7 +99,7 @@ public class Scoria {
 
         if (depth == 0 || Evaluator.gameWinner(board, turn, board_hash) != Evaluator.NOT_OVER) {
             Game.move_count++;
-            return new int[] {Evaluator.boardEval(board, turn, board_hash), -1};
+            return new int[] {Evaluator.boardEval(board, turn, board_hash)};
         }
 
         int color = turn ? PieceData.WHITE : PieceData.BLACK;
@@ -119,6 +120,10 @@ public class Scoria {
                 int eval = minimax(board, depth - 1, alpha, beta, !turn)[0];
                 MoveHandler.undoState(board, move, captured, board_hash);
                 
+                if (System.nanoTime() > cancel_time && cancel_mode) {
+                    return new int[] {Integer.MIN_VALUE};
+                }
+
                 if (eval > max_eval[0]) {
                     max_eval[0] = eval;
                     max_eval[1] = move;
@@ -126,12 +131,7 @@ public class Scoria {
 
                 alpha = Math.max(eval, alpha);
                 if (beta <= alpha) {
-                    Transposition.addState(board_hash, new Transposition.BoardState(depth, max_eval, Transposition.BETA_NODE));
                     break;
-                }
-
-                if (System.nanoTime() > cancel_time && cancel_mode) {
-                    return new int[] {-1};
                 }
             }
 
@@ -145,6 +145,10 @@ public class Scoria {
                 int eval = minimax(board, depth - 1, alpha, beta, !turn)[0];
                 MoveHandler.undoState(board, move, captured, board_hash);
 
+                if (System.nanoTime() > cancel_time && cancel_mode) {
+                    return new int[] {Integer.MIN_VALUE};
+                }
+
                 if (eval < min_eval[0]) {
                     min_eval[0] = eval;
                     min_eval[1] = move;
@@ -152,12 +156,7 @@ public class Scoria {
                 
                 beta = Math.min(eval, beta);
                 if (beta <= alpha) {
-                    Transposition.addState(board_hash, new Transposition.BoardState(depth, min_eval, Transposition.ALPHA_NODE));
                     break;
-                }
-
-                if (System.nanoTime() > cancel_time && cancel_mode) {
-                    return new int[] {-1};
                 }
             }
 
