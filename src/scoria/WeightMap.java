@@ -70,14 +70,14 @@ public abstract class WeightMap {
          20, 30, 10,  0,  0, 10, 30, 20
     };
 
-    public static int[] getMap(int type) {
+    public static int getMap(int type, int pos) {
         return switch (type) {
-            case PieceData.PAWN -> PAWN_WEIGHTS;
-            case PieceData.KNIGHT -> KNIGHT_WEIGHTS;
-            case PieceData.BISHOP -> BISHOP_WEIGHTS;
-            case PieceData.ROOK -> ROOK_WEIGHTS;
-            case PieceData.QUEEN -> QUEEN_WEIGHTS;
-            case PieceData.KING -> KING_WEIGHTS;
+            case PieceData.PAWN -> PAWN_WEIGHTS[pos];
+            case PieceData.KNIGHT -> KNIGHT_WEIGHTS[pos];
+            case PieceData.BISHOP -> BISHOP_WEIGHTS[pos];
+            case PieceData.ROOK -> ROOK_WEIGHTS[pos];
+            case PieceData.QUEEN -> QUEEN_WEIGHTS[pos];
+            case PieceData.KING -> KING_WEIGHTS[pos];
             default -> throw new IllegalArgumentException("Unexpected value: " + type);
         };
     }

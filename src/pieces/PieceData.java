@@ -26,7 +26,7 @@ public class PieceData {
     public static final byte WHITE_QUEEN_ROOK = 0b1011;
     public static final byte WHITE_KING_ROOK  = 0b0111;
 
-    public final static int[][] KNIGHT_DIRECTIONS = {
+    public static final int[][] KNIGHT_DIRECTIONS = {
         {2, 1},
         {2, -1},
         {-2, 1},
@@ -37,21 +37,21 @@ public class PieceData {
         {-1, 2}
     };
 
-    public final static int[][] BISHOP_DIRECTIONS = {
+    public static final int[][] BISHOP_DIRECTIONS = {
         {1, 1},
         {1, -1},
         {-1, 1},
         {-1, -1}
     };
 
-    public final static int[][] ROOK_DIRECTIONS = {
+    public static final int[][] ROOK_DIRECTIONS = {
         {1, 0},
         {-1, 0},
         {0, 1},
         {0, -1}
     };
 
-    public final static int[][] ALL_DIRECTIONS = {
+    public static final int[][] ALL_DIRECTIONS = {
         {1, 1},
         {1, -1},
         {-1, 1},
@@ -62,12 +62,12 @@ public class PieceData {
         {0, -1}
     };
 
-    public static final int[][] WHITE_PAWN_DIRECTIONS = {
+    public static final int[][] WHITE_PAWN_ATTACKS = {
         {1, -1},
         {1, 1}
     };
 
-    public static final int[][] BLACK_PAWN_DIRECTIONS = {
+    public static final int[][] BLACK_PAWN_ATTACKS = {
         {-1, -1},
         {-1, 1}
     };

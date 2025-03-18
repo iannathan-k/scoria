@@ -118,7 +118,9 @@ public abstract class PieceHandler {
         return possible_moves;
     }
 
-    private static boolean slidingPiece(byte[] board, int[][] premoves, int attacker, int color) {
+    private static boolean slidingPiece(byte[] board, int[][] premoves, int attacker, int opponent_color) {
+        int queen_attacker = PieceData.QUEEN | opponent_color;
+        attacker |= opponent_color;
         for (int[] dir : premoves) {
             for (int target : dir) {
                 byte target_piece = board[target];
@@ -126,13 +128,13 @@ public abstract class PieceHandler {
                 if (target_piece == PieceData.EMPTY) {
                     continue;
                 }
-                if ((target_piece & PieceData.COLOR_MASK) == color) {
-                    break;
-                }
-                int type = board[target] & PieceData.TYPE_MASK;
-                if (type == attacker || type == PieceData.QUEEN) {
+                if (target_piece == attacker) {
                     return true;
                 }
+                if (target_piece == queen_attacker) {
+                    return true;
+                }
+
                 break;
             }
         }
@@ -141,60 +143,41 @@ public abstract class PieceHandler {
     }
 
     public static boolean underAttack(byte[] board, int color, int pos) {
-        if (slidingPiece(board, PreComputer.BISHOP_PREMOVES[pos], PieceData.BISHOP, color)) {
+        int opponent_color = 8 - color;
+
+        if (slidingPiece(board, PreComputer.BISHOP_PREMOVES[pos], PieceData.BISHOP, opponent_color)) {
             return true;
         }
 
-        if (slidingPiece(board, PreComputer.ROOK_PREMOVES[pos], PieceData.ROOK, color)) {
+        if (slidingPiece(board, PreComputer.ROOK_PREMOVES[pos], PieceData.ROOK, opponent_color)) {
             return true;
         }
 
+        int opponent = PieceData.KNIGHT | opponent_color;
         for (int target : PreComputer.KNIGHT_PREMOVES[pos]) {
-            byte target_piece = board[target];
-            if ((target_piece & PieceData.TYPE_MASK) != PieceData.KNIGHT) {
-                continue;
+            if (board[target] == opponent) {
+                return true;
             }
-            if ((target_piece & PieceData.COLOR_MASK) == color) {
-                continue;
-            }
-            
-            return true;
         }
 
         // pawn
-        int[][] dirs = (color == PieceData.WHITE) ? PieceData.BLACK_PAWN_DIRECTIONS : PieceData.WHITE_PAWN_DIRECTIONS;
-        int row = pos >> 3;
-        int col = pos & 7;
+        opponent = PieceData.PAWN | opponent_color;
+        int[] attacks = (color == PieceData.WHITE) 
+            ? PreComputer.BLACK_PAWN_PREATTACKS[pos] 
+            : PreComputer.WHITE_PAWN_PREATTACKS[pos];
 
-        for (int[] dir : dirs) {
-            int new_row = row + dir[0];
-            int new_col = col + dir[1];
-            if (!inRange(new_row, new_col)) {
-                continue;
+        for (int target : attacks) {
+            if (board[target] == opponent) {
+                return true;
             }
-
-            byte piece = board[new_row << 3 | new_col];
-            if ((piece & PieceData.TYPE_MASK) != PieceData.PAWN) {
-                continue;
-            }
-            if ((piece & PieceData.COLOR_MASK) == color) {
-                continue;
-            }
-
-            return true;
         }
 
         // king
+        opponent = PieceData.KING | opponent_color;
         for (int target : PreComputer.KING_PREMOVES[pos]) {
-            byte target_piece = board[target];
-            if ((target_piece & PieceData.TYPE_MASK) != PieceData.KING) {
-                continue;
+            if (board[target] == opponent) {
+                return true;
             }
-            if ((target_piece & PieceData.COLOR_MASK) == color) {
-                continue;
-            }
-            
-            return true;
         }
 
         return false;
