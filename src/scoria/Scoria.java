@@ -65,7 +65,7 @@ public class Scoria {
         byte piece = board[origin_pos];
         byte captured = board[target_pos];
 
-        int score = 0;
+        int score = 3 * Evaluator.posWeight(piece & PieceData.TYPE_MASK, color, target_pos);
 
         if (captured != PieceData.EMPTY) {
             score += 3 * Evaluator.piece_points[captured & PieceData.TYPE_MASK];
@@ -75,8 +75,6 @@ public class Scoria {
         if ((move & MoveHandler.PROMO_MASK) != 0) {
             score += 500;
         }
-
-        score += 3 * Evaluator.posWeight(piece & PieceData.TYPE_MASK, color, target_pos);
 
         return score;
     }

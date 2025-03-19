@@ -28,7 +28,7 @@ public class Evaluator {
 
         // any legal moves
         if (PieceHandler.hasPossibleMove(board, color)) {
-            return -1;
+            return NOT_OVER;
         }
 
         // if king in check
@@ -45,8 +45,7 @@ public class Evaluator {
     }
 
     public static int boardEval(byte[] board, boolean turn, long hash) {
-        int winner = gameWinner(board, turn, hash);
-        switch (winner) {
+        switch (gameWinner(board, turn, hash)) {
             case NOT_OVER: break;
             case PieceData.WHITE: return 10000;
             case PieceData.BLACK: return -10000;
@@ -62,21 +61,14 @@ public class Evaluator {
             }
 
             int type = piece & PieceData.TYPE_MASK;
+            int color = piece & PieceData.COLOR_MASK;
+            int sign = (color == PieceData.WHITE) ? 1 : -1; 
 
-            if ((piece & PieceData.COLOR_MASK) == PieceData.WHITE) {
-                evaluation += 2 * piece_points[type];
-                evaluation += Evaluator.posWeight(type, PieceData.WHITE, i);
+            evaluation += sign * 2 * piece_points[type];
+            evaluation += sign * Evaluator.posWeight(type, color, i);
 
-                if (type != PieceData.PAWN) {
-                    evaluation += 2 * PieceHandler.generateMoves(board, type, PieceData.WHITE, i).size();
-                }
-            } else {
-                evaluation -= 2 * piece_points[type];
-                evaluation -= posWeight(type, PieceData.BLACK, i);
-
-                if (type != PieceData.PAWN) {
-                    evaluation -= 2 * PieceHandler.generateMoves(board, type, PieceData.BLACK, i).size();
-                }
+            if (type != PieceData.PAWN) {
+                evaluation += sign * 2 * PieceHandler.generateMoves(board, type, color, i).size();
             }
         }
 

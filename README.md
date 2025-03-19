@@ -58,6 +58,7 @@ java src/Main
 | `eval {depth}`  | Run a evaluation for each possible move after n moves where depth is n                                         | 5       |
 | `side {color}`  | Set the color of the human player with 'w' for white. If no color is passed it will display the current color  | white   |
 | `version`       | Output the currrent version of the scoria                                                                      |         |
+| `help`          | Output the help screen with commands and their usages                                                          |         |
 | `exit`          | Exit the program                                                                                               |         |
 
 ## Perft

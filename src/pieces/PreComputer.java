@@ -108,7 +108,7 @@ public class PreComputer {
                     possible_moves.add(row << 3 | col);
                 }
             }
-
+            
             KING_PREMOVES[i] = possible_moves.stream().mapToInt(j -> j).toArray();
         }
 

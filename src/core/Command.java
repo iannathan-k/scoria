@@ -17,7 +17,7 @@ public class Command {
 
             case "eval" -> GameHandler.eval(has_modifier ? Integer.parseInt(modifier) : 5);
 
-            case "version" -> System.out.println("Scoria v3.2.9");
+            case "version" -> System.out.println("Scoria v3.2.10");
 
             case "think" -> {
                 if (has_modifier) {
@@ -43,6 +43,28 @@ public class Command {
                     Game.setPlayerSide(modifier == "white");
                 }
             }
+
+            case "help" -> System.out.println(
+                """
+                usage: <command> {argument}
+
+                scoria settings
+                    pos {fen}       Setup game by fen string
+                    think {time}    Set max thinkking time
+                    side {color}    Set human side by color
+
+                debugging tools
+                    perft {depth}   Run a perft by depth
+                    eval {depth}    Run an evaluation by depth
+                    version         Display current version
+
+                miscellaneous
+                    d               Display the board
+                    version         Display current version
+                    exit            Exit program
+                    help            Displays this text
+                """
+            );
                 
             default -> System.out.println("unknown command: " + field);
         }

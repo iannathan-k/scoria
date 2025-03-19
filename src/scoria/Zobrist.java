@@ -35,10 +35,8 @@ public class Zobrist {
             byte piece = board[i];
             if (piece == PieceData.EMPTY) continue;
 
-            int offset = (piece & PieceData.TYPE_MASK) - 1;
-            offset += (piece < PieceData.BLACK) ? 0 : 6;
-
-            hash ^= zobrist_table[i][offset];
+            piece -= (piece < PieceData.BLACK) ? 1 : 3;
+            hash ^= zobrist_table[i][piece];
         }
 
         // turn
