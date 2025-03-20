@@ -1,8 +1,10 @@
 package src.core;
 
+import java.util.Scanner;
+
 public class Command {
 
-    public static void parseCommand(String command) {
+    public static void parseCommand(String command, Scanner scanner) {
         String[] command_stream = command.split("\\s", 2);
         boolean has_modifier = (command_stream.length == 2) ? true : false;
         String field = command_stream[0];
@@ -17,7 +19,7 @@ public class Command {
 
             case "eval" -> GameHandler.eval(has_modifier ? Integer.parseInt(modifier) : 5);
 
-            case "version" -> System.out.println("Scoria v3.2.10");
+            case "version" -> System.out.println("Scoria v3.2.11");
 
             case "think" -> {
                 if (has_modifier) {
@@ -29,8 +31,8 @@ public class Command {
 
             case "play" -> {
                 switch (modifier) {
-                    case "1" -> GameHandler.humanBotCLI();
-                    case "2" -> GameHandler.humanBotUCI();
+                    case "1" -> GameHandler.humanBotCLI(scanner);
+                    case "2" -> GameHandler.humanBotUCI(scanner);
                     case "3" -> GameHandler.botBotCLI();
                     case "4" -> GameHandler.botBotUCI();
                 };

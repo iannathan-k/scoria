@@ -15,11 +15,12 @@ public class Main {
         PreComputer.initializePremoves();
 
         Scanner scanner = new Scanner(System.in);
+
         while (true) {
             String command = scanner.nextLine();
             if (command.equals("exit")) break;
 
-            Command.parseCommand(command);
+            Command.parseCommand(command, scanner);
         }
         scanner.close();
     }
