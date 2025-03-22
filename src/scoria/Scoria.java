@@ -62,18 +62,15 @@ public class Scoria {
     private static int heuristicScore(byte[] board, int move, int color) {
         int origin_pos = (move >> 8) & MoveHandler.POS_MASK;
         int target_pos = move & MoveHandler.POS_MASK;
-        byte piece = board[origin_pos];
+        int piece_type = board[origin_pos] & PieceData.TYPE_MASK;
         byte captured = board[target_pos];
 
-        int score = 3 * Evaluator.posWeight(piece & PieceData.TYPE_MASK, color, target_pos);
+        int score = 3 * Evaluator.posWeight(piece_type, color, target_pos);
+        score -= Evaluator.posWeight(piece_type, color, origin_pos);
 
         if (captured != PieceData.EMPTY) {
             score += 3 * Evaluator.piece_points[captured & PieceData.TYPE_MASK];
-            score -= Evaluator.piece_points[piece & PieceData.TYPE_MASK];
-        }
-
-        if ((move & MoveHandler.PROMO_MASK) != 0) {
-            score += 500;
+            score -= Evaluator.piece_points[piece_type];
         }
 
         return score;
@@ -117,7 +114,7 @@ public class Scoria {
                 byte captured = MoveHandler.moveState(board, move, board_hash);
                 int eval = minimax(board, depth - 1, alpha, beta, !turn)[0];
                 MoveHandler.undoState(board, move, captured, board_hash);
-                
+
                 if (System.nanoTime() > cancel_time && cancel_mode) {
                     return new int[] {Integer.MIN_VALUE};
                 }
@@ -158,7 +155,7 @@ public class Scoria {
                 }
             }
 
-            Transposition.addState(board_hash, new Transposition.BoardState(depth, min_eval, getNodeType(min_eval[0], parent_alpha, parent_beta)));
+            Transposition.addState(board_hash, new Transposition.BoardState(depth, min_eval, getNodeType(min_eval[0], alpha, beta)));
             return min_eval;
         }
     }

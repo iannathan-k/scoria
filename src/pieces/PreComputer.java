@@ -12,12 +12,58 @@ public class PreComputer {
     public static final int[][] WHITE_PAWN_PREATTACKS = new int[64][];
     public static final int[][] BLACK_PAWN_PREATTACKS = new int[64][];
 
+    public static final int[][] KNIGHT_DIRECTIONS = {
+        {2, 1},
+        {2, -1},
+        {-2, 1},
+        {-2, -1},
+        {1, -2},
+        {-1, -2},
+        {1, 2},
+        {-1, 2}
+    };
+
+    public static final int[][] BISHOP_DIRECTIONS = {
+        {1, 1},
+        {1, -1},
+        {-1, 1},
+        {-1, -1}
+    };
+
+    public static final int[][] ROOK_DIRECTIONS = {
+        {1, 0},
+        {-1, 0},
+        {0, 1},
+        {0, -1}
+    };
+
+    public static final int[][] ALL_DIRECTIONS = {
+        {1, 1},
+        {1, -1},
+        {-1, 1},
+        {-1, -1},
+        {1, 0},
+        {-1, 0},
+        {0, 1},
+        {0, -1}
+    };
+
+    public static final int[][] WHITE_PAWN_ATTACKS = {
+        {1, -1},
+        {1, 1}
+    };
+
+    public static final int[][] BLACK_PAWN_ATTACKS = {
+        {-1, -1},
+        {-1, 1}
+    };
+
     public static void initializePremoves() {
         // Knight Premoves
         for (int i = 0; i < 64; i++) {
             ArrayList<Integer> possible_moves = new ArrayList<Integer>();
     
-            for (int[] dir : PieceData.KNIGHT_DIRECTIONS) {
+            for (int[] dir : KNIGHT_DIRECTIONS) {
                 int row = (i >> 3) + dir[0];
                 int col = (i & 7) + dir[1];
                 if (PieceHandler.inRange(row, col)) {
@@ -34,7 +80,7 @@ public class PreComputer {
             for (int k = 0; k < 4; k++) {
                 ArrayList<Integer> possible_moves = new ArrayList<Integer>();
         
-                int[] dir = PieceData.BISHOP_DIRECTIONS[k];
+                int[] dir = BISHOP_DIRECTIONS[k];
                 int row = (i >> 3) + dir[0];
                 int col = (i & 7) + dir[1];
         
@@ -57,7 +103,7 @@ public class PreComputer {
             for (int k = 0; k < 4; k++) {
                 ArrayList<Integer> possible_moves = new ArrayList<Integer>();
         
-                int[] dir = PieceData.ROOK_DIRECTIONS[k];
+                int[] dir = ROOK_DIRECTIONS[k];
                 int row = (i >> 3) + dir[0];
                 int col = (i & 7) + dir[1];
         
@@ -80,7 +126,7 @@ public class PreComputer {
             for (int k = 0; k < 8; k++) {
                 ArrayList<Integer> possible_moves = new ArrayList<Integer>();
         
-                int[] dir = PieceData.ALL_DIRECTIONS[k];
+                int[] dir = ALL_DIRECTIONS[k];
                 int row = (i >> 3) + dir[0];
                 int col = (i & 7) + dir[1];
         
@@ -101,7 +147,7 @@ public class PreComputer {
         for (int i = 0; i < 64; i++) {
             ArrayList<Integer> possible_moves = new ArrayList<Integer>();
 
-            for (int[] dir : PieceData.ALL_DIRECTIONS) {
+            for (int[] dir : ALL_DIRECTIONS) {
                 int row = (i >> 3) + dir[0];
                 int col = (i & 7) + dir[1];
                 if (PieceHandler.inRange(row, col)) {
@@ -117,7 +163,7 @@ public class PreComputer {
             ArrayList<Integer> possible_attacks = new ArrayList<Integer>();
 
 
-            int[][] dirs = PieceData.BLACK_PAWN_ATTACKS;
+            int[][] dirs = BLACK_PAWN_ATTACKS;
             int row = i >> 3;
             int col = i & 7;
     
@@ -136,7 +182,7 @@ public class PreComputer {
         for (int i = 0; i < 64; i++) {
             ArrayList<Integer> possible_attacks = new ArrayList<Integer>();
 
-            int[][] dirs = PieceData.WHITE_PAWN_ATTACKS;
+            int[][] dirs = WHITE_PAWN_ATTACKS;
             int row = i >> 3;
             int col = i & 7;
     

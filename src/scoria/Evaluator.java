@@ -41,7 +41,7 @@ public class Evaluator {
     }
 
     public static int posWeight(int type, int color, int pos) {
-        return (color == PieceData.WHITE) ? WeightMap.getMap(type, pos) : WeightMap.getMap(type, 63 - pos);
+        return (color == PieceData.WHITE) ? WeightMap.POSITION_WEIGHTS[type][pos] : WeightMap.POSITION_WEIGHTS[type][63 - pos];
     }
 
     public static int boardEval(byte[] board, boolean turn, long hash) {

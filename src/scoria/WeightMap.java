@@ -1,10 +1,8 @@
 package src.scoria;
 
-import src.pieces.PieceData;
-
 public abstract class WeightMap {
     
-    private final static int[] PAWN_WEIGHTS = {
+    private static final int[] PAWN_WEIGHTS = {
          0,   0,  0,  0,  0,  0,  0,  0,
         50,  50, 50, 50, 50, 50, 50, 50,
         10,  10, 20, 30, 30, 20, 10, 10,
@@ -15,7 +13,7 @@ public abstract class WeightMap {
          0,   0,  0,  0,  0,  0,  0,  0
     };
 
-    private final static int[] KNIGHT_WEIGHTS = {
+    private static final int[] KNIGHT_WEIGHTS = {
         -50,-40,-30,-30,-30,-30,-40,-50,
         -40,-20,  0,  0,  0,  0,-20,-40,
         -30,  0, 10, 15, 15, 10,  0,-30,
@@ -26,7 +24,7 @@ public abstract class WeightMap {
         -50,-40,-30,-30,-30,-30,-40,-50
     };
 
-    private final static int[] BISHOP_WEIGHTS = {
+    private static final int[] BISHOP_WEIGHTS = {
         -20,-10,-10,-10,-10,-10,-10,-20,
         -10,  0,  0,  0,  0,  0,  0,-10,
         -10,  0,  5, 10, 10,  5,  0,-10,
@@ -37,7 +35,7 @@ public abstract class WeightMap {
         -20,-10,-10,-10,-10,-10,-10,-20
     };
 
-    private final static int[] ROOK_WEIGHTS = {
+    private static final int[] ROOK_WEIGHTS = {
          0,   0,  0,  0,  0,  0,  0,  0,
          5,  10, 10, 10, 10, 10, 10,  5,
         -5,   0,  0,  0,  0,  0,  0, -5,
@@ -48,7 +46,7 @@ public abstract class WeightMap {
          0,   0,  0,  5,  5,  0,  0,  0
     };
 
-    private final static int[] QUEEN_WEIGHTS = {
+    private static final int[] QUEEN_WEIGHTS = {
         -20,-10,-10, -5, -5,-10,-10,-20,
         -10,  0,  0,  0,  0,  0,  0,-10,
         -10,  0,  5,  5,  5,  5,  0,-10,
@@ -59,7 +57,7 @@ public abstract class WeightMap {
         -20,-10,-10, -5, -5,-10,-10,-20
     };
 
-    private final static int[] KING_WEIGHTS = {
+    private static final int[] KING_WEIGHTS = {
         -30,-40,-40,-50,-50,-40,-40,-30,
         -30,-40,-40,-50,-50,-40,-40,-30,
         -30,-40,-40,-50,-50,-40,-40,-30,
@@ -70,15 +68,16 @@ public abstract class WeightMap {
          20, 30, 10,  0,  0, 10, 30, 20
     };
 
-    public static int getMap(int type, int pos) {
-        return switch (type) {
-            case PieceData.PAWN -> PAWN_WEIGHTS[pos];
-            case PieceData.KNIGHT -> KNIGHT_WEIGHTS[pos];
-            case PieceData.BISHOP -> BISHOP_WEIGHTS[pos];
-            case PieceData.ROOK -> ROOK_WEIGHTS[pos];
-            case PieceData.QUEEN -> QUEEN_WEIGHTS[pos];
-            case PieceData.KING -> KING_WEIGHTS[pos];
-            default -> throw new IllegalArgumentException("Unexpected value: " + type);
-        };
-    }
+    private static final int[] NULL_WEIGHTS = {};
+
+    public static final int[][] POSITION_WEIGHTS = {
+        NULL_WEIGHTS,
+        PAWN_WEIGHTS,
+        KNIGHT_WEIGHTS,
+        BISHOP_WEIGHTS,
+        ROOK_WEIGHTS,
+        QUEEN_WEIGHTS,
+        KING_WEIGHTS
+    };
+
 }
