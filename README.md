@@ -48,6 +48,8 @@ java src/Main
 
 ## Commands
 
+### Normal Mode
+
 | Field           | Description                                                                                                    | Default |
 |-----------------|----------------------------------------------------------------------------------------------------------------|---------|
 | `pos {fen}`     | Setup the game board based on a fen string                                                                     |         |
@@ -59,7 +61,21 @@ java src/Main
 | `side {color}`  | Set the color of the human player with 'w' for white. If no color is passed it will display the current color  | white   |
 | `version`       | Output the currrent version of the scoria                                                                      |         |
 | `help`          | Output the help screen with commands and their usages                                                          |         |
-| `exit`          | Exit the program                                                                                               |         |
+| `quit`          | Exit the program                                                                                               |         |
+
+### Uci Mode
+
+| Field                           | Description                                                              |
+|---------------------------------|--------------------------------------------------------------------------|
+| `uci`                           | Toggle to uci mode                                                       |
+| `ucinewgame`                    | Start a new game without reseting position                               |
+| `isready`                       | Declare when the engine is ready to play                                 |
+| `position {fen} {moves}`        | Set the position of the board by fen, followed by moves to current state |
+| `go {mode} {arg}`               | Run a go command for one of the [modes](#go-commands)                    |
+| `setoption name {name} {value}` | Change an internal setting of scoria                                     |
+| `d`                             | Display the current board state in the command line                      |
+| `help`                          | Output the help screen with commands and their usages                    |
+| `quit`                          | Exit the program                                                         |
 
 ## Perft
 
@@ -82,6 +98,15 @@ Eval recursively searches the nodes until the certain depth, where it finds the 
 >d3c2: -197\
 >best move: d3d2, -197\
 >total time: 80ms
+
+## Go Commands
+
+| Field             | Description                    |
+|-------------------|--------------------------------|
+| `movetime {time}` | Generate move limited by time  |
+| `depth {depth}`   | Generate move limited by depth |
+| `perft {depth}`   | Run a perft to depth           |
+| `eval {depth}`    | Run an evaluation to depth     |
 
 ## Play
 

@@ -18,7 +18,7 @@ public class Main {
 
         while (true) {
             String command = scanner.nextLine();
-            if (command.equals("exit")) break;
+            if (command.equals("quit")) break;
 
             Command.parseCommand(command, scanner);
         }

@@ -7,7 +7,8 @@ import src.scoria.Zobrist;
 public class Game {
     
     public static byte[] board = new byte[64];
-    public static long THINK_TIME = 1000;
+    public static long MAX_TIME = 1000;
+    public static int MAX_DEPTH = Integer.MAX_VALUE;
     public static int move_count;
     private static int move_number;
     private static long last_think_time;
@@ -54,7 +55,7 @@ public class Game {
     }
 
     public static int[] getScoriaMove(boolean turn) {
-        return Scoria.iterativeDeepener(board, turn);
+        return Scoria.iterativeDeepener(board, turn, MAX_DEPTH, MAX_TIME);
     }
 
     public static boolean getTurn() {

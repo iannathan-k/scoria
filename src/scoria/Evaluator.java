@@ -18,6 +18,10 @@ public class Evaluator {
         position_table.put(hash, position_table.get(hash) - 1);
     }
 
+    public static void clearPositionTable() {
+        position_table.clear();
+    }
+
     public static int gameWinner(byte[] board, boolean turn, long hash) {
         int color = turn ? PieceData.WHITE : PieceData.BLACK;
 
