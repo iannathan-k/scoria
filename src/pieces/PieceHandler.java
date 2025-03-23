@@ -8,7 +8,7 @@ public abstract class PieceHandler {
     private static int[] king_positions = new int[2]; // {white, black}
 
     private static ArrayDeque<Integer> castle_rights = new ArrayDeque<Integer>();
-    private static ArrayDeque<Integer> passant_rights = new ArrayDeque<Integer>(); // you also need for black and white so just << 8 for then the blacks
+    private static ArrayDeque<Integer> passant_rights = new ArrayDeque<Integer>();
 
     /*
      * Passant Rights
@@ -21,8 +21,8 @@ public abstract class PieceHandler {
      */
 
     public static void setPassantRights(int col, int color) {
-        passant_rights.push(8 - color + col);
         // invert color
+        passant_rights.push(8 - color + col);
     }
 
     public static void clearPassantRights() {
@@ -39,7 +39,7 @@ public abstract class PieceHandler {
     }
 
     public static void clearCastleRights() {
-        castle_rights.push(0b0000);
+        castle_rights.push(0);
     }
 
     public static void setCastleRights(int mask) {
@@ -65,10 +65,6 @@ public abstract class PieceHandler {
     public static int getKingPos(int color) {
         return king_positions[color >> 3];
     }
-    
-    public static boolean isKingStuck(byte[] board, int color) {
-        return King.getMoves(board, getKingPos(color), color).isEmpty();
-    }
 
     public static boolean inRange(int row, int col) {
         return (row | col) > -1 && (row | col) < 8;
@@ -86,6 +82,18 @@ public abstract class PieceHandler {
         };
     }
 
+    public static boolean checkMobility(byte[] board, int type, int color, int pos) {
+        return switch(type) {
+            case PieceData.PAWN -> Pawn.hasMove(board, pos, color);
+            case PieceData.KNIGHT -> Knight.hasMove(board, pos, color);
+            case PieceData.BISHOP -> Bishop.hasMove(board, pos, color);
+            case PieceData.ROOK -> Rook.hasMove(board, pos, color);
+            case PieceData.QUEEN -> Queen.hasMove(board, pos, color);
+            case PieceData.KING -> King.hasMove(board, pos, color);
+            default -> throw new IllegalArgumentException("Invalid Type");
+        };
+    }
+
     public static boolean hasPossibleMove(byte[] board, int color) {
         for (int i = 0; i < 64; i++) {
             byte piece = board[i];
@@ -95,7 +103,7 @@ public abstract class PieceHandler {
             if ((piece & PieceData.COLOR_MASK) != color) {
                 continue;
             }
-            if (generateMoves(board, piece & PieceData.TYPE_MASK, color, i).size() > 0) {
+            if (checkMobility(board, piece & PieceData.TYPE_MASK, color, i)) {
                 return true;
             }
         }
@@ -163,8 +171,8 @@ public abstract class PieceHandler {
         // pawn
         opponent = PieceData.PAWN | opponent_color;
         int[] attacks = (color == PieceData.WHITE) 
-            ? PreComputer.BLACK_PAWN_PREATTACKS[pos] 
-            : PreComputer.WHITE_PAWN_PREATTACKS[pos];
+            ? PreComputer.WHITE_PAWN_PREATTACKS[pos] 
+            : PreComputer.BLACK_PAWN_PREATTACKS[pos];
 
         for (int target : attacks) {
             if (board[target] == opponent) {

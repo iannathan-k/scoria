@@ -2,6 +2,8 @@ package src.pieces;
 
 import java.util.ArrayList;
 
+import src.core.MoveHandler;
+
 public class PreComputer {
     public static final int[][] KNIGHT_PREMOVES = new int[64][];
     public static final int[][][] BISHOP_PREMOVES = new int[64][][];
@@ -9,10 +11,15 @@ public class PreComputer {
     public static final int[][][] QUEEN_PREMOVES = new int[64][][];
     public static final int[][] KING_PREMOVES = new int[64][];
 
+    public static final int[][] WHITE_PAWN_PREMOVES = new int[64][];
+    public static final int[][] BLACK_PAWN_PREMOVES = new int[64][];
+    public static final int[][] WHITE_PAWN_PRECAPTURES = new int[64][];
+    public static final int[][] BLACK_PAWN_PRECAPTURES = new int[64][];
+
     public static final int[][] WHITE_PAWN_PREATTACKS = new int[64][];
     public static final int[][] BLACK_PAWN_PREATTACKS = new int[64][];
 
-    public static final int[][] KNIGHT_DIRECTIONS = {
+    private static final int[][] KNIGHT_DIRECTIONS = {
         {2, 1},
         {2, -1},
         {-2, 1},
@@ -23,21 +30,21 @@ public class PreComputer {
         {-1, 2}
     };
 
-    public static final int[][] BISHOP_DIRECTIONS = {
+    private static final int[][] BISHOP_DIRECTIONS = {
         {1, 1},
         {1, -1},
         {-1, 1},
         {-1, -1}
     };
 
-    public static final int[][] ROOK_DIRECTIONS = {
+    private static final int[][] ROOK_DIRECTIONS = {
         {1, 0},
         {-1, 0},
         {0, 1},
         {0, -1}
     };
 
-    public static final int[][] ALL_DIRECTIONS = {
+    private static final int[][] ALL_DIRECTIONS = {
         {1, 1},
         {1, -1},
         {-1, 1},
@@ -48,12 +55,12 @@ public class PreComputer {
         {0, -1}
     };
 
-    public static final int[][] WHITE_PAWN_ATTACKS = {
+    private static final int[][] BLACK_PAWN_ATTACKS = {
         {1, -1},
         {1, 1}
     };
 
-    public static final int[][] BLACK_PAWN_ATTACKS = {
+    private static final int[][] WHITE_PAWN_ATTACKS = {
         {-1, -1},
         {-1, 1}
     };
@@ -158,10 +165,107 @@ public class PreComputer {
             KING_PREMOVES[i] = possible_moves.stream().mapToInt(j -> j).toArray();
         }
 
+        // Black Pawn Captures
+        for (int i = 0; i < 64; i++) {
+            ArrayList<Integer> possible_moves = new ArrayList<Integer>();
+
+            int[][] dirs = BLACK_PAWN_ATTACKS;
+            int row = i >> 3;
+            int col = i & 7;
+    
+            for (int[] dir : dirs) {
+                int new_row = row + dir[0];
+                int new_col = col + dir[1];
+                if (!PieceHandler.inRange(new_row, new_col)) {
+                    continue;
+                }
+                int target = new_row << 3 | new_col;
+                if (new_row == 7) {
+                    target |= MoveHandler.PROMO_MASK;
+                }
+                possible_moves.add(target);
+            }
+
+            BLACK_PAWN_PRECAPTURES[i] = possible_moves.stream().mapToInt(j -> j).toArray();
+        }
+
+        // White Pawn Captures
+        for (int i = 0; i < 64; i++) {
+            ArrayList<Integer> possible_moves = new ArrayList<Integer>();
+
+            int[][] dirs = WHITE_PAWN_ATTACKS;
+            int row = i >> 3;
+            int col = i & 7;
+    
+            for (int[] dir : dirs) {
+                int new_row = row + dir[0];
+                int new_col = col + dir[1];
+                if (!PieceHandler.inRange(new_row, new_col)) {
+                    continue;
+                }
+                int target = new_row << 3 | new_col;
+                if (new_row == 0) {
+                    target |= MoveHandler.PROMO_MASK;
+                }
+                possible_moves.add(target);
+            }
+
+            WHITE_PAWN_PRECAPTURES[i] = possible_moves.stream().mapToInt(j -> j).toArray();
+        }
+
+        // Black Pawn Moves
+        for (int i = 0; i < 64; i++) {
+            ArrayList<Integer> possible_moves = new ArrayList<Integer>();
+
+            int row = i >> 3;
+            int col = i & 7;
+            int new_row = row + 1;
+
+            int target = new_row << 3 | col;
+            if (!PieceHandler.inRange(new_row, col)) {
+                continue;
+            }
+            if (new_row == 7) {
+                target |= MoveHandler.PROMO_MASK;
+            }
+
+            possible_moves.add(target);
+            if (row == 1) {
+                new_row++;
+                possible_moves.add(new_row << 3 | col | MoveHandler.DOUBLE_MASK);
+            }
+
+            BLACK_PAWN_PREMOVES[i] = possible_moves.stream().mapToInt(j -> j).toArray();
+        }
+
+        // White Pawn Moves
+        for (int i = 0; i < 64; i++) {
+            ArrayList<Integer> possible_moves = new ArrayList<Integer>();
+
+            int row = i >> 3;
+            int col = i & 7;
+            int new_row = row - 1;
+
+            int target = new_row << 3 | col;
+            if (!PieceHandler.inRange(new_row, col)) {
+                continue;
+            }
+            if (new_row == 0) {
+                target |= MoveHandler.PROMO_MASK;
+            }
+
+            possible_moves.add(target);
+            if (row == 6) {
+                new_row--;
+                possible_moves.add(new_row << 3 | col | MoveHandler.DOUBLE_MASK);
+            }
+
+            WHITE_PAWN_PREMOVES[i] = possible_moves.stream().mapToInt(j -> j).toArray();
+        }
+
         // Black Pawn Attacks
         for (int i = 0; i < 64; i++) {
             ArrayList<Integer> possible_attacks = new ArrayList<Integer>();
-
 
             int[][] dirs = BLACK_PAWN_ATTACKS;
             int row = i >> 3;

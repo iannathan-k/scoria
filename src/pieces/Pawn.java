@@ -6,93 +6,54 @@ import src.core.MoveHandler;
 
 public abstract class Pawn{
 
-    private static boolean passantCheck(byte[] board, int color, int row, int new_row, int new_col, int passant_rights, int pos) {
+    private static boolean passantCheck(byte[] board, int color, int pos, int target, int move, int passant_rights) {
+        int new_col = target & 7;
         if (passant_rights != new_col + color) {
             return false;
         }
 
-        int capture = row << 3 | new_col;
-        if ((board[capture] & PieceData.TYPE_MASK) != PieceData.PAWN) {
+        int capture = (pos & MoveHandler.ROW_MASK) | new_col;
+        if (board[capture] != (PieceData.PASSANT_PAWN ^ color)) {
             return false;
         }
-        if ((board[capture] & PieceData.COLOR_MASK) == color) {
-            return false;
-        }
-        
-        int target = new_row << 3 | new_col;
-        if (board[target] != PieceData.EMPTY) {
+        if (board[target & MoveHandler.POS_MASK] != PieceData.EMPTY) {
             return false;
         }
         
-        int move = (pos << 8 | target) | MoveHandler.PASSANT_MASK;
-        if (PieceHandler.kingCheck(board, move, color)) {
-            return false;
-        }
-
-        return true;
+        return !PieceHandler.kingCheck(board, move | MoveHandler.PASSANT_MASK, color);
     }
 
     public static ArrayList<Integer> getMoves(byte[] board, int pos, int color) {
         ArrayList<Integer> possible_moves = new ArrayList<Integer>();
 
-        int row = pos >> 3;
-        int col = pos & 7;
-        int dir = (color == PieceData.WHITE) ? -1 : 1;
+        int[] straight_moves = (color == PieceData.WHITE) 
+            ? PreComputer.WHITE_PAWN_PREMOVES[pos] 
+            : PreComputer.BLACK_PAWN_PREMOVES[pos];
 
-        for (int i = 1; i < 3; i++) {
-            int new_row = row + dir * i;
-            if (new_row > 7 || new_row < 0) {
-                continue;
+        for (int target : straight_moves) {
+            int move = pos << 8 | target;
+            if (board[target & MoveHandler.POS_MASK] != PieceData.EMPTY) {
+                break;
             }
-
-            int target = new_row << 3 | col; 
-            int move = pos << 8 | target; 
-            if (board[target] != PieceData.EMPTY) {
-                continue;
-            }
-            if (PieceHandler.kingCheck(board, move, color)) {
-                continue;
-            }
-
-            if (i == 1) {
-                // promotion flag
-                if (new_row == 0 || new_row == 7) {
-                    move |= MoveHandler.PROMO_MASK;
-                }
-                possible_moves.add(move);
-                continue;
-            }
-
-            // double move
-            if (board[row + dir << 3 | col] != PieceData.EMPTY) {
-                continue;
-            }
-            if (row == 1 || row == 6) {
-                move |= MoveHandler.DOUBLE_MASK;
+            if (!PieceHandler.kingCheck(board, move, color)) {
                 possible_moves.add(move);
             }
         }
 
-        // capture moves & passant
         int passant_rights = PieceHandler.peekPassantRights();
-        int new_row = row + dir;
+        int[] capture_moves = (color == PieceData.WHITE)
+            ? PreComputer.WHITE_PAWN_PRECAPTURES[pos]
+            : PreComputer.BLACK_PAWN_PRECAPTURES[pos];
 
-        // -1 for left, 1 for right
-        for (int i = -1; i < 2; i+= 2) {
-            int new_col = col + i;
-            if (!PieceHandler.inRange(new_row, new_col)) {
-                continue;
-            }
-
-            // sneaky passant
-            int target = new_row << 3 | new_col;
+        for (int target : capture_moves) {
+            byte piece = board[target & MoveHandler.POS_MASK];
             int move = pos << 8 | target;
-            if (passantCheck(board, color, row, new_row, new_col, passant_rights, pos)) {
+
+            if (passantCheck(board, color, pos, target, move, passant_rights)) {
                 possible_moves.add(move | MoveHandler.PASSANT_MASK);
                 continue;
             }
 
-            byte piece = board[target];
             if (piece == PieceData.EMPTY) {
                 continue;
             }
@@ -105,5 +66,46 @@ public abstract class Pawn{
         }
 
         return possible_moves;
+    }
+
+    public static boolean hasMove(byte[] board, int pos, int color) {
+        int[] straight_moves = (color == PieceData.WHITE) 
+            ? PreComputer.WHITE_PAWN_PREMOVES[pos] 
+            : PreComputer.BLACK_PAWN_PREMOVES[pos];
+
+        for (int target : straight_moves) {
+            int move = pos << 8 | target;
+            if (board[target & MoveHandler.POS_MASK] != PieceData.EMPTY) {
+                break;
+            }
+            if (!PieceHandler.kingCheck(board, move, color)) {
+                return true;
+            }
+        }
+
+        int passant_rights = PieceHandler.peekPassantRights();
+        int[] capture_moves = (color == PieceData.WHITE)
+            ? PreComputer.WHITE_PAWN_PRECAPTURES[pos]
+            : PreComputer.BLACK_PAWN_PRECAPTURES[pos];
+
+        for (int target : capture_moves) {
+            byte piece = board[target & MoveHandler.POS_MASK];
+
+            if (passantCheck(board, color, pos, target, pos << 8 | target, passant_rights)) {
+                return true;
+            }
+
+            if (piece == PieceData.EMPTY) {
+                continue;
+            }
+            if ((piece & PieceData.COLOR_MASK) == color) {
+                continue;
+            }
+            if (!PieceHandler.kingCheck(board, pos << 8 | target, color)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

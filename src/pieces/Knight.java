@@ -25,5 +25,24 @@ public abstract class Knight {
         return possible_moves;
 
     }
+
+    public static boolean hasMove(byte[] board, int pos, int color) {
+        for (int target : PreComputer.KNIGHT_PREMOVES[pos]) {
+            byte target_piece = board[target];
+
+            if (target_piece == PieceData.EMPTY) {
+                if (!PieceHandler.kingCheck(board, pos << 8 | target, color)) {
+                    return true;
+                }
+            } else if ((target_piece & PieceData.COLOR_MASK) != color) {
+                if (!PieceHandler.kingCheck(board, pos << 8 | target, color)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+
+    }
     
 }

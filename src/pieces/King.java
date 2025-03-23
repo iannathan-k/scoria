@@ -63,5 +63,32 @@ public abstract class King {
 
         return possible_moves;
     }
+
+    public static boolean hasMove(byte[] board, int pos, int color) {
+        for (int target : PreComputer.KING_PREMOVES[pos]) {
+            byte target_piece = board[target];
+
+            if (target_piece == PieceData.EMPTY) {
+                if (!PieceHandler.kingCheck(board, pos << 8 | target, color)) {
+                    return true;
+                }
+            } else if ((target_piece & PieceData.COLOR_MASK) != color) {
+                if (!PieceHandler.kingCheck(board, pos << 8 | target, color)) {
+                    return true;
+                }
+            }
+        }
+
+        if (!PieceHandler.underAttack(board, color, pos)) {
+            if (canCastle(board, 0b01, color, pos, -1)) {
+                return true;
+            }
+            if (canCastle(board, 0b10, color, pos, 1)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
     
 }

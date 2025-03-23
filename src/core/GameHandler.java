@@ -116,7 +116,6 @@ public class GameHandler {
         boolean turn = Game.getTurn();
         int color = turn ? PieceData.WHITE : PieceData.BLACK;
         ArrayList<Integer> first_moves = PieceHandler.getAllMoves(board, color);
-        
 
         int best_eval = turn ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         String best_move = "";

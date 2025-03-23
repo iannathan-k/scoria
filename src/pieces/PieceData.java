@@ -13,9 +13,9 @@ public class PieceData {
 
     // Colors
 
-    public final static byte BLACK  = 0b00001000;
-    public final static byte WHITE  = 0b00000000;
-    public final static byte NULL   = 0b00010000;
+    public static final byte BLACK  = 0b00001000;
+    public static final byte WHITE  = 0b00000000;
+    public static final byte NULL   = 0b00010000;
 
     // Masks
 
@@ -29,4 +29,8 @@ public class PieceData {
     public static final byte BLACK_KING_ROOK  = 0b1101;
     public static final byte WHITE_QUEEN_ROOK = 0b1011;
     public static final byte WHITE_KING_ROOK  = 0b0111;
+
+    // Others
+
+    public static final byte PASSANT_PAWN = PAWN | BLACK;
 }

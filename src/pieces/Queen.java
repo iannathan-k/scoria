@@ -30,4 +30,28 @@ public abstract class Queen {
 
         return possible_moves;
     }
+
+    public static boolean hasMove(byte[] board, int pos, int color) {
+        for (int[] dir : PreComputer.QUEEN_PREMOVES[pos]) {
+            for (int target : dir) {
+                byte target_piece = board[target];
+
+                if (target_piece == PieceData.EMPTY) {
+                    if (!PieceHandler.kingCheck(board, pos << 8 | target, color)) {
+                        return true;
+                    }
+                } else {
+                    if ((target_piece & PieceData.COLOR_MASK) == color) {
+                        break;
+                    }
+                    if (!PieceHandler.kingCheck(board, pos << 8 | target, color)) {
+                        return true;
+                    }
+                    break;
+                }
+            }
+        }
+
+        return false;
+    }
 }
