@@ -1,7 +1,5 @@
 package src.core;
 
-import java.util.Scanner;
-
 import src.scoria.Evaluator;
 import src.scoria.Scoria;
 import src.scoria.Zobrist;
@@ -15,7 +13,7 @@ public class Command {
         usage: <command> {argument}
 
         scoria settings
-            uci             Toggle Uci Mode
+            uci             Toggle Uci mode
             pos {fen}       Setup game by fen string
             think {time}    Set max thinkking time
             side {color}    Set human side by color
@@ -54,11 +52,11 @@ public class Command {
 
     private static final String uci_string = 
         """
-        id name Scoria_v3.3.13
+        id name Scoria_v3.3.14
         id author iannathan-k (Ian Nathan Kusmiantoro)
 
-        option name Max_Think type long deafult 1000
-        option name Max_Depth type int deafult Integer.MAX_VALUE
+        option name Max_Think type long default 1000
+        option name Max_Depth type int default 256
         uciok
         """.strip();
 
@@ -148,7 +146,7 @@ public class Command {
         }
     }
 
-    public static void parseCommand(String command, Scanner scanner) {
+    public static void parseCommand(String command) {
         String[] command_stream = command.split("\\s", 2);
         boolean has_modifier = (command_stream.length == 2) ? true : false;
         String field = command_stream[0];
@@ -181,8 +179,8 @@ public class Command {
 
             case "play" -> {
                 switch (modifier) {
-                    case "1" -> GameHandler.humanBotCLI(scanner);
-                    case "2" -> GameHandler.humanBotUCI(scanner);
+                    case "1" -> GameHandler.humanBotCLI();
+                    case "2" -> GameHandler.humanBotUCI();
                     case "3" -> GameHandler.botBotCLI();
                     case "4" -> GameHandler.botBotUCI();
                 };

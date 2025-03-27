@@ -8,9 +8,8 @@ public class Game {
     
     public static byte[] board = new byte[64];
     public static long MAX_TIME = 1000;
-    public static int MAX_DEPTH = Integer.MAX_VALUE;
+    public static int MAX_DEPTH = 256;
     public static int move_count;
-    private static int move_number;
     private static long last_think_time;
     private static int last_depth;
     private static boolean turn;
@@ -21,21 +20,8 @@ public class Game {
         Zobrist.initTable();
 
         move_count = 0;
-        move_number = 0;
         last_think_time = 0;
         last_depth = 0;
-    }
-
-    public static void nextMoveNumber() {
-        move_number++;
-    }
-
-    public static void lastMoveNumber() {
-        move_number--;
-    }
-
-    public static int currentMoveNumber() {
-        return move_number;
     }
 
     public static void setLastThinkTime(long time) {

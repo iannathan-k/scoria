@@ -62,7 +62,7 @@ public abstract class PieceHandler {
         king_positions[color >> 3] = pos;
     }
 
-    public static int getKingPos(int color) {
+    public static int getKingPosition(int color) {
         return king_positions[color >> 3];
     }
 
@@ -194,7 +194,7 @@ public abstract class PieceHandler {
     public static boolean kingCheck(byte[] board, int move, int color) {
         byte captured = MoveHandler.pseudoMoveState(board, move);
 
-        boolean result = underAttack(board, color, getKingPos(color));
+        boolean result = underAttack(board, color, getKingPosition(color));
 
         MoveHandler.pseudoUndoState(board, move, captured);
 

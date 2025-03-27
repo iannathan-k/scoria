@@ -10,8 +10,9 @@ import src.scoria.Zobrist;
 
 public class GameHandler {
 
-    public static void humanBotCLI(Scanner scanner) {
+    public static void humanBotCLI() {
         int[] scoria_move = new int[2];
+        Scanner scanner = new Scanner(System.in);
 
         while (!Game.isGameOver()) {
             long hash = Zobrist.manualHash(Game.board, Game.getTurn());
@@ -29,11 +30,13 @@ public class GameHandler {
 
             Game.notTurn();
         }
+        scanner.close();
 
         Interface.printEndGame();
     }
 
-    public static void humanBotUCI(Scanner scanner) {
+    public static void humanBotUCI() {
+        Scanner scanner = new Scanner(System.in);
         while (!Game.isGameOver()) {
             long hash = Zobrist.manualHash(Game.board, Game.getTurn());
             if (Game.isHumanTurn()) {
@@ -122,19 +125,24 @@ public class GameHandler {
         Scoria.setCancelMode(false);
         long start = System.nanoTime();
 
+        int alpha = Integer.MIN_VALUE;
+        int beta = Integer.MAX_VALUE;
+
         long hash = Zobrist.manualHash(board, turn);
         for (int move : first_moves) {
             byte captured = MoveHandler.moveState(board, move, hash);
-            int eval = Scoria.minimax(board, depth - 1, Integer.MIN_VALUE, Integer.MAX_VALUE, !turn)[0];
+            int eval = Scoria.minimax(board, depth - 1, alpha, beta, !turn)[0];
             MoveHandler.undoState(board, move, captured, hash);
             System.out.println(Interface.moveToUci(move) + ": " + eval);
         
             if (turn && eval > best_eval) {
                 best_eval = eval;
                 best_move = Interface.moveToUci(move);
+                alpha = Math.max(eval, alpha);
             } else if (!turn && eval < best_eval) {
                 best_eval = eval;
                 best_move = Interface.moveToUci(move);
+                beta = Math.min(eval, beta);
             }
         }
 

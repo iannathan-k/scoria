@@ -76,7 +76,6 @@ public class MoveHandler {
     }
 
     public static byte moveState(byte[] board, int move, long hash) {
-        Game.nextMoveNumber();
         Evaluator.incrementPositionTable(hash);
         PieceHandler.clearPassantRights();
 
@@ -135,7 +134,6 @@ public class MoveHandler {
     }
 
     public static void undoState(byte[] board, int move, byte captured, long hash) {
-        Game.lastMoveNumber();
         Evaluator.decrementPositionTable(hash);
         PieceHandler.popPassantRights();
 

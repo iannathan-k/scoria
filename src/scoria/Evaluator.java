@@ -36,8 +36,8 @@ public class Evaluator {
         }
 
         // if king in check
-        if (PieceHandler.underAttack(board, color, PieceHandler.getKingPos(color))) {
-            return turn ? PieceData.BLACK : PieceData.WHITE;
+        if (PieceHandler.underAttack(board, color, PieceHandler.getKingPosition(color))) {
+            return color ^ PieceData.COLOR_MASK;
         }
         
         // stalemate

@@ -20,7 +20,7 @@ public class Main {
             String command = scanner.nextLine();
             if (command.equals("quit")) break;
 
-            Command.parseCommand(command, scanner);
+            Command.parseCommand(command);
         }
         scanner.close();
     }
