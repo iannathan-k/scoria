@@ -8,10 +8,10 @@ public class Evaluator {
     public static final int[] piece_points = {0, 100, 320, 330, 500, 900, 0};
     public static final int NOT_OVER = -1;
 
-    private static HashMap<Long, Integer> position_table = new HashMap<Long, Integer>();
+    public static HashMap<Long, Integer> position_table = new HashMap<Long, Integer>();
 
     public static void incrementPositionTable(long hash) {
-        position_table.put(hash, position_table.getOrDefault(hash, 0) + 1);
+        position_table.put(hash, position_table.getOrDefault(hash, 1) + 1);
     }
 
     public static void decrementPositionTable(long hash) {

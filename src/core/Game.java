@@ -64,7 +64,7 @@ public class Game {
 
     public static boolean isGameOver() {
         long hash = Zobrist.manualHash(board, turn);
-        return Evaluator.gameWinner(board, turn, hash) != -1;
+        return Evaluator.gameWinner(board, turn, hash) != Evaluator.NOT_OVER;
     }
 
     public static void setPlayerSide(boolean side) {
