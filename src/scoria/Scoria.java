@@ -18,12 +18,13 @@ public class Scoria {
     }
 
     public static int[] iterativeDeepener(byte[] board, boolean turn, int MAX_DEPTH, long MAX_TIME) {
+        int sign = turn ? 1 : -1;
         current_depth = 0;
         current_best_move = new int[2];
         cancel_time = System.nanoTime() + MAX_TIME * 1_000_000L;
         while (System.nanoTime() < cancel_time && current_depth < MAX_DEPTH) {
             current_depth++;
-            int[] move = minimax(board, current_depth, Integer.MIN_VALUE, Integer.MAX_VALUE, turn);
+            int[] move = negamax(board, current_depth, Integer.MIN_VALUE + 1, Integer.MAX_VALUE - 1, turn, sign);
             
             if (move[0] != Integer.MIN_VALUE) {
                 current_best_move = move;
@@ -76,10 +77,9 @@ public class Scoria {
         return score;
     }
 
-    public static int[] minimax(byte[] board, int depth, int alpha, int beta, boolean turn) {
+    public static int[] negamax(byte[] board, int depth, int alpha, int beta, boolean turn, int sign) {
         long board_hash = Zobrist.manualHash(board, turn);
         Transposition.BoardState entry = Transposition.getState(board_hash);
-
         if (entry != null && entry.getDepth() >= depth) {
             if (entry.isExact()) {
                 return entry.getBestMove();
@@ -94,7 +94,7 @@ public class Scoria {
 
         if (depth == 0 || Evaluator.gameWinner(board, turn, board_hash) != Evaluator.NOT_OVER) {
             Game.move_count++;
-            return new int[] {Evaluator.boardEval(board, turn, board_hash)};
+            return new int[] {sign * Evaluator.boardEval(board, turn, board_hash)};
         }
 
         int color = turn ? PieceData.WHITE : PieceData.BLACK;
@@ -106,57 +106,41 @@ public class Scoria {
         ));
 
         int parent_alpha = alpha;
-        int parent_beta = beta;
+        boolean is_first = true;
 
-        if (turn) {
-            int[] max_eval = {Integer.MIN_VALUE, -1};
-            for (int move : possible_moves) {
-                byte captured = MoveHandler.moveState(board, move, board_hash);
-                int eval = minimax(board, depth - 1, alpha, beta, !turn)[0];
-                MoveHandler.undoState(board, move, captured, board_hash);
+        int[] best_eval = {Integer.MIN_VALUE, -1};
+        for (int move : possible_moves) {
+            byte captured = MoveHandler.moveState(board, move, board_hash);
 
-                if (System.nanoTime() > cancel_time && cancel_mode) {
-                    return new int[] {Integer.MIN_VALUE};
-                }
+            int eval;
+            if (is_first) {
+                eval = -negamax(board, depth - 1, -beta, -alpha, !turn, -sign)[0];
+                is_first = false;
+            } else {
+                eval = -negamax(board, depth - 1, -alpha - 1, -alpha, !turn, -sign)[0];
 
-                if (eval > max_eval[0]) {
-                    max_eval[0] = eval;
-                    max_eval[1] = move;
-                }
-
-                alpha = Math.max(eval, alpha);
-                if (beta <= alpha) {
-                    break;
+                if (eval > alpha && eval < beta) {
+                    eval = -negamax(board, depth - 1, -beta, -alpha, !turn, -sign)[0];
                 }
             }
 
-            Transposition.addState(board_hash, new Transposition.BoardState(depth, max_eval, getNodeType(max_eval[0], parent_alpha, parent_beta)));
-            return max_eval;
+            MoveHandler.undoState(board, move, captured, board_hash);
 
-        } else {
-            int[] min_eval = {Integer.MAX_VALUE, -1};
-            for (int move : possible_moves) {
-                byte captured = MoveHandler.moveState(board, move, board_hash);
-                int eval = minimax(board, depth - 1, alpha, beta, !turn)[0];
-                MoveHandler.undoState(board, move, captured, board_hash);
-
-                if (System.nanoTime() > cancel_time && cancel_mode) {
-                    return new int[] {Integer.MIN_VALUE};
-                }
-
-                if (eval < min_eval[0]) {
-                    min_eval[0] = eval;
-                    min_eval[1] = move;
-                }
-                
-                beta = Math.min(eval, beta);
-                if (beta <= alpha) {
-                    break;
-                }
+            if (System.nanoTime() > cancel_time && cancel_mode) {
+                return new int[] {Integer.MIN_VALUE};
             }
 
-            Transposition.addState(board_hash, new Transposition.BoardState(depth, min_eval, getNodeType(min_eval[0], alpha, beta)));
-            return min_eval;
+            if (eval > best_eval[0]) {
+                best_eval[0] = eval;
+                best_eval[1] = move;
+            }
+
+            alpha = Math.max(eval, alpha);
+            if (beta <= alpha) break;
         }
+
+        Transposition.addState(board_hash, new Transposition.BoardState(depth, best_eval, getNodeType(best_eval[0], parent_alpha, beta)));
+
+        return best_eval;
     }
 }

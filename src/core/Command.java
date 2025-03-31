@@ -36,7 +36,7 @@ public class Command {
         usage: <command> {argument1} {argument2}
 
         uci settings
-            uci                          Toggle UCI Settings
+            uci                          Toggle Uci Settings
             ucinewgame                   Create a new game
             isready                      Wait for the engine
 
@@ -52,7 +52,7 @@ public class Command {
 
     private static final String uci_string = 
         """
-        id name Scoria_v3.3.15
+        id name Scoria_v3.4.15
         id author iannathan-k (Ian Nathan Kusmiantoro)
 
         option name Max_Think type long default 1000

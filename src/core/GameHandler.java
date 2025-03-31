@@ -120,30 +120,28 @@ public class GameHandler {
         int color = turn ? PieceData.WHITE : PieceData.BLACK;
         ArrayList<Integer> first_moves = PieceHandler.getAllMoves(board, color);
 
-        int best_eval = turn ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+        int best_eval = Integer.MIN_VALUE;
         String best_move = "";
         Scoria.setCancelMode(false);
         long start = System.nanoTime();
 
         int alpha = Integer.MIN_VALUE;
         int beta = Integer.MAX_VALUE;
+        int sign = turn ? 1 : -1;
 
         long hash = Zobrist.manualHash(board, turn);
         for (int move : first_moves) {
             byte captured = MoveHandler.moveState(board, move, hash);
-            int eval = Scoria.minimax(board, depth - 1, alpha, beta, !turn)[0];
+            int eval = -Scoria.negamax(board, depth - 1, -beta, -alpha, !turn, -sign)[0];
             MoveHandler.undoState(board, move, captured, hash);
-            System.out.println(Interface.moveToUci(move) + ": " + eval);
-        
-            if (turn && eval > best_eval) {
+            System.out.println(Interface.moveToUci(move) + ": " + sign * eval);
+
+            if (eval > best_eval) {
                 best_eval = eval;
                 best_move = Interface.moveToUci(move);
-                alpha = Math.max(eval, alpha);
-            } else if (!turn && eval < best_eval) {
-                best_eval = eval;
-                best_move = Interface.moveToUci(move);
-                beta = Math.min(eval, beta);
             }
+
+            alpha = Math.max(alpha, best_eval);
         }
 
         long run_time = (System.nanoTime() - start) / 1_000_000;
