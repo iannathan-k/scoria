@@ -66,7 +66,7 @@ public class Scoria {
         return node_count;
     }
 
-    private static int heuristicScore(byte[] board, int move, int color, int depth) {
+    private static int heuristicScore(byte[] board, int move, int color) {
         int origin_pos = (move >> 8) & MoveHandler.POS_MASK;
         int target_pos = move & MoveHandler.POS_MASK;
         int piece_type = board[origin_pos] & PieceData.TYPE_MASK;
@@ -115,8 +115,8 @@ public class Scoria {
 
         ArrayList<Integer> possible_moves = PieceHandler.getAllMoves(board, color);
         possible_moves.sort((move1, move2) -> Integer.compare(
-            heuristicScore(board, move2, color, depth), 
-            heuristicScore(board, move1, color, depth)
+            heuristicScore(board, move2, color), 
+            heuristicScore(board, move1, color)
         ));
 
         int parent_alpha = alpha;
