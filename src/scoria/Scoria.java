@@ -13,8 +13,14 @@ public class Scoria {
     private static int[] current_best_move = new int[2];
     private static int current_depth;
 
+    private static int[][] history_table = new int[2][16191];
+
     public static void setCancelMode(boolean mode) {
         cancel_mode = mode;
+    }
+
+    public static void clearHistoryTable() {
+        history_table = new int[2][16191];
     }
 
     public static int[] iterativeDeepener(byte[] board, boolean turn, int MAX_DEPTH, long MAX_TIME) {
@@ -60,7 +66,7 @@ public class Scoria {
         return node_count;
     }
 
-    private static int heuristicScore(byte[] board, int move, int color) {
+    private static int heuristicScore(byte[] board, int move, int color, int depth) {
         int origin_pos = (move >> 8) & MoveHandler.POS_MASK;
         int target_pos = move & MoveHandler.POS_MASK;
         int piece_type = board[origin_pos] & PieceData.TYPE_MASK;
@@ -73,6 +79,8 @@ public class Scoria {
             score += 3 * Evaluator.piece_points[captured & PieceData.TYPE_MASK];
             score -= Evaluator.piece_points[piece_type];
         }
+
+        score += history_table[color >> 3][move & 0xFFFF];
 
         return score;
     }
@@ -98,11 +106,17 @@ public class Scoria {
         }
 
         int color = turn ? PieceData.WHITE : PieceData.BLACK;
-        ArrayList<Integer> possible_moves = PieceHandler.getAllMoves(board, color);
+        if (depth > 3 && !PieceHandler.kingUnderAttack(board, color)) {
+            int null_eval = -negamax(board, depth - 4, -beta, -beta + 1, !turn, -sign)[0];
+            if (null_eval >= beta) {
+                return new int[] {beta};
+            }
+        }
 
+        ArrayList<Integer> possible_moves = PieceHandler.getAllMoves(board, color);
         possible_moves.sort((move1, move2) -> Integer.compare(
-            heuristicScore(board, move2, color), 
-            heuristicScore(board, move1, color)
+            heuristicScore(board, move2, color, depth), 
+            heuristicScore(board, move1, color, depth)
         ));
 
         int parent_alpha = alpha;
@@ -136,7 +150,10 @@ public class Scoria {
             }
 
             alpha = Math.max(eval, alpha);
-            if (beta <= alpha) break;
+            if (beta <= alpha) {
+                history_table[color >> 3][move & 0xFFFF] += depth * depth;
+                break;
+            }
         }
 
         Transposition.addState(board_hash, new Transposition.BoardState(depth, best_eval, getNodeType(best_eval[0], parent_alpha, beta)));

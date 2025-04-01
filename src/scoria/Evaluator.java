@@ -36,7 +36,7 @@ public class Evaluator {
         }
 
         // if king in check
-        if (PieceHandler.underAttack(board, color, PieceHandler.getKingPosition(color))) {
+        if (PieceHandler.kingUnderAttack(board, color)) {
             return color ^ PieceData.COLOR_MASK;
         }
         

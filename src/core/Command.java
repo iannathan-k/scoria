@@ -52,7 +52,7 @@ public class Command {
 
     private static final String uci_string = 
         """
-        id name Scoria_v3.4.15
+        id name Scoria_v3.5.15
         id author iannathan-k (Ian Nathan Kusmiantoro)
 
         option name Max_Think type long default 1000
@@ -131,11 +131,16 @@ public class Command {
         }
     }
 
+    private static void clearHeuristics() {
+        Evaluator.clearPositionTable();
+        Scoria.clearHistoryTable();
+    }
+
     public static void parseUniversalCommand(String command) {
         String[] args = command.split("\\s" , 3);
         switch (args[0]) {
             case "uci" -> System.out.println(uci_string);
-            case "ucinewgame" -> Evaluator.clearPositionTable();
+            case "ucinewgame" -> clearHeuristics();
             case "isready" -> System.out.println("readyok");
             case "position" -> positionCommand(args);
             case "go" -> goCommand(args);

@@ -18,6 +18,8 @@ public class Game {
     public static void initGame(String fen) {
         Setup.setUp(board, fen);
         Zobrist.initTable();
+        Scoria.clearHistoryTable();
+        Evaluator.clearPositionTable();
 
         move_count = 0;
         last_think_time = 0;

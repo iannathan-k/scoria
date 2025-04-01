@@ -125,8 +125,8 @@ public class GameHandler {
         Scoria.setCancelMode(false);
         long start = System.nanoTime();
 
-        int alpha = Integer.MIN_VALUE;
-        int beta = Integer.MAX_VALUE;
+        int alpha = Integer.MIN_VALUE + 1;
+        int beta = Integer.MAX_VALUE - 1;
         int sign = turn ? 1 : -1;
 
         long hash = Zobrist.manualHash(board, turn);

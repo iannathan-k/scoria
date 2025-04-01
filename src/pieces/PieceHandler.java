@@ -200,4 +200,8 @@ public abstract class PieceHandler {
 
         return result;
     }
+
+    public static boolean kingUnderAttack(byte[] board, int color) {
+        return underAttack(board, color, getKingPosition(color));
+    }
 }
