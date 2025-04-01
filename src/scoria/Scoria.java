@@ -35,9 +35,6 @@ public class Scoria {
             if (move[0] != Integer.MIN_VALUE) {
                 current_best_move = move;
             }
-            if (Math.abs(move[0]) == 10000) {
-                break;
-            }
         }
         Game.setLastThinkDepth(current_depth);
         Game.setLastThinkTime((System.nanoTime() - cancel_time) / 1_000_000 + MAX_TIME);
@@ -102,7 +99,7 @@ public class Scoria {
 
         if (depth == 0 || Evaluator.gameWinner(board, turn, board_hash) != Evaluator.NOT_OVER) {
             Game.move_count++;
-            return new int[] {sign * Evaluator.boardEval(board, turn, board_hash)};
+            return new int[] {sign * Evaluator.boardEval(board, turn, board_hash, depth)};
         }
 
         int color = turn ? PieceData.WHITE : PieceData.BLACK;

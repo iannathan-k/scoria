@@ -8,7 +8,7 @@ public class Evaluator {
     public static final int[] piece_points = {0, 100, 320, 330, 500, 900, 0};
     public static final int NOT_OVER = -1;
 
-    public static HashMap<Long, Integer> position_table = new HashMap<Long, Integer>();
+    private static HashMap<Long, Integer> position_table = new HashMap<Long, Integer>();
 
     public static void incrementPositionTable(long hash) {
         position_table.put(hash, position_table.getOrDefault(hash, 1) + 1);
@@ -48,13 +48,17 @@ public class Evaluator {
         return (color == PieceData.WHITE) ? WeightMap.POSITION_WEIGHTS[type][pos] : WeightMap.POSITION_WEIGHTS[type][63 - pos];
     }
 
-    public static int boardEval(byte[] board, boolean turn, long hash) {
+    public static int lightEval(byte[] board, boolean turn) {
+        return boardEval(board, turn, 0, 1);
+    }
+
+    public static int boardEval(byte[] board, boolean turn, long hash, int depth) {
         switch (gameWinner(board, turn, hash)) {
             case NOT_OVER: break;
-            case PieceData.WHITE: return 10000;
-            case PieceData.BLACK: return -10000;
+            case PieceData.WHITE: return 10000 * (depth + 1);
+            case PieceData.BLACK: return -10000 * (depth + 1);
             case PieceData.NULL: return 0;
-        };
+        }
 
         int evaluation = 0;
         
@@ -70,10 +74,7 @@ public class Evaluator {
 
             evaluation += sign * 2 * piece_points[type];
             evaluation += sign * Evaluator.posWeight(type, color, i);
-
-            if (type != PieceData.PAWN) {
-                evaluation += sign * 2 * PieceHandler.generateMoves(board, type, color, i).size();
-            }
+            evaluation += sign * 2 * PieceHandler.getMobility(board, type, color, i);
         }
 
         return evaluation;

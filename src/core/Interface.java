@@ -99,7 +99,6 @@ public abstract class Interface {
     }
 
     public static void printCLI() {
-        long hash = Zobrist.manualHash(Game.board, Game.getTurn());
         if (Game.getTurn()) {
             System.out.println("~~~ black to move ~~~");
         } else {
@@ -108,7 +107,7 @@ public abstract class Interface {
 
         Interface.printBoard(Game.board);
 
-        System.out.println("eval: " + Evaluator.boardEval(Game.board, Game.getTurn(), hash));
+        System.out.println("eval: " + Evaluator.lightEval(Game.board, Game.getTurn()));
         System.out.println("depth: " + Game.getLastThinkDepth());
         System.out.println("nodes: " + Game.getMoveCount());
         System.out.println("time: " + Game.getLastThinkTime() + "ms");

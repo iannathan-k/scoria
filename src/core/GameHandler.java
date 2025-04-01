@@ -147,7 +147,7 @@ public class GameHandler {
         long run_time = (System.nanoTime() - start) / 1_000_000;
 
         Scoria.setCancelMode(true);
-        System.out.println("best move: " + best_move +  ", " + best_eval);
+        System.out.println("best move: " + best_move +  ", " + sign * best_eval);
         System.out.println("total time: " + run_time + "ms");
     }
 }

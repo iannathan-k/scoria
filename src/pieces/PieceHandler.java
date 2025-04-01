@@ -82,7 +82,7 @@ public abstract class PieceHandler {
         };
     }
 
-    public static boolean checkMobility(byte[] board, int type, int color, int pos) {
+    public static boolean hasMove(byte[] board, int type, int color, int pos) {
         return switch(type) {
             case PieceData.PAWN -> Pawn.hasMove(board, pos, color);
             case PieceData.KNIGHT -> Knight.hasMove(board, pos, color);
@@ -90,6 +90,18 @@ public abstract class PieceHandler {
             case PieceData.ROOK -> Rook.hasMove(board, pos, color);
             case PieceData.QUEEN -> Queen.hasMove(board, pos, color);
             case PieceData.KING -> King.hasMove(board, pos, color);
+            default -> throw new IllegalArgumentException("Invalid Type");
+        };
+    }
+
+    public static int getMobility(byte[] board, int type, int color, int pos) {
+        return switch(type) {
+            case PieceData.PAWN -> 0;
+            case PieceData.KNIGHT -> Knight.getMobility(board, pos, color);
+            case PieceData.BISHOP -> Bishop.getMobility(board, pos, color);
+            case PieceData.ROOK -> Rook.getMobility(board, pos, color);
+            case PieceData.QUEEN -> Queen.getMobility(board, pos, color);
+            case PieceData.KING -> King.getMobility(board, pos, color);
             default -> throw new IllegalArgumentException("Invalid Type");
         };
     }
@@ -103,7 +115,7 @@ public abstract class PieceHandler {
             if ((piece & PieceData.COLOR_MASK) != color) {
                 continue;
             }
-            if (checkMobility(board, piece & PieceData.TYPE_MASK, color, i)) {
+            if (hasMove(board, piece & PieceData.TYPE_MASK, color, i)) {
                 return true;
             }
         }
