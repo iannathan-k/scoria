@@ -43,7 +43,7 @@ public class Game {
     }
 
     public static int[] getScoriaMove(boolean turn) {
-        return Scoria.iterativeDeepener(board, turn, MAX_DEPTH, MAX_TIME);
+        return Scoria.iterativeDeepener(board, turn);
     }
 
     public static boolean getTurn() {

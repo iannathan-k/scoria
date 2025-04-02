@@ -3,6 +3,7 @@ package src.scoria;
 import java.util.ArrayList;
 
 import src.core.Game;
+import src.core.Interface;
 import src.core.MoveHandler;
 import src.pieces.*;
 
@@ -23,12 +24,13 @@ public class Scoria {
         history_table = new int[2][16191];
     }
 
-    public static int[] iterativeDeepener(byte[] board, boolean turn, int MAX_DEPTH, long MAX_TIME) {
+    public static int[] iterativeDeepener(byte[] board, boolean turn) {
         int sign = turn ? 1 : -1;
         current_depth = 0;
         current_best_move = new int[2];
-        cancel_time = System.nanoTime() + MAX_TIME * 1_000_000L;
-        while (System.nanoTime() < cancel_time && current_depth < MAX_DEPTH) {
+        cancel_time = System.nanoTime() + Game.MAX_TIME * 1_000_000L;
+
+        while (System.nanoTime() < cancel_time) {
             current_depth++;
             int[] move = negamax(board, current_depth, Integer.MIN_VALUE + 1, Integer.MAX_VALUE - 1, turn, sign);
             
@@ -36,8 +38,38 @@ public class Scoria {
                 current_best_move = move;
             }
         }
+        
         Game.setLastThinkDepth(current_depth);
-        Game.setLastThinkTime((System.nanoTime() - cancel_time) / 1_000_000 + MAX_TIME);
+        Game.setLastThinkTime((System.nanoTime() - cancel_time) / 1_000_000 + Game.MAX_TIME);
+        return current_best_move;
+    }
+
+    public static int[] uciGoIterative(byte[] board, boolean turn, int MAX_DEPTH, long MAX_TIME) {
+        int sign = turn ? 1 : -1;
+        current_depth = 0;
+        current_best_move = new int[2];
+        cancel_time = System.nanoTime() + MAX_TIME * 1_000_000L;
+
+        long start = System.currentTimeMillis();
+        while (System.nanoTime() < cancel_time && current_depth < MAX_DEPTH) {
+            current_depth++;
+            
+            int[] move = negamax(board, current_depth, Integer.MIN_VALUE + 1, Integer.MAX_VALUE - 1, turn, sign);
+            
+            if (move[0] != Integer.MIN_VALUE) {
+                current_best_move = move;
+                long time = System.currentTimeMillis() - start;
+                int nodes = Game.getMoveCount();
+                System.out.println(
+                    "info depth " + current_depth + 
+                    " score " + move[0] +
+                    " nodes " + nodes + 
+                    " time " + time +
+                    " pv " + Interface.moveToUci(move[1])
+                );
+            }
+        }
+
         return current_best_move;
     }
 
@@ -73,11 +105,12 @@ public class Scoria {
         score -= Evaluator.posWeight(piece_type, color, origin_pos);
 
         if (captured != PieceData.EMPTY) {
+            score += 100;
             score += 3 * Evaluator.piece_points[captured & PieceData.TYPE_MASK];
             score -= Evaluator.piece_points[piece_type];
         }
 
-        score += history_table[color >> 3][move & 0xFFFF];
+        score += Math.min(history_table[color >> 3][move & 0xFFFF], 256);
 
         return score;
     }

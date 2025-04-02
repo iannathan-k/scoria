@@ -52,11 +52,11 @@ public class Command {
 
     private static final String uci_string = 
         """
-        id name Scoria_v3.5.17
+        id name Scoria_v3.5.18
         id author iannathan-k (Ian Nathan Kusmiantoro)
 
-        option name Max_Think type long default 1000
-        option name Max_Depth type int default 256
+        option name Max_Think type spin default 1000
+        option name Max_Depth type spin default 256
         uciok
         """.strip();
 
@@ -118,7 +118,7 @@ public class Command {
             max_depth = Game.MAX_DEPTH;
         }
 
-        int move = Scoria.iterativeDeepener(Game.board, Game.getTurn(), max_depth, max_time)[1];
+        int move = Scoria.uciGoIterative(Game.board, Game.getTurn(), max_depth, max_time)[1];
         System.out.println("bestmove " + Interface.moveToUci(move));
 
     }
