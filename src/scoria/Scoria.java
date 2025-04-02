@@ -110,7 +110,7 @@ public class Scoria {
             score -= Evaluator.piece_points[piece_type];
         }
 
-        score += Math.min(history_table[color >> 3][move & 0xFFFF], 256);
+        score += Math.min(history_table[color >> 3][move & 0xFFFF], 100);
 
         return score;
     }
