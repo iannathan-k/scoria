@@ -132,7 +132,7 @@ public class GameHandler {
         long hash = Zobrist.manualHash(board, turn);
         for (int move : first_moves) {
             byte captured = MoveHandler.moveState(board, move, hash);
-            int eval = -Scoria.negamax(board, depth - 1, -beta, -alpha, !turn, -sign)[0];
+            int eval = -Scoria.negamax(board, depth - 1, -beta, -alpha, !turn, -sign, false)[0];
             MoveHandler.undoState(board, move, captured, hash);
             System.out.println(Interface.moveToUci(move) + ": " + sign * eval);
 

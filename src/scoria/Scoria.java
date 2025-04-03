@@ -32,7 +32,7 @@ public class Scoria {
 
         while (System.nanoTime() < cancel_time) {
             current_depth++;
-            int[] move = negamax(board, current_depth, Integer.MIN_VALUE + 1, Integer.MAX_VALUE - 1, turn, sign);
+            int[] move = negamax(board, current_depth, Integer.MIN_VALUE + 1, Integer.MAX_VALUE - 1, turn, sign, false);
             
             if (move[0] != Integer.MIN_VALUE) {
                 current_best_move = move;
@@ -54,7 +54,7 @@ public class Scoria {
         while (System.nanoTime() < cancel_time && current_depth < MAX_DEPTH) {
             current_depth++;
             
-            int[] move = negamax(board, current_depth, Integer.MIN_VALUE + 1, Integer.MAX_VALUE - 1, turn, sign);
+            int[] move = negamax(board, current_depth, Integer.MIN_VALUE + 1, Integer.MAX_VALUE - 1, turn, sign, false);
             
             if (move[0] != Integer.MIN_VALUE) {
                 current_best_move = move;
@@ -115,7 +115,11 @@ public class Scoria {
         return score;
     }
 
-    public static int[] negamax(byte[] board, int depth, int alpha, int beta, boolean turn, int sign) {
+    private static boolean isCapture(byte[] board, int move) {
+        return board[move & MoveHandler.POS_MASK] != PieceData.EMPTY;
+    }
+
+    public static int[] negamax(byte[] board, int depth, int alpha, int beta, boolean turn, int sign, boolean is_null) {
         long board_hash = Zobrist.manualHash(board, turn);
         Transposition.BoardState entry = Transposition.getState(board_hash);
         if (entry != null && entry.getDepth() >= depth) {
@@ -136,8 +140,8 @@ public class Scoria {
         }
 
         int color = turn ? PieceData.WHITE : PieceData.BLACK;
-        if (depth > 3 && !PieceHandler.kingUnderAttack(board, color)) {
-            int null_eval = -negamax(board, depth - 4, -beta, -beta + 1, !turn, -sign)[0];
+        if (depth > 3 && !PieceHandler.kingUnderAttack(board, color) && !is_null) {
+            int null_eval = -negamax(board, depth - 4, -beta, -beta + 1, !turn, -sign, true)[0];
             if (null_eval >= beta) {
                 return new int[] {beta};
             }
@@ -154,17 +158,23 @@ public class Scoria {
 
         int[] best_eval = {Integer.MIN_VALUE, -1};
         for (int move : possible_moves) {
+
+            int reduction = 0;
+            if (!is_first && depth > 3 && !is_null && !isCapture(board, move)) {
+                reduction = depth >> 1;
+            }
+
             byte captured = MoveHandler.moveState(board, move, board_hash);
 
             int eval;
             if (is_first) {
-                eval = -negamax(board, depth - 1, -beta, -alpha, !turn, -sign)[0];
+                eval = -negamax(board, depth - 1, -beta, -alpha, !turn, -sign, false)[0];
                 is_first = false;
             } else {
-                eval = -negamax(board, depth - 1, -alpha - 1, -alpha, !turn, -sign)[0];
+                eval = -negamax(board, depth - 1 - reduction, -alpha - 1, -alpha, !turn, -sign, true)[0];
 
                 if (eval > alpha && eval < beta) {
-                    eval = -negamax(board, depth - 1, -beta, -alpha, !turn, -sign)[0];
+                    eval = -negamax(board, depth - 1, -beta, -alpha, !turn, -sign, false)[0];
                 }
             }
 

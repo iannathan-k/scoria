@@ -52,7 +52,7 @@ public class Command {
 
     private static final String uci_string = 
         """
-        id name Scoria_v3.5.18
+        id name Scoria_v3.5.19
         id author iannathan-k (Ian Nathan Kusmiantoro)
 
         option name Max_Think type spin default 1000
