@@ -52,13 +52,27 @@ public class Command {
 
     private static final String uci_string = 
         """
-        id name Scoria_v3.5.19
+        id name Scoria_v3.5.20
         id author iannathan-k (Ian Nathan Kusmiantoro)
 
         option name Max_Think type spin default 1000
         option name Max_Depth type spin default 256
         uciok
         """.strip();
+
+        public static final String scoria_logo =
+        """
+        ========================================
+               _____                 _      
+              / ___/_________  _____(_)___ _
+              \\__ \\/ ___/ __ \\/ ___/ / __ `/
+             ___/ / /__/ /_/ / /  / / /_/ / 
+            /____/\\___/\\____/_/  /_/\\__,_/  
+         
+            Ian Nathan Kusmiantoro
+            Version 3.5.20
+        ========================================
+        """;
 
     private static boolean uci_mode = false;
 

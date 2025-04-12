@@ -10,7 +10,7 @@ public class Main {
 
     public static void main(String args[]) {
         
-        System.out.println("starting...");
+        System.out.println(Command.scoria_logo);
         Game.initGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
         PreComputer.initializePremoves();
 
