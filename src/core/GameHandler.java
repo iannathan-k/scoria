@@ -12,7 +12,7 @@ public class GameHandler {
 
 	public static void humanBotCLI() {
     	int[] scoria_move = new int[2];
-    	Scanner scanner = new Scanner(System.in);
+    	Scanner scanner = ListenerThread.scanner;
 
     	while (!Game.isGameOver()) {
         	long hash = Zobrist.manualHash(Game.board, Game.getTurn());
@@ -30,15 +30,15 @@ public class GameHandler {
 
         	Game.notTurn();
     	}
-    	scanner.close();
 
     	Interface.printEndGame();
 	}
 
 	public static void humanBotUCI() {
-    	Scanner scanner = new Scanner(System.in);
     	while (!Game.isGameOver()) {
         	long hash = Zobrist.manualHash(Game.board, Game.getTurn());
+			Scanner scanner = ListenerThread.scanner;
+
         	if (Game.isHumanTurn()) {
             	String uci_move = scanner.nextLine();
 
@@ -57,7 +57,6 @@ public class GameHandler {
 
         	Game.notTurn();
     	}
-    	scanner.close();
 
     	Interface.printEndGame();
 

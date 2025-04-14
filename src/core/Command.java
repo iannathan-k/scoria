@@ -52,24 +52,24 @@ public class Command {
 
     private static final String uci_string = 
         """
-        id name Scoria_v3.5.21
+        id name Scoria_v3.5.22
         id author iannathan-k (Ian Nathan Kusmiantoro)
         uciok
         """.strip();
 
-        public static final String scoria_logo =
-        """
-        ========================================
-               _____                 _      
-              / ___/_________  _____(_)___ _
-              \\__ \\/ ___/ __ \\/ ___/ / __ `/
-             ___/ / /__/ /_/ / /  / / /_/ / 
-            /____/\\___/\\____/_/  /_/\\__,_/  
-         
-            Ian Nathan Kusmiantoro
-            Version 3.5.21
-        ========================================
-        """;
+    public static final String scoria_logo =
+    """
+    ========================================
+           _____                 _      
+          / ___/_________  _____(_)___ _
+          \\__ \\/ ___/ __ \\/ ___/ / __ `/
+         ___/ / /__/ /_/ / /  / / /_/ / 
+        /____/\\___/\\____/_/  /_/\\__,_/  
+        
+        Ian Nathan Kusmiantoro
+        Version 3.5.22
+    ========================================
+    """;
 
     private static boolean uci_mode = false;
 
@@ -106,6 +106,12 @@ public class Command {
 
         if (args.length > 1) {
             switch (args[1]) {
+                case "infinite" -> {
+                    max_depth = 256;
+                    ListenerThread listenerThread = new ListenerThread();
+                    listenerThread.start();
+                }
+
                 case "movetime" -> max_time = Long.parseLong(args[2]);
                 case "depth" -> max_depth = Integer.parseInt(args[2]);
     

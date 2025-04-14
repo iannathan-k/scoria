@@ -4,6 +4,7 @@ import java.util.Scanner;
 
 import src.core.Command;
 import src.core.Game;
+import src.core.ListenerThread;
 import src.pieces.PreComputer;
 
 public class Main {
@@ -14,9 +15,9 @@ public class Main {
         Game.initGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
         PreComputer.initializePremoves();
 
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner = ListenerThread.scanner;
 
-        while (true) {
+        while (scanner.hasNextLine()) {
             String command = scanner.nextLine();
             if (command.equals("quit")) break;
 

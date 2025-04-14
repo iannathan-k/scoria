@@ -8,7 +8,7 @@ import src.core.MoveHandler;
 import src.pieces.*;
 
 public class Scoria {
-	private static long cancel_time;
+	public static long cancel_time;
 	private static int[] current_best_move = new int[2];
     private static int current_depth;
 
@@ -114,7 +114,7 @@ public class Scoria {
 
     	return score;
 	}
-	
+
 	public static int[] negamax(byte[] board, int depth, int alpha, int beta, boolean turn, int sign, boolean is_null) {
     	long board_hash = Zobrist.manualHash(board, turn);
     	Transposition.BoardState entry = Transposition.getState(board_hash);
