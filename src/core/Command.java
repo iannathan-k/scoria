@@ -54,9 +54,6 @@ public class Command {
         """
         id name Scoria_v3.5.20
         id author iannathan-k (Ian Nathan Kusmiantoro)
-
-        option name Max_Think type spin default 1000
-        option name Max_Depth type spin default 256
         uciok
         """.strip();
 
