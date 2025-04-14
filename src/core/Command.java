@@ -52,7 +52,7 @@ public class Command {
 
     private static final String uci_string = 
         """
-        id name Scoria_v3.5.20
+        id name Scoria_v3.5.21
         id author iannathan-k (Ian Nathan Kusmiantoro)
         uciok
         """.strip();
@@ -67,7 +67,7 @@ public class Command {
             /____/\\___/\\____/_/  /_/\\__,_/  
          
             Ian Nathan Kusmiantoro
-            Version 3.5.20
+            Version 3.5.21
         ========================================
         """;
 
