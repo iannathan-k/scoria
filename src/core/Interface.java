@@ -1,20 +1,9 @@
 package src.core;
 
 import src.pieces.PieceData;
-import src.scoria.*;
 
 public abstract class Interface {
-    private static String getChar(int type) {
-        return switch (type) {
-            case PieceData.PAWN -> "P";
-            case PieceData.KNIGHT -> "N";
-            case PieceData.BISHOP -> "B";
-            case PieceData.ROOK -> "R";
-            case PieceData.QUEEN -> "Q";
-            case PieceData.KING -> "K";
-            default -> throw new IllegalArgumentException("Invalid Char " + type);
-        };
-    }
+    private static final String[] CHARACTER_LIST = {" ", "P", "N", "B", "R", "Q", "K"};
 
     public static void printBoard(byte[] board) {
         System.out.println("    a   b   c   d   e   f   g   h");
@@ -26,12 +15,7 @@ public abstract class Interface {
             for (int j = 0; j < 8; j++) {
                 byte piece = board[i << 3 | j];
 
-                if (piece == PieceData.EMPTY) {
-                    line += "  | ";
-                    continue;
-                }
-
-                String piece_char = getChar(piece & PieceData.TYPE_MASK);
+                String piece_char = CHARACTER_LIST[piece & PieceData.TYPE_MASK];
                 if ((piece & PieceData.COLOR_MASK) == PieceData.BLACK) {
                     piece_char = piece_char.toLowerCase();
                 }
@@ -86,30 +70,5 @@ public abstract class Interface {
         }
 
         return move;
-    }
-
-    public static void printEndGame() {
-        long hash = Zobrist.manualHash(Game.board, Game.getTurn());
-        int winner = Evaluator.gameWinner(Game.board, Game.getTurn(), hash);
-        switch (winner) {
-            case PieceData.WHITE -> System.out.println("white won");
-            case PieceData.BLACK -> System.out.println("black won");
-            case PieceData.NULL -> System.out.println("stalemate");
-        }
-    }
-
-    public static void printCLI() {
-        if (Game.getTurn()) {
-            System.out.println("~~~ black to move ~~~");
-        } else {
-            System.out.println("~~~ white to move ~~~");
-        }
-
-        Interface.printBoard(Game.board);
-
-        System.out.println("eval: " + Evaluator.lightEval(Game.board, Game.getTurn()));
-        System.out.println("depth: " + Game.getLastThinkDepth());
-        System.out.println("nodes: " + Game.getMoveCount());
-        System.out.println("time: " + Game.getLastThinkTime() + "ms");
     }
 }

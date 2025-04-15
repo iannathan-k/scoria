@@ -1,8 +1,6 @@
 package src.core;
 
 import java.util.ArrayList;
-import java.util.Scanner;
-
 import src.pieces.PieceData;
 import src.pieces.PieceHandler;
 import src.scoria.Scoria;
@@ -10,88 +8,24 @@ import src.scoria.Zobrist;
 
 public class GameHandler {
 
-	public static void humanBotCLI() {
-    	int[] scoria_move = new int[2];
-    	Scanner scanner = ListenerThread.scanner;
+	public static int perftCount(byte[] board, int depth, boolean turn) {
+    	if (depth == 0) return 1;
 
-    	while (!Game.isGameOver()) {
-        	long hash = Zobrist.manualHash(Game.board, Game.getTurn());
-        	if (Game.isHumanTurn()) {
-            	String uci_move = scanner.nextLine();
-            	int move = Interface.uciToMove(uci_move);
-            	MoveHandler.moveState(Game.board, move, hash);
-            	Interface.printCLI();
-        	} else {
-            	scoria_move = Game.getScoriaMove(Game.getTurn());
-            	MoveHandler.moveState(Game.board, scoria_move[1], hash);
-            	Interface.printCLI();
-            	System.out.println("move: " + Interface.moveToUci(scoria_move[1]));
-        	}
+    	int color = turn ? PieceData.WHITE : PieceData.BLACK;
+    	ArrayList<Integer> possible_moves = PieceHandler.getAllMoves(board, color);
 
-        	Game.notTurn();
+    	int node_count = 0;
+
+    	for (int move : possible_moves) {
+        	byte captured = MoveHandler.moveState(board, move, -1);
+        	node_count += perftCount(board, depth - 1, !turn);
+        	MoveHandler.undoState(board, move, captured, -1);
     	}
-
-    	Interface.printEndGame();
-	}
-
-	public static void humanBotUCI() {
-    	while (!Game.isGameOver()) {
-        	long hash = Zobrist.manualHash(Game.board, Game.getTurn());
-			Scanner scanner = ListenerThread.scanner;
-
-        	if (Game.isHumanTurn()) {
-            	String uci_move = scanner.nextLine();
-
-            	while (uci_move.equals("d")) {
-                	Interface.printCLI();
-                	uci_move = scanner.nextLine();
-            	}
-
-            	int move = Interface.uciToMove(uci_move);
-            	MoveHandler.moveState(Game.board, move, hash);
-        	} else {
-            	int[] scoria_move = Game.getScoriaMove(Game.getTurn());
-            	System.out.println(Interface.moveToUci(scoria_move[1]));
-            	MoveHandler.moveState(Game.board, scoria_move[1], hash);
-        	}
-
-        	Game.notTurn();
-    	}
-
-    	Interface.printEndGame();
-
-	}
-
-	public static void botBotCLI() {
-
-    	while (!Game.isGameOver()) {
-        	long hash = Zobrist.manualHash(Game.board, Game.getTurn());
-        	int[] scoria_move = Game.getScoriaMove(Game.getTurn());
-        	MoveHandler.moveState(Game.board, scoria_move[1], hash);
-        	Interface.printCLI();
-        	Game.notTurn();
-    	}
-
-    	Interface.printEndGame();
-
-	}
-
-	public static void botBotUCI() {
-
-    	while (!Game.isGameOver()) {
-        	long hash = Zobrist.manualHash(Game.board, Game.getTurn());
-        	int[] scoria_move = Game.getScoriaMove(Game.getTurn());
-        	MoveHandler.moveState(Game.board, scoria_move[1], hash);
-        	System.out.println(Interface.moveToUci(scoria_move[1]));
-        	Game.notTurn();
-    	}
-
-    	Interface.printEndGame();
-
+    	return node_count;
 	}
 
 	public static void perft(int depth) {
-    	int color = Game.getTurn() ? PieceData.WHITE : PieceData.BLACK;
+    	int color = Game.turn ? PieceData.WHITE : PieceData.BLACK;
     	ArrayList<Integer> first_moves = PieceHandler.getAllMoves(Game.board, color);
 
     	long total_nodes = 0;
@@ -100,7 +34,7 @@ public class GameHandler {
 
     	for (int move : first_moves) {
         	byte captured = MoveHandler.moveState(Game.board, move, -1);
-        	int move_count = Scoria.perftCount(Game.board, depth - 1, !Game.getTurn());
+        	int move_count = perftCount(Game.board, depth - 1, !Game.turn);
         	MoveHandler.undoState(Game.board, move, captured, -1);
 
         	total_nodes += move_count;
@@ -113,7 +47,7 @@ public class GameHandler {
 
 	public static void eval(int depth) {
     	byte[] board = Game.board;
-    	boolean turn = Game.getTurn();
+    	boolean turn = Game.turn;
     	int color = turn ? PieceData.WHITE : PieceData.BLACK;
     	ArrayList<Integer> first_moves = PieceHandler.getAllMoves(board, color);
 

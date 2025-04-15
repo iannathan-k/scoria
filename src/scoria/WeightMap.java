@@ -68,10 +68,8 @@ public abstract class WeightMap {
          20, 30, 10,  0,  0, 10, 30, 20
     };
 
-    private static final int[] NULL_WEIGHTS = {};
-
     public static final int[][] POSITION_WEIGHTS = {
-        NULL_WEIGHTS,
+        null,
         PAWN_WEIGHTS,
         KNIGHT_WEIGHTS,
         BISHOP_WEIGHTS,

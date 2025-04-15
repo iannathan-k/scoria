@@ -1,6 +1,6 @@
 # Scoria AI
 
-Started just after the new year of 2025, introducing Scoria, a rudimentary chess bot, programmed completely in Java. Current with an estimated rating ~1500 on lichess at 1,000ms thinking time, capable of beating Stockfish level 3 on Lichess.
+Started just after the new year of 2025, introducing Scoria, a rudimentary chess bot started as a passion program, programmed completely in Java. Current with an estimated rating ~1500 on lichess at 1,000ms thinking time, capable of beating Stockfish level 4 on Lichess.
 
 ## Table of Contents
 
@@ -48,23 +48,6 @@ java src/Main
 
 ## Commands
 
-### Normal Mode
-
-| Field           | Description                                                                                                    | Default |
-|-----------------|----------------------------------------------------------------------------------------------------------------|---------|
-| `pos {fen}`     | Setup the game board based on a fen string                                                                     |         |
-| `d`             | Display the current board state in the command line                                                            |         |
-| `play {mode}`   | Play from the current position. [See Here](#gamemodes)                                                         |         |
-| `perft {depth}` | Run a [perft](#perft) for the number of positions after n moves where depth is n                               | 5       |
-| `think {time}`  | Set the think time for the bot in milliseconds. If no time is passed in it will display the current think time | 1000    |
-| `eval {depth}`  | Run a evaluation for each possible move after n moves where depth is n                                         | 5       |
-| `side {color}`  | Set the color of the human player with 'w' for white. If no color is passed it will display the current color  | white   |
-| `version`       | Output the currrent version of the scoria                                                                      |         |
-| `help`          | Output the help screen with commands and their usages                                                          |         |
-| `quit`          | Exit the program                                                                                               |         |
-
-### Uci Mode
-
 | Field                           | Description                                                              |
 |---------------------------------|--------------------------------------------------------------------------|
 | `uci`                           | Toggle to uci mode                                                       |
@@ -107,83 +90,13 @@ Eval recursively searches the nodes until the certain depth, where it finds the 
 | `depth {depth}`   | Generate move limited by depth |
 | `perft {depth}`   | Run a perft to depth           |
 | `eval {depth}`    | Run an evaluation to depth     |
+| `infinite`        | Go until "stop" command given  |
 
 ## Play
 
 In setting up the board, you will use fen notiation which is the universally agreed way to representing chess board states. To learn more [click here](https://www.chess.com/terms/fen-chess)
 
 To move, you will be prompted to enter your move using UCI format. UCI is the universal chess interface, stating the starting square and the final square. For more information [click here](https://en.wikipedia.org/wiki/Universal_Chess_Interface).
-
-## Gamemodes
-
-### Human vs Bot CLI
-
-This is mode 1, you play as white again a bot with the board as well as other information being printed directly into the command line for convenience.
-
->\~~~ white to move ~~~
->
->|   | a | b | c | d | e | f | g | h |
->|---|---|---|---|---|---|---|---|---|
->| 8 |   |   |   |   |   |   |   |   |
->| 7 |   |   |   |   |   |   |   |   |
->| 6 |   |   |   | K |   | p | k |   |
->| 5 |   | P |   |   |   |   |   |   |
->| 4 |   |   |   |   |   |   |   |   |
->| 3 |   |   | r |   |   |   |   |   |
->| 2 |   |   |   |   |   |   |   |   |
->| 1 |   |   |   |   |   |   |   | R |
->
->eval: -15\
->depth: 6\
->nodes: 20636\
->time: 1000ms\
->move: f5g6
-
-### Human vs Bot UCI
-
-This is mode 2, where similarly to mode 1 you play as white against the bot, but instead of printing out all information it simply prints out it's move in uci notation.
-
->e2e4\
->e7e5\
->g1f3\
->g8f6\
->b1c3\
->b8c6
-
-### Bot vs Bot CLI
-
-This is mode 3, where the bot plays against itself and prints out the board as well as useful information into the command line.
-
->\~~~ black to move ~~~
->
->|   | a | b | c | d | e | f | g | h |
->|---|---|---|---|---|---|---|---|---|
->| 8 |   |   |   |   | r |   | k | r |
->| 7 | p | p |   |   |   |   | p |   |
->| 6 |   |   | b | B |   | n |   | p |
->| 5 |   |   | P |   | p |   |   |   |
->| 4 |   |   | B |   | P |   |   |   |
->| 3 | P |   |   |   |   |   |   | P |
->| 2 |   | P |   |   |   | P | R |   |
->| 1 |   |   | R |   |   |   | K |   |
->
->eval: 293\
->depth: 6\
->nodes: 23012\
->time: 1000ms
-
-### Bot vs Bot UCI
-
-This is mode 4, where the bot plays against itself, but only prints out the UCI notation of what moves it makes to be referenced in some other form of UI like Lichess analysis.
-
->g1f3\
->g8f6\
->b1c3\
->b8c6\
->e2e3\
->a7a6
-
-<br>
 
 # Mechanism
 
