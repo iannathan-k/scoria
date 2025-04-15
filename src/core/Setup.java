@@ -67,7 +67,7 @@ public abstract class Setup {
         }
 
         // Turn
-        Game.turn = fen_stream[1].equals("w");
+        Game.turn = fen_stream[1].equals("w") ? 1 : -1;
 
         // Castling Rights
         if (fen_stream.length >= 3 && !fen_stream[2].equals("-")) {

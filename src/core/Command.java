@@ -31,7 +31,7 @@ public class Command {
 
     private static final String uci_string = 
         """
-        id name Scoria_v3.5.23
+        id name Scoria_v3.5.24
         id author iannathan-k (Ian Nathan Kusmiantoro)
         uciok
         """.strip();
@@ -46,7 +46,7 @@ public class Command {
         /____/\\___/\\____/_/  /_/\\__,_/  
         
         Ian Nathan Kusmiantoro
-        Version 3.5.23
+        Version 3.5.24
     ========================================
     """;
 
@@ -78,7 +78,7 @@ public class Command {
             long hash = Zobrist.manualHash(Game.board, Game.turn);
             int bot_move = Interface.uciToMove(uci_move);
             MoveHandler.moveState(Game.board, bot_move, hash);
-            Game.turn = !Game.turn;
+            Game.turn = -Game.turn;
             Game.move_number++;
         }
     }
@@ -97,17 +97,12 @@ public class Command {
             switch (args[i]) {
                 case "movetime" -> max_time = Long.parseLong(args[i + 1]);
                 case "depth" -> max_depth = Integer.parseInt(args[i + 1]);
-                case "btime" -> max_time = (!Game.turn) ? calculateTime(Integer.parseInt(args[i + 1])) : max_time;
-                case "wtime" -> max_time = (Game.turn) ? calculateTime(Integer.parseInt(args[i + 1])) : max_time;
+                case "btime" -> max_time = (Game.turn == -1) ? calculateTime(Integer.parseInt(args[i + 1])) : max_time;
+                case "wtime" -> max_time = (Game.turn == 1) ? calculateTime(Integer.parseInt(args[i + 1])) : max_time;
                 case "infinite" -> new ListenerThread().start();
 
                 case "perft" -> {
                     GameHandler.perft(Integer.parseInt(args[i + 1]));
-                    return;
-                }
-
-                case "eval" -> {
-                    GameHandler.eval(Integer.parseInt(args[i + 1]));
                     return;
                 }
             }
@@ -117,29 +112,22 @@ public class Command {
         System.out.println("bestmove " + Interface.moveToUci(move));
     }
 
-    private static void optionCommand(String[] args) {
-        String[] sub_args = args[2].split("\\s+");
-        switch (sub_args[0]) {
-            case "Max_Think" -> Game.max_time = Long.parseLong(sub_args[1]);
-            case "Max_Depth" -> Game.max_depth = Integer.parseInt(sub_args[1]);
-        }
-    }
-
-    private static void clearHeuristics() {
+    private static void clearGameInfo() {
         Evaluator.clearPositionTable();
         Scoria.clearHistoryTable();
+        Game.move_number = 0;
+        Game.node_count = 0;
     }
 
     public static void parseCommand(String command) {
         String[] args = command.split("\\s" , 3);
         switch (args[0]) {
             case "uci" -> System.out.println(uci_string);
-            case "ucinewgame" -> clearHeuristics();
+            case "ucinewgame" -> clearGameInfo();
             case "isready" -> System.out.println("readyok");
             case "position" -> positionCommand(args);
             case "go" -> goCommand(command);
             case "d" -> Interface.printBoard(Game.board);
-            case "setoption" -> optionCommand(args);
             case "help" -> System.out.println(help_uci_string);
             default -> System.out.println("unknown command: " + command);
         }

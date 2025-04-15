@@ -16,9 +16,7 @@ public abstract class Interface {
                 byte piece = board[i << 3 | j];
 
                 String piece_char = CHARACTER_LIST[piece & PieceData.TYPE_MASK];
-                if ((piece & PieceData.COLOR_MASK) == PieceData.BLACK) {
-                    piece_char = piece_char.toLowerCase();
-                }
+                piece_char = (piece < PieceData.BLACK) ? piece_char : piece_char.toLowerCase();
 
                 line += piece_char + " | ";
             }
@@ -26,6 +24,15 @@ public abstract class Interface {
             System.out.println(line);
             System.out.println("  +---+---+---+---+---+---+---+---+");
         }
+    }
+
+    public static String getVariationString(int[] moves) {
+        String line = "";
+        for (int i = 1; i < moves.length; i++) {
+            line += moveToUci(moves[i]);
+            line += " ";
+        }
+        return line;
     }
 
     public static String posToSquare(int pos) {
@@ -56,14 +63,12 @@ public abstract class Interface {
         }
 
         // Passant Flag
-        if ((piece & PieceData.TYPE_MASK) == PieceData.PAWN && captured == PieceData.EMPTY) {
-            if ((origin_pos & 7) != (target_pos & 7)) {
+        if ((piece & PieceData.TYPE_MASK) == PieceData.PAWN) {
+            if ((origin_pos & 7) != (target_pos & 7) && captured == PieceData.EMPTY) {
                 move |= MoveHandler.PASSANT_MASK;
             }
-        }
 
-        // Promotion Flag
-        if ((piece & PieceData.TYPE_MASK) == PieceData.PAWN) {
+            // Promotion Flag
             if ((target_pos >> 3) == 7 || (target_pos >> 3) == 0) {
                 move |= MoveHandler.PROMO_MASK;
             }

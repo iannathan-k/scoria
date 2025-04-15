@@ -9,17 +9,12 @@ public class Game {
     // Game Attributes
 
     public static byte[] board = new byte[64];
-    public static boolean turn = true;
+    public static int turn = 1;
 
     // Game Information
 
     public static int move_number;
     public static int node_count;
-
-    // Limit Options
-
-    public static long max_time;
-    public static int max_depth;
 
     public static void initGame(String fen) {
         Setup.setUp(board, fen);
@@ -28,6 +23,7 @@ public class Game {
         Evaluator.clearPositionTable();
 
         node_count = 0;
+        move_number = 0;
     }
 
     public static int getNodeCount() {

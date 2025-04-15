@@ -40,7 +40,7 @@ public class Transposition {
         }
     }
     
-    private static HashMap<Long, BoardState> transposition_table = new HashMap<Long, BoardState>();
+    public static HashMap<Long, BoardState> transposition_table = new HashMap<Long, BoardState>();
 
     public static void addState(long hash, BoardState state) {
         transposition_table.put(hash, state);

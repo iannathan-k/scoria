@@ -89,7 +89,6 @@ Eval recursively searches the nodes until the certain depth, where it finds the 
 | `movetime {time}` | Generate move limited by time  |
 | `depth {depth}`   | Generate move limited by depth |
 | `perft {depth}`   | Run a perft to depth           |
-| `eval {depth}`    | Run an evaluation to depth     |
 | `infinite`        | Go until "stop" command given  |
 
 ## Play

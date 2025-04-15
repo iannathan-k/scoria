@@ -26,24 +26,16 @@ public class MoveHandler {
         byte piece = board[origin_pos];
         byte captured = board[target_pos];
 
-        int type = piece & PieceData.TYPE_MASK;
         int color = piece & PieceData.COLOR_MASK;
 
-        if (type == PieceData.PAWN) {
-            if ((move & PASSANT_MASK) != 0) {
-                // en passant
-                int passant_pos = target_pos + (color == PieceData.WHITE ? 8 : -8);
-                captured = board[passant_pos];
-                board[passant_pos] = PieceData.EMPTY;
-            } else if ((move & PROMO_MASK) != 0) {
-                // promotion logic
-                board[target_pos] = (byte) (PieceData.QUEEN | color);
-                board[origin_pos] = PieceData.EMPTY;
-                return captured;
-            }    
-        } else if (type == PieceData.KING) {
+        if ((piece & PieceData.TYPE_MASK) == PieceData.KING) {
             PieceHandler.setKingPosition(target_pos, color);
-        } 
+        } else if ((move & PASSANT_MASK) != 0) {
+            // en passant
+            int passant_pos = target_pos + (color == PieceData.WHITE ? 8 : -8);
+            captured = board[passant_pos];
+            board[passant_pos] = PieceData.EMPTY;
+        }
 
         board[target_pos] = piece;
         board[origin_pos] = PieceData.EMPTY;
@@ -64,11 +56,6 @@ public class MoveHandler {
             int passant_pos = target_pos + (color == PieceData.WHITE ? 8 : -8);
             board[passant_pos] = captured;
             captured = PieceData.EMPTY;
-        } else if ((move & PROMO_MASK) != 0) {
-            // promotion logic
-            board[origin_pos] = (byte) (PieceData.PAWN | color);
-            board[target_pos] = captured;
-            return;
         }
 
         board[origin_pos] = piece;

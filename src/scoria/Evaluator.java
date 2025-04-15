@@ -22,8 +22,21 @@ public class Evaluator {
         position_table.clear();
     }
 
-    public static int gameWinner(byte[] board, boolean turn, long hash) {
-        int color = turn ? PieceData.WHITE : PieceData.BLACK;
+    public static int posWeight(int type, int color, int pos) {
+        return (color == PieceData.WHITE) ? WeightMap.POSITION_WEIGHTS[type][pos] : WeightMap.POSITION_WEIGHTS[type][63 - pos];
+    }
+
+    public static boolean isGameOver(byte[] board, int turn, long hash) {
+        int color = (turn == 1) ? PieceData.WHITE : PieceData.BLACK;
+
+        if (position_table.get(hash) != null && position_table.get(hash) >= 3) return true;
+        if (PieceHandler.hasPossibleMove(board, color)) return false;
+        if (PieceHandler.kingUnderAttack(board, color)) return true;
+        return true;
+    }
+
+    public static int gameWinner(byte[] board, int turn, long hash) {
+        int color = (turn == 1) ? PieceData.WHITE : PieceData.BLACK;
 
         // threefold repetition
         if (position_table.get(hash) != null && position_table.get(hash) >= 3) {
@@ -44,15 +57,7 @@ public class Evaluator {
         return PieceData.NULL;
     }
 
-    public static int posWeight(int type, int color, int pos) {
-        return (color == PieceData.WHITE) ? WeightMap.POSITION_WEIGHTS[type][pos] : WeightMap.POSITION_WEIGHTS[type][63 - pos];
-    }
-
-    public static int lightEval(byte[] board, boolean turn) {
-        return boardEval(board, turn, 0, 1);
-    }
-
-    public static int boardEval(byte[] board, boolean turn, long hash, int depth) {
+    public static int boardEval(byte[] board, int turn, long hash, int depth) {
         switch (gameWinner(board, turn, hash)) {
             case NOT_OVER: break;
             case PieceData.WHITE: return 10000 * (depth + 1);

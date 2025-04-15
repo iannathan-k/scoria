@@ -29,7 +29,7 @@ public class Zobrist {
         turn_table = random.nextLong();
     }
 
-    public static long manualHash(byte[] board, boolean turn) {
+    public static long manualHash(byte[] board, int turn) {
         long hash = 0;
         for (int i = 0; i < 64; i++) {
             byte piece = board[i];
@@ -40,7 +40,7 @@ public class Zobrist {
         }
 
         // turn
-        hash ^= turn ? turn_table : 0;
+        hash ^= (turn == 1) ? turn_table : 0;
 
         // en passant
         hash ^= passant_table[PieceHandler.peekPassantRights()];
