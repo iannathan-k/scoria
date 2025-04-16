@@ -25,11 +25,4 @@ public class Game {
         node_count = 0;
         move_number = 0;
     }
-
-    public static int getNodeCount() {
-        int count = node_count;
-        node_count = 0;
-        return count;
-    }
-
 }

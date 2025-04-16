@@ -28,8 +28,9 @@ public abstract class Interface {
 
     public static String getVariationString(int[] moves) {
         String line = "";
-        for (int i = 1; i < moves.length; i++) {
-            line += moveToUci(moves[i]);
+        for (int move : moves) {
+            if (move == 0) continue;
+            line += moveToUci(move);
             line += " ";
         }
         return line;

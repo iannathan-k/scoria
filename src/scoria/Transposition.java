@@ -10,12 +10,12 @@ public class Transposition {
 
     static class BoardState {
         private int depth;
-        private int[] best_move;
+        private int best_score;
         private int node_type;
 
-        public BoardState(int depth, int[] best_move, int node_type) {
+        public BoardState(int depth, int best_score, int node_type) {
             this.depth = depth;
-            this.best_move = best_move;
+            this.best_score = best_score;
             this.node_type = node_type;
         }
 
@@ -23,8 +23,8 @@ public class Transposition {
             return depth;
         }
 
-        public int[] getBestMove() {
-            return best_move;
+        public int getBestScore() {
+            return best_score;
         }
 
         public boolean isExact() {
@@ -40,7 +40,7 @@ public class Transposition {
         }
     }
     
-    public static HashMap<Long, BoardState> transposition_table = new HashMap<Long, BoardState>();
+    private static HashMap<Long, BoardState> transposition_table = new HashMap<Long, BoardState>();
 
     public static void addState(long hash, BoardState state) {
         transposition_table.put(hash, state);

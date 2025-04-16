@@ -1,6 +1,7 @@
 package src.scoria;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import src.core.DebugLogger;
 import src.core.Game;
@@ -33,20 +34,22 @@ public class Scoria {
     	long start = System.currentTimeMillis();
     	while (System.currentTimeMillis() < cancel_time && current_depth < MAX_DEPTH) {
         	current_depth++;
-			int[] move = negascout(board, current_depth, INITIAL_ALPHA, INITIAL_BETA, turn, new int[current_depth + 1]);
+			int[] move = new int[current_depth];
+			int eval = negascout(board, current_depth, INITIAL_ALPHA, INITIAL_BETA, turn, move);
        	 
-        	if (move[0] != Integer.MIN_VALUE) {
+        	if (eval != Integer.MIN_VALUE) {
 				principle_variation = move;
             	DebugLogger.logOut(
                 	"info depth " + current_depth +
-                	" score " + move[0] +
-                	" nodes " + Game.getNodeCount() +
+                	" score " + eval +
+                	" nodes " + Game.node_count +
                 	" time " + (System.currentTimeMillis() - start) +
                 	" pv " + Interface.getVariationString(move)
             	);
         	}
     	}
 
+		Game.node_count = 0;
     	return principle_variation;
 	}
 
@@ -55,12 +58,7 @@ public class Scoria {
     	int target_pos = move & MoveHandler.POS_MASK;
     	int piece_type = board[origin_pos] & PieceData.TYPE_MASK;
     	byte captured = board[target_pos];
-
-		// Principle Variation
-		if (current_depth - depth > 1) {
-			if (principle_variation[depth + 1] == move) return 5000;
-		}
-
+		
     	int score = 3 * Evaluator.posWeight(piece_type, color, target_pos);
     	score -= Evaluator.posWeight(piece_type, color, origin_pos);
 
@@ -75,24 +73,25 @@ public class Scoria {
     	return score;
 	}
 
-	public static int[] negascout(byte[] board, int depth, int alpha, int beta, int turn, int[] variation) {
+	public static int negascout(byte[] board, int depth, int alpha, int beta, int turn, int[] variation) {
     	long board_hash = Zobrist.manualHash(board, turn);
     	Transposition.BoardState entry = Transposition.getState(board_hash);
     	if (entry != null && entry.getDepth() >= depth) {
+			Arrays.fill(variation, depth, current_depth, 0);
         	if (entry.isExact()) {
-            	return entry.getBestMove();
+            	return entry.getBestScore();
         	}
-        	if (entry.isBeta() && entry.getBestMove()[0] >= beta) {
-            	return entry.getBestMove();
+        	if (entry.isBeta() && entry.getBestScore() >= beta) {
+            	return entry.getBestScore();
         	}
-        	if (entry.isAlpha() && entry.getBestMove()[0] <= alpha) {
-            	return entry.getBestMove();
+        	if (entry.isAlpha() && entry.getBestScore() <= alpha) {
+            	return entry.getBestScore();
         	}
     	}
 
 		if (depth == 0 || Evaluator.isGameOver(board, turn, board_hash)) {
 			Game.node_count++;
-			return new int[] {turn * Evaluator.boardEval(board, turn, board_hash, depth)};
+			return turn * Evaluator.boardEval(board, turn, board_hash, depth);
 		}
 
     	int color = (turn == 1) ? PieceData.WHITE : PieceData.BLACK;
@@ -106,34 +105,33 @@ public class Scoria {
     	int parent_alpha = alpha;
     	boolean is_first = true;
 
+		int[] child_variation = new int[current_depth];
+
     	for (int move : possible_moves) {
         	byte captured = MoveHandler.moveState(board, move, board_hash);
 
-			int[] child_variation = variation.clone();
-
 			int eval;
 			if (is_first) {
-				eval = -negascout(board, depth - 1, -beta, -alpha, -turn, child_variation)[0];
+				eval = -negascout(board, depth - 1, -beta, -alpha, -turn, child_variation);
 				is_first = false;
 			} else {
-				eval = -negascout(board, depth - 1, -alpha - 1, -alpha, -turn, child_variation)[0];
+				eval = -negascout(board, depth - 1, -alpha - 1, -alpha, -turn, child_variation);
 
 				if (eval > alpha && eval < beta) {
-					eval = -negascout(board, depth - 1, -beta, -alpha, -turn, child_variation)[0];
+					eval = -negascout(board, depth - 1, -beta, -alpha, -turn, child_variation);
 				}
 			}
 
         	MoveHandler.undoState(board, move, captured, board_hash);
 
         	if (System.currentTimeMillis() > cancel_time) {
-            	return new int[] {Integer.MIN_VALUE};
+            	return Integer.MIN_VALUE;
         	}
 
         	if (eval > best_score) {
 				best_score = eval;
 				System.arraycopy(child_variation, 0, variation, 0, variation.length);
-				variation[0] = eval;
-            	variation[current_depth - depth + 1] = move;
+            	variation[current_depth - depth] = move;
         	}
 
         	alpha = Math.max(eval, alpha);
@@ -148,8 +146,8 @@ public class Scoria {
     	(best_score <= parent_alpha) ? Transposition.ALPHA_NODE :
     	Transposition.EXACT_NODE;
 
-    	Transposition.addState(board_hash, new Transposition.BoardState(depth, variation, node_type));
+    	Transposition.addState(board_hash, new Transposition.BoardState(depth, best_score, node_type));
 
-        return variation;
+        return best_score;
 	}
 }
