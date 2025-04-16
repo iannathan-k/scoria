@@ -36,10 +36,10 @@ public class GameHandler {
         	MoveHandler.undoState(Game.board, move, captured, -1);
 
         	total_nodes += move_count;
-        	System.out.println(Interface.moveToUci(move) + ": " + move_count);
+        	DebugLogger.logOut(Interface.moveToUci(move) + ": " + move_count);
     	}
 
-    	System.out.println("total nodes: " + total_nodes);
-    	System.out.println("total time: " + (System.currentTimeMillis() - start) + "ms");
+    	DebugLogger.logOut("total nodes: " + total_nodes);
+    	DebugLogger.logOut("total time: " + (System.currentTimeMillis() - start) + "ms");
 	}
 }

@@ -10,9 +10,11 @@ public class ListenerThread extends Thread {
 
     @Override
     public void run() {
-        String input = scanner.nextLine().trim();;
+        String input = scanner.nextLine().trim();
+        DebugLogger.logIn(input);
         while (!input.equals("stop")) {
             input = scanner.nextLine().trim();
+            DebugLogger.logIn(input);
         }
         Scoria.cancel_time = 0;
     }

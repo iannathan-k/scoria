@@ -50,6 +50,8 @@ public class Command {
     ========================================
     """;
 
+    public static boolean debug_log = false;
+
     private static void positionCommand(String[] args) {
         String[] move_args = new String[0];
     
@@ -109,7 +111,7 @@ public class Command {
         }
 
         int move = Scoria.iterativeDeepener(Game.board, Game.turn, max_depth, max_time)[1];
-        System.out.println("bestmove " + Interface.moveToUci(move));
+        DebugLogger.logOut("bestmove " + Interface.moveToUci(move));
     }
 
     private static void clearGameInfo() {
@@ -122,14 +124,14 @@ public class Command {
     public static void parseCommand(String command) {
         String[] args = command.split("\\s" , 3);
         switch (args[0]) {
-            case "uci" -> System.out.println(uci_string);
+            case "uci" -> DebugLogger.logOut(uci_string);
             case "ucinewgame" -> clearGameInfo();
-            case "isready" -> System.out.println("readyok");
+            case "isready" -> DebugLogger.logOut("readyok");
             case "position" -> positionCommand(args);
             case "go" -> goCommand(command);
             case "d" -> Interface.printBoard(Game.board);
-            case "help" -> System.out.println(help_uci_string);
-            default -> System.out.println("unknown command: " + command);
+            case "help" -> DebugLogger.logOut(help_uci_string);
+            default -> DebugLogger.logOut("unknown command: " + command);
         }
     }
 }   

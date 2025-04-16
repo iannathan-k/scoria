@@ -1,6 +1,8 @@
 package src.scoria;
 
 import java.util.ArrayList;
+
+import src.core.DebugLogger;
 import src.core.Game;
 import src.core.Interface;
 import src.core.MoveHandler;
@@ -35,7 +37,7 @@ public class Scoria {
        	 
         	if (move[0] != Integer.MIN_VALUE) {
 				principle_variation = move;
-            	System.out.println(
+            	DebugLogger.logOut(
                 	"info depth " + current_depth +
                 	" score " + move[0] +
                 	" nodes " + Game.getNodeCount() +

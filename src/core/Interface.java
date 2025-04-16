@@ -6,8 +6,8 @@ public abstract class Interface {
     private static final String[] CHARACTER_LIST = {" ", "P", "N", "B", "R", "Q", "K"};
 
     public static void printBoard(byte[] board) {
-        System.out.println("    a   b   c   d   e   f   g   h");
-        System.out.println("  +---+---+---+---+---+---+---+---+");
+        DebugLogger.logOut("    a   b   c   d   e   f   g   h");
+        DebugLogger.logOut("  +---+---+---+---+---+---+---+---+");
 
         for (int i = 0; i < 8; i++) {
             String line = (8 - i) + " | ";
@@ -21,8 +21,8 @@ public abstract class Interface {
                 line += piece_char + " | ";
             }
 
-            System.out.println(line);
-            System.out.println("  +---+---+---+---+---+---+---+---+");
+            DebugLogger.logOut(line);
+            DebugLogger.logOut("  +---+---+---+---+---+---+---+---+");
         }
     }
 
