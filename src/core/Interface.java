@@ -36,6 +36,12 @@ public abstract class Interface {
         return line;
     }
 
+    public static String getPieceCharacter(int piece) {
+        String piece_char = CHARACTER_LIST[piece & PieceData.TYPE_MASK];
+        piece_char = (piece < PieceData.BLACK) ? piece_char : piece_char.toLowerCase();
+        return piece_char;
+    }
+
     public static String posToSquare(int pos) {
         return (char) (97 + (pos & 7)) + Integer.toString(8 - (pos >> 3));
     }

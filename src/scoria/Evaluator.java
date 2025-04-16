@@ -1,6 +1,8 @@
 package src.scoria;
 
 import java.util.*;
+
+import src.core.Game;
 import src.pieces.*;
 
 public class Evaluator {
@@ -81,6 +83,18 @@ public class Evaluator {
             evaluation += sign * Evaluator.posWeight(type, color, i);
             evaluation += sign * 2 * PieceHandler.getMobility(board, type, color, i);
         }
+
+        return evaluation;
+    }
+
+    public static int pieceEval(int piece, int pos) {
+        int type = piece & PieceData.TYPE_MASK;
+        int color = piece & PieceData.COLOR_MASK;
+        int sign = (color == PieceData.WHITE) ? 1 : -1;
+
+        int evaluation = sign * 2 * piece_points[type];
+        evaluation += sign * Evaluator.posWeight(type, color, pos);
+        evaluation += sign * 2 * PieceHandler.getMobility(Game.board, type, color, pos);
 
         return evaluation;
     }
