@@ -94,7 +94,21 @@ public class Scoria {
 			return turn * Evaluator.boardEval(board, turn, board_hash, depth);
 		}
 
-    	int color = (turn == 1) ? PieceData.WHITE : PieceData.BLACK;
+		/* It might be worth noting a few of these conditions required
+		 * 1. You should not do a consecutive null move, so if you made a null move you should not make another one.
+		 * 2. Ply from root should be greater than 2.
+		 * 3. The board should not only have pawns and kings left.
+		 * 4. Static evaluation should be greater than beta.
+		 * 5. It might be worth noting to play around with the reduction value, anywhere from 3-4
+		 * 
+		 * Best is r2 with beta guard
+		 */
+		int color = (turn == 1) ? PieceData.WHITE : PieceData.BLACK;
+		if (depth > 2 && !PieceHandler.kingUnderAttack(board, color) && Evaluator.boardEval(board, turn, board_hash, depth) >= beta) {
+			int null_eval = -negascout(board, depth - 3, -beta, -beta + 1, -turn, variation);
+			if (null_eval >= beta) return beta;
+		}
+    	
     	ArrayList<Integer> possible_moves = PieceHandler.getAllMoves(board, color);
     	possible_moves.sort((move1, move2) -> Integer.compare(
         	heuristicScore(board, move2, color, depth),

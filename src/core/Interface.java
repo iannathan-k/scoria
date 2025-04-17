@@ -51,7 +51,10 @@ public abstract class Interface {
     }
 
     public static String moveToUci(int move) {
-        return posToSquare((move >> 8) & MoveHandler.POS_MASK) + posToSquare(move & MoveHandler.POS_MASK);
+        String move_string = posToSquare((move >> 8) & MoveHandler.POS_MASK) + posToSquare(move & MoveHandler.POS_MASK);
+        
+        if ((move & MoveHandler.PROMO_MASK) != 0) move_string += "q";
+        return move_string;
     }
 
     public static int uciToMove(String uci) {
