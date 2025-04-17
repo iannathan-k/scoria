@@ -41,7 +41,7 @@ public class Scoria {
 				principle_variation = move;
             	DebugLogger.logOut(
                 	"info depth " + current_depth +
-                	" score " + eval +
+                	" score cp " + eval +
                 	" nodes " + Game.node_count +
                 	" time " + (System.currentTimeMillis() - start) +
                 	" pv " + Interface.getVariationString(move)

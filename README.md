@@ -56,6 +56,7 @@ java src/Main
 | `position {fen} {moves}`        | Set the position of the board by fen, followed by moves to current state |
 | `go {mode} {arg}`               | Run a go command for one of the [modes](#go-commands)                    |
 | `setoption name {name} {value}` | Change an internal setting of scoria                                     |
+| `eval`                          | Display the current static evaluation breakdown                          |
 | `d`                             | Display the current board state in the command line                      |
 | `help`                          | Output the help screen with commands and their usages                    |
 | `quit`                          | Exit the program                                                         |

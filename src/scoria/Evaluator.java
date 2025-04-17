@@ -79,9 +79,17 @@ public class Evaluator {
             int color = piece & PieceData.COLOR_MASK;
             int sign = (color == PieceData.WHITE) ? 1 : -1; 
 
-            evaluation += sign * 2 * piece_points[type];
+            /* Evaluation methods to try
+             * 1. Adjusted Mobility Weightings
+             * 2. Fixed Mobility Weighting
+             * 3. No Mobility Weighting
+             * 4. Estimated weighting use precomputed moves
+             * 5. Attacked Pieces Weighting
+             */
+
+            evaluation += sign * piece_points[type];
             evaluation += sign * Evaluator.posWeight(type, color, i);
-            evaluation += sign * 2 * PieceHandler.getMobility(board, type, color, i);
+            evaluation += sign * 5 * PieceHandler.getMobility(board, type, color, i);
         }
 
         return evaluation;
@@ -92,9 +100,9 @@ public class Evaluator {
         int color = piece & PieceData.COLOR_MASK;
         int sign = (color == PieceData.WHITE) ? 1 : -1;
 
-        int evaluation = sign * 2 * piece_points[type];
+        int evaluation = sign * piece_points[type];
         evaluation += sign * Evaluator.posWeight(type, color, pos);
-        evaluation += sign * 2 * PieceHandler.getMobility(Game.board, type, color, pos);
+        evaluation += sign * 5 * PieceHandler.getMobility(Game.board, type, color, pos);
 
         return evaluation;
     }
