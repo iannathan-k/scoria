@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import src.scoria.Evaluator;
 import src.scoria.Scoria;
+import src.scoria.Transposition;
 import src.scoria.Zobrist;
 
 public class Command {
@@ -31,8 +32,12 @@ public class Command {
 
     private static final String uci_string = 
         """
-        id name Scoria_v3.5.28
+        id name Scoria_v3.5.29
         id author iannathan-k (Ian Nathan Kusmiantoro)
+
+        option name Debug Log File type string default <empty>
+        option name Move Overhead type spin default 0 min 0 max 100
+        option name Clear Hash type button
         uciok
         """.strip();
 
@@ -46,11 +51,11 @@ public class Command {
         /____/\\___/\\____/_/  /_/\\__,_/  
         
         Ian Nathan Kusmiantoro
-        Version 3.5.28
+        Version 3.5.29
     ========================================
     """;
 
-    public static boolean debug_log = false;
+    private static int latency = 0;
 
     private static void positionCommand(String[] args) {
         String[] move_args = new String[0];
@@ -86,8 +91,8 @@ public class Command {
     }
 
     private static long calculateTime(long remaining_time) {
-        int remaining_moves = Math.max(60 - Game.move_number, 10);
-        return Math.max(100, remaining_time / remaining_moves);
+        int remaining_moves = Math.max(60 - (Game.move_number >> 1), 10);
+        return Math.max(150, remaining_time / remaining_moves);
     }
 
     private static void goCommand(String command) {
@@ -110,8 +115,20 @@ public class Command {
             }
         }
 
+        max_time -= latency;
+
         int move = Scoria.iterativeDeepener(Game.board, Game.turn, max_depth, max_time)[0];
         DebugLogger.logOut("bestmove " + Interface.moveToUci(move));
+    }
+
+    private static void setOptionCommand(String arg) {
+        String[] sub_args = arg.split(" value ");
+        switch (sub_args[0]) {
+            case "Debug Log File" -> DebugLogger.debug_path = sub_args[1];
+            case "Move Overhead" -> latency = Integer.parseInt(sub_args[1]);
+            case "Clear Hash" -> Transposition.clearTranspositionTable();
+            default -> DebugLogger.logOut("unrecognized option: " + sub_args[0]);
+        }
     }
 
     private static void clearGameInfo() {
@@ -132,6 +149,7 @@ public class Command {
             case "d" -> Interface.printBoard(Game.board);
             case "help" -> DebugLogger.logOut(help_uci_string);
             case "eval" -> GameHandler.eval();
+            case "setoption" -> setOptionCommand(args[2]);
             default -> DebugLogger.logOut("unknown command: " + command);
         }
     }

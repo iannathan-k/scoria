@@ -4,10 +4,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class DebugLogger {
+
+    public static String debug_path = "";
+
     public static void logIn(String line) {
-        if (!Command.debug_log) return;
+        if (debug_path.isEmpty()) return;
         try {
-            FileWriter writer = new FileWriter("scoria.log", true);
+            FileWriter writer = new FileWriter(debug_path, true);
             writer.write("<< " + line + "\n");
             writer.close();
         } catch (IOException exception) {
@@ -18,9 +21,9 @@ public class DebugLogger {
     public static void logOut(String line) {
         System.out.println(line);
 
-        if (!Command.debug_log) return;
+        if (debug_path.isEmpty()) return;
         try {
-            FileWriter writer = new FileWriter("scoria.log", true);
+            FileWriter writer = new FileWriter(debug_path, true);
             writer.write(">> " + line + "\n");
             writer.close();
         } catch (IOException exception) {

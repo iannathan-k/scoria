@@ -50,4 +50,8 @@ public class Transposition {
         return transposition_table.get(hash);
     }
 
+    public static void clearTranspositionTable() {
+        transposition_table.clear();
+    }
+
 }
