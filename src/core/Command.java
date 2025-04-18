@@ -32,12 +32,13 @@ public class Command {
 
     private static final String uci_string = 
         """
-        id name Scoria_v3.5.32
+        id name Scoria_v3.5.33
         id author iannathan-k (Ian Nathan Kusmiantoro)
 
         option name Debug Log File type string default <empty>
         option name Move Overhead type spin default 0 min 0 max 100
         option name Clear Hash type button
+        option name Ponder type check default false
         uciok
         """.strip();
 
@@ -51,11 +52,17 @@ public class Command {
         /____/\\___/\\____/_/  /_/\\__,_/  
         
         Ian Nathan Kusmiantoro
-        Version 3.5.32
+        Version 3.5.33
     ========================================
     """;
 
+    public static boolean ponder_hit;
+
+    // option settings
+
     private static int latency = 0;
+    private static boolean ponder = false;
+    public static String debug_path = "";
 
     private static void positionCommand(String[] args) {
         String[] move_args = new String[0];
@@ -99,6 +106,7 @@ public class Command {
         String[] args = command.split("\\s+");
         long max_time = Integer.MAX_VALUE;
         int max_depth = 245;
+        ponder_hit = true;
 
         for (int i = 1; i < args.length; i += 2) {
             switch (args[i]) {
@@ -107,6 +115,11 @@ public class Command {
                 case "btime" -> max_time = (Game.turn == -1) ? calculateTime(Integer.parseInt(args[i + 1])) : max_time;
                 case "wtime" -> max_time = (Game.turn == 1) ? calculateTime(Integer.parseInt(args[i + 1])) : max_time;
                 case "infinite" -> new ListenerThread().start();
+                case "ponder" -> {
+                    new ListenerThread().start();
+                    ponder_hit = false;
+                    i--;
+                }
 
                 case "perft" -> {
                     GameHandler.perft(Integer.parseInt(args[i + 1]));
@@ -116,17 +129,29 @@ public class Command {
         }
 
         max_time -= latency;
+       
+        if (!ponder_hit) {
+            ListenerThread.ponderhit_time = max_time;
+            max_time = Integer.MAX_VALUE;
+        }
 
-        int move = Scoria.iterativeDeepener(Game.board, Game.turn, max_depth, max_time)[0];
-        DebugLogger.logOut("bestmove " + Interface.moveToUci(move));
+        int[] principal_variation = Scoria.iterativeDeepener(Game.board, Game.turn, max_depth, max_time);
+
+        if (!ponder_hit) return;
+
+        String bestmove = "bestmove " + Interface.moveToUci(principal_variation[0]);
+        if (principal_variation.length > 1 && ponder) bestmove += " ponder " + Interface.moveToUci(principal_variation[1]);
+
+        DebugLogger.logOut(bestmove);
     }
 
     private static void setOptionCommand(String arg) {
         String[] sub_args = arg.split(" value ");
         switch (sub_args[0]) {
-            case "Debug Log File" -> DebugLogger.debug_path = (sub_args.length > 1) ? sub_args[1] : "";
+            case "Debug Log File" -> debug_path = (sub_args.length > 1) ? sub_args[1] : "";
             case "Move Overhead" -> latency = Integer.parseInt(sub_args[1]);
             case "Clear Hash" -> Transposition.clearHashTable();
+            case "Ponder" -> ponder = Boolean.parseBoolean(sub_args[1]);
             default -> DebugLogger.logOut("unrecognized option: " + sub_args[0]);
         }
     }

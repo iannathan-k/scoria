@@ -5,12 +5,10 @@ import java.io.IOException;
 
 public class DebugLogger {
 
-    public static String debug_path = "";
-
     public static void logIn(String line) {
-        if (debug_path.isBlank()) return;
+        if (Command.debug_path.isBlank()) return;
         try {
-            FileWriter writer = new FileWriter(debug_path, true);
+            FileWriter writer = new FileWriter(Command.debug_path, true);
             writer.write("<< " + line + "\n");
             writer.close();
         } catch (IOException exception) {
@@ -21,9 +19,9 @@ public class DebugLogger {
     public static void logOut(String line) {
         System.out.println(line);
 
-        if (debug_path.isBlank()) return;
+        if (Command.debug_path.isBlank()) return;
         try {
-            FileWriter writer = new FileWriter(debug_path, true);
+            FileWriter writer = new FileWriter(Command.debug_path, true);
             writer.write(">> " + line + "\n");
             writer.close();
         } catch (IOException exception) {
