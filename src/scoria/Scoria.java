@@ -73,9 +73,49 @@ public class Scoria {
     	return score;
 	}
 
+	private static boolean canNullPrune(byte[] board, int turn, int beta, int color) {
+		if (PieceHandler.kingUnderAttack(board, color)) return false;
+		if (Evaluator.staticEval(board, turn) >= beta) return false;
+
+		return true;
+	}
+
+	private static int quiescence(byte[] board, int alpha, int beta, int turn, int depth) {
+		long board_hash = Zobrist.manualHash(board, turn);
+		if (Transposition.hasQuiescence(board_hash)) {
+			return Transposition.getQuiescence(board_hash);
+		}
+
+		int static_eval = turn * Evaluator.boardEval(board, turn, board_hash, depth);
+		
+		if (static_eval >= beta) return static_eval;
+		if (alpha < static_eval) alpha = static_eval;
+
+		int color = (turn == 1) ? PieceData.WHITE : PieceData.BLACK;
+		ArrayList<Integer> captures_moves = PieceHandler.getAllCaptures(board, color);
+		captures_moves.sort((move1, move2) -> Integer.compare(
+        	heuristicScore(board, move2, color, depth),
+        	heuristicScore(board, move1, color, depth)
+    	));
+
+		int best_eval = static_eval;
+		for (int moves : captures_moves) {
+			byte captured = MoveHandler.moveState(board, moves, board_hash);
+			int eval = -quiescence(board, -beta, -alpha, -turn, depth);
+			MoveHandler.undoState(board, moves, captured, board_hash);
+
+			if (eval >= beta) return eval;
+			best_eval = Math.max(eval, best_eval);
+			alpha = Math.max(eval, alpha);
+		}
+
+		Transposition.addQuiescence(board_hash, best_eval);
+		return best_eval;
+	}
+
 	public static int negascout(byte[] board, int depth, int alpha, int beta, int turn, int[] variation) {
     	long board_hash = Zobrist.manualHash(board, turn);
-    	Transposition.BoardState entry = Transposition.getState(board_hash);
+    	Transposition.BoardState entry = Transposition.getTransposition(board_hash);
     	if (entry != null && entry.getDepth() >= depth) {
 			Arrays.fill(variation, depth, current_depth, 0);
         	if (entry.isExact()) {
@@ -88,10 +128,10 @@ public class Scoria {
             	return entry.getBestScore();
         	}
     	}
-
+		
 		if (depth == 0 || Evaluator.isGameOver(board, turn, board_hash)) {
 			Game.node_count++;
-			return turn * Evaluator.boardEval(board, turn, board_hash, depth);
+			return quiescence(board, alpha, beta, turn, depth);
 		}
 
 		/* It might be worth noting a few of these conditions required
@@ -103,13 +143,14 @@ public class Scoria {
 		 * 
 		 * Best is r2 with beta guard
 		 */
+		
 		int color = (turn == 1) ? PieceData.WHITE : PieceData.BLACK;
-		if (depth > 2 && !PieceHandler.kingUnderAttack(board, color) && Evaluator.boardEval(board, turn, board_hash, depth) >= beta) {
+		if (depth > 2 && canNullPrune(board, turn, beta, color)) {
 			int null_eval = -negascout(board, depth - 3, -beta, -beta + 1, -turn, variation);
 			if (null_eval >= beta) return beta;
 		}
     	
-    	ArrayList<Integer> possible_moves = PieceHandler.getAllMoves(board, color);
+		ArrayList<Integer> possible_moves = PieceHandler.getAllMoves(board, color);
     	possible_moves.sort((move1, move2) -> Integer.compare(
         	heuristicScore(board, move2, color, depth),
         	heuristicScore(board, move1, color, depth)
@@ -117,7 +158,7 @@ public class Scoria {
 
 		int best_score = Integer.MIN_VALUE;
     	int parent_alpha = alpha;
-    	boolean is_first = true;
+		boolean first_move = true;
 
 		int[] child_variation = new int[current_depth];
 
@@ -125,9 +166,9 @@ public class Scoria {
         	byte captured = MoveHandler.moveState(board, move, board_hash);
 
 			int eval;
-			if (is_first) {
+			if (first_move) {
 				eval = -negascout(board, depth - 1, -beta, -alpha, -turn, child_variation);
-				is_first = false;
+				first_move = false;
 			} else {
 				eval = -negascout(board, depth - 1, -alpha - 1, -alpha, -turn, child_variation);
 
@@ -160,7 +201,7 @@ public class Scoria {
     	(best_score <= parent_alpha) ? Transposition.ALPHA_NODE :
     	Transposition.EXACT_NODE;
 
-    	Transposition.addState(board_hash, new Transposition.BoardState(depth, best_score, node_type));
+    	Transposition.addTransposition(board_hash, new Transposition.BoardState(depth, best_score, node_type));
 
         return best_score;
 	}

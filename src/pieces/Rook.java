@@ -31,6 +31,30 @@ public abstract class Rook {
         return possible_moves;
     }
 
+    public static ArrayList<Integer> getCaptures(byte[] board, int pos, int color) {
+        ArrayList<Integer> capture_moves = new ArrayList<Integer>();
+
+        for (int[] dir : PreComputer.ROOK_PREMOVES[pos]) {
+            for (int target : dir) {
+                int move = pos << 8 | target;
+                byte target_piece = board[target];
+
+                if (target_piece == PieceData.EMPTY) {
+                    continue;
+                }
+                if ((target_piece & PieceData.COLOR_MASK) == color) {
+                    break;
+                }
+                if (!PieceHandler.kingCheck(board, move, color)) {
+                    capture_moves.add(move);
+                }
+                break;
+            }
+        }
+
+        return capture_moves;
+    }
+
     public static boolean hasMove(byte[] board, int pos, int color) {
         for (int[] dir : PreComputer.ROOK_PREMOVES[pos]) {
             for (int target : dir) {

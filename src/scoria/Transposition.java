@@ -41,17 +41,31 @@ public class Transposition {
     }
     
     private static HashMap<Long, BoardState> transposition_table = new HashMap<Long, BoardState>();
+    private static HashMap<Long, Integer> quiescence_table = new HashMap<Long, Integer>();
 
-    public static void addState(long hash, BoardState state) {
+    public static void addTransposition(long hash, BoardState state) {
         transposition_table.put(hash, state);
     }
 
-    public static BoardState getState(long hash) {
+    public static BoardState getTransposition(long hash) {
         return transposition_table.get(hash);
     }
 
-    public static void clearTranspositionTable() {
+    public static void clearHashTable() {
         transposition_table.clear();
+        quiescence_table.clear();
+    }
+
+    public static boolean hasQuiescence(long hash) {
+        return quiescence_table.containsKey(hash);
+    }
+
+    public static void addQuiescence(long hash, int score) {
+        quiescence_table.put(hash, score);
+    }
+
+    public static int getQuiescence(long hash) {
+        return quiescence_table.get(hash);
     }
 
 }

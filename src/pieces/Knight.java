@@ -26,6 +26,27 @@ public abstract class Knight {
 
     }
 
+    public static ArrayList<Integer> getCaptures(byte[] board, int pos, int color) {
+        ArrayList<Integer> capture_moves = new ArrayList<Integer>();
+
+        for (int target : PreComputer.KNIGHT_PREMOVES[pos]) {
+            byte target_piece = board[target];
+            int move = pos << 8 | target;
+
+            if (target_piece == PieceData.EMPTY) {
+                continue;
+            }
+            if ((target_piece & PieceData.COLOR_MASK) != color) {
+                if (!PieceHandler.kingCheck(board, move, color)) {
+                    capture_moves.add(move);
+                }
+            }
+        }
+
+        return capture_moves;
+
+    }
+
     public static boolean hasMove(byte[] board, int pos, int color) {
         for (int target : PreComputer.KNIGHT_PREMOVES[pos]) {
             byte target_piece = board[target];

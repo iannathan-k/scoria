@@ -106,6 +106,18 @@ public abstract class PieceHandler {
         };
     }
 
+    public static ArrayList<Integer> getAttacks(byte[] board, int type, int color, int pos) {
+        return switch(type) {
+            case PieceData.PAWN -> Pawn.getCaptures(board, pos, color);
+            case PieceData.KNIGHT -> Knight.getCaptures(board, pos, color);
+            case PieceData.BISHOP -> Bishop.getCaptures(board, pos, color);
+            case PieceData.ROOK -> Rook.getCaptures(board, pos, color);
+            case PieceData.QUEEN -> Queen.getCaptures(board, pos, color);
+            case PieceData.KING -> King.getCaptures(board, pos, color);
+            default -> throw new IllegalArgumentException("Invalid Type");
+        };
+    }
+
     public static boolean hasPossibleMove(byte[] board, int color) {
         for (int i = 0; i < 64; i++) {
             byte piece = board[i];
@@ -136,6 +148,22 @@ public abstract class PieceHandler {
             possible_moves.addAll(generateMoves(board, piece & PieceData.TYPE_MASK, color, i));
         }
         return possible_moves;
+    }
+
+    public static ArrayList<Integer> getAllCaptures(byte[] board, int color) {
+        ArrayList<Integer> capture_moves = new ArrayList<Integer>();
+
+        for (int i = 0; i < 64; i++) {
+            byte piece = board[i];
+            if (piece == PieceData.EMPTY) {
+                continue;
+            }
+            if ((piece & PieceData.COLOR_MASK) != color) {
+                continue;
+            }
+            capture_moves.addAll(getAttacks(board, piece & PieceData.TYPE_MASK, color, i));
+        }
+        return capture_moves;
     }
 
     private static boolean slidingPiece(byte[] board, int[][] premoves, int attacker, int opponent_color) {

@@ -95,6 +95,35 @@ public class Evaluator {
         return evaluation;
     }
 
+    public static int staticEval(byte[] board, int turn) {
+        int evaluation = 0;
+        
+        for (int i = 0; i < 64; i++) {
+            int piece = board[i];
+            if (piece == PieceData.EMPTY) {
+                continue;
+            }
+
+            int type = piece & PieceData.TYPE_MASK;
+            int color = piece & PieceData.COLOR_MASK;
+            int sign = (color == PieceData.WHITE) ? 1 : -1; 
+
+            /* Evaluation methods to try
+             * 1. Adjusted Mobility Weightings
+             * 2. Fixed Mobility Weighting
+             * 3. No Mobility Weighting
+             * 4. Estimated weighting use precomputed moves
+             * 5. Attacked Pieces Weighting
+             */
+
+            evaluation += sign * piece_points[type];
+            evaluation += sign * Evaluator.posWeight(type, color, i);
+            evaluation += sign * PieceHandler.getMobility(board, type, color, i);
+        }
+
+        return evaluation;
+    }
+
     public static int pieceEval(int piece, int pos) {
         int type = piece & PieceData.TYPE_MASK;
         int color = piece & PieceData.COLOR_MASK;
@@ -102,7 +131,7 @@ public class Evaluator {
 
         int evaluation = sign * piece_points[type];
         evaluation += sign * Evaluator.posWeight(type, color, pos);
-        evaluation += sign * 5 * PieceHandler.getMobility(Game.board, type, color, pos);
+        evaluation += sign * PieceHandler.getMobility(Game.board, type, color, pos);
 
         return evaluation;
     }

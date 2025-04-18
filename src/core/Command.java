@@ -32,7 +32,7 @@ public class Command {
 
     private static final String uci_string = 
         """
-        id name Scoria_v3.5.30
+        id name Scoria_v3.5.31
         id author iannathan-k (Ian Nathan Kusmiantoro)
 
         option name Debug Log File type string default <empty>
@@ -51,7 +51,7 @@ public class Command {
         /____/\\___/\\____/_/  /_/\\__,_/  
         
         Ian Nathan Kusmiantoro
-        Version 3.5.30
+        Version 3.5.31
     ========================================
     """;
 
@@ -126,7 +126,7 @@ public class Command {
         switch (sub_args[0]) {
             case "Debug Log File" -> DebugLogger.debug_path = (sub_args.length > 1) ? sub_args[1] : "";
             case "Move Overhead" -> latency = Integer.parseInt(sub_args[1]);
-            case "Clear Hash" -> Transposition.clearTranspositionTable();
+            case "Clear Hash" -> Transposition.clearHashTable();
             default -> DebugLogger.logOut("unrecognized option: " + sub_args[0]);
         }
     }
