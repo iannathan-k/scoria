@@ -82,10 +82,6 @@ public class Scoria {
 
 	private static int quiescence(byte[] board, int alpha, int beta, int turn, int depth) {
 		long board_hash = Zobrist.manualHash(board, turn);
-		if (Transposition.hasQuiescence(board_hash)) {
-			return Transposition.getQuiescence(board_hash);
-		}
-
 		int static_eval = turn * Evaluator.boardEval(board, turn, board_hash, depth);
 		
 		if (static_eval >= beta) return static_eval;
@@ -109,7 +105,6 @@ public class Scoria {
 			alpha = Math.max(eval, alpha);
 		}
 
-		Transposition.addQuiescence(board_hash, best_eval);
 		return best_eval;
 	}
 
