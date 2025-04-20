@@ -10,8 +10,7 @@ import src.core.MoveHandler;
 import src.pieces.*;
 
 public class Scoria {
-	private static final int INITIAL_ALPHA = Integer.MIN_VALUE + 1;
-	private static final int INITIAL_BETA  = Integer.MAX_VALUE - 1;
+	private static final int INFINITY = Integer.MAX_VALUE - 1;
 
 	public static long cancel_time;
 	public static int current_depth;
@@ -31,11 +30,24 @@ public class Scoria {
     	cancel_time = System.currentTimeMillis() + MAX_TIME;
 		current_depth = 0;
 
+		int start_alpha = -INFINITY;
+		int start_beta = INFINITY;
+
     	long start = System.currentTimeMillis();
     	while (System.currentTimeMillis() < cancel_time && current_depth < MAX_DEPTH) {
         	current_depth++;
 			int[] move = new int[current_depth];
-			int eval = negascout(board, current_depth, INITIAL_ALPHA, INITIAL_BETA, turn, move);
+			int eval = negascout(board, current_depth, start_alpha, start_beta, turn, move);
+
+			if (eval <= start_alpha || eval >= start_beta) {
+				start_alpha = -INFINITY;
+				start_beta = INFINITY;
+				current_depth--;
+				continue;
+			}
+
+			start_alpha = eval - 70;
+			start_beta = eval + 70;
        	 
         	if (eval != Integer.MIN_VALUE) {
 				principle_variation = move;
@@ -53,7 +65,7 @@ public class Scoria {
     	return principle_variation;
 	}
 
-	private static int heuristicScore(byte[] board, int move, int color, int depth) {
+	private static int heuristicScore(byte[] board, int move, int color) {
     	int origin_pos = (move >> 8) & MoveHandler.POS_MASK;
     	int target_pos = move & MoveHandler.POS_MASK;
     	int piece_type = board[origin_pos] & PieceData.TYPE_MASK;
@@ -80,6 +92,8 @@ public class Scoria {
 		return true;
 	}
 
+	// Might want to use ply instead of depth as if mate is found within it will not return
+	// A proper evaluation because depth is no longer weighted, it is static. Use ply instead
 	private static int quiescence(byte[] board, int alpha, int beta, int turn, int depth) {
 		long board_hash = Zobrist.manualHash(board, turn);
 		int static_eval = turn * Evaluator.boardEval(board, turn, board_hash, depth);
@@ -90,8 +104,8 @@ public class Scoria {
 		int color = (turn == 1) ? PieceData.WHITE : PieceData.BLACK;
 		ArrayList<Integer> captures_moves = PieceHandler.getAllCaptures(board, color);
 		captures_moves.sort((move1, move2) -> Integer.compare(
-        	heuristicScore(board, move2, color, depth),
-        	heuristicScore(board, move1, color, depth)
+        	heuristicScore(board, move2, color),
+        	heuristicScore(board, move1, color)
     	));
 
 		int best_eval = static_eval;
@@ -147,8 +161,8 @@ public class Scoria {
     	
 		ArrayList<Integer> possible_moves = PieceHandler.getAllMoves(board, color);
     	possible_moves.sort((move1, move2) -> Integer.compare(
-        	heuristicScore(board, move2, color, depth),
-        	heuristicScore(board, move1, color, depth)
+        	heuristicScore(board, move2, color),
+        	heuristicScore(board, move1, color)
     	));
 
 		int best_score = Integer.MIN_VALUE;

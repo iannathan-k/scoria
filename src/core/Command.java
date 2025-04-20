@@ -32,7 +32,7 @@ public class Command {
 
     private static final String uci_string = 
         """
-        id name Scoria_v3.5.33
+        id name Scoria_v3.5.34
         id author iannathan-k (Ian Nathan Kusmiantoro)
 
         option name Debug Log File type string default <empty>
@@ -52,7 +52,7 @@ public class Command {
         /____/\\___/\\____/_/  /_/\\__,_/  
         
         Ian Nathan Kusmiantoro
-        Version 3.5.33
+        Version 3.5.34
     ========================================
     """;
 
@@ -140,7 +140,9 @@ public class Command {
         if (!ponder_hit) return;
 
         String bestmove = "bestmove " + Interface.moveToUci(principal_variation[0]);
-        if (principal_variation.length > 1 && ponder) bestmove += " ponder " + Interface.moveToUci(principal_variation[1]);
+        if (principal_variation.length > 1 && ponder) {
+            bestmove += " ponder " + Interface.moveToUci(principal_variation[1]);
+        }
 
         DebugLogger.logOut(bestmove);
     }
