@@ -16,14 +16,14 @@ public class Scoria {
 	public static int current_depth;
 	public static int[] principle_variation;
 
-	private static int[][] history_table = new int[2][16191];
+	private static int[][] history_table = new int[2][4095];
 
 	public static void preventCancel() {
     	cancel_time = Long.MAX_VALUE;
 	}
 
 	public static void clearHistoryTable() {
-    	history_table = new int[2][16191];
+    	history_table = new int[2][4095];
 	}
 
 	public static int[] iterativeDeepener(byte[] board, int turn, int MAX_DEPTH, long MAX_TIME) {
@@ -66,7 +66,7 @@ public class Scoria {
 	}
 
 	private static int heuristicScore(byte[] board, int move, int color) {
-    	int origin_pos = (move >> 8) & MoveHandler.POS_MASK;
+    	int origin_pos = (move >> 6) & MoveHandler.POS_MASK;
     	int target_pos = move & MoveHandler.POS_MASK;
     	int piece_type = board[origin_pos] & PieceData.TYPE_MASK;
     	byte captured = board[target_pos];
@@ -80,9 +80,25 @@ public class Scoria {
         	score -= Evaluator.piece_points[piece_type];
     	}
 		
-    	score += Math.min(history_table[color >> 3][move & 0xFFFF], 100);
+    	score += Math.min(history_table[color >> 3][move & 0xFFF], 80);
 
     	return score;
+	}
+
+	private static void sortMoves(byte[] board, ArrayList<Integer> possible_moves, int color) {
+		long[] scored_moves = new long[possible_moves.size()];
+		for (int i = 0; i < scored_moves.length; i++) {
+			int move = possible_moves.get(i);
+			scored_moves[i] = (0xFFFL - (long) heuristicScore(board, move, color)) << 40 | (long) i << 32 | move;
+		}
+
+		Arrays.sort(scored_moves);
+
+		possible_moves.clear();
+		for (long scored : scored_moves) {
+			possible_moves.add((int) scored);
+		}
+
 	}
 
 	private static boolean canNullPrune(byte[] board, int turn, int beta, int color) {
@@ -103,10 +119,7 @@ public class Scoria {
 
 		int color = (turn == 1) ? PieceData.WHITE : PieceData.BLACK;
 		ArrayList<Integer> captures_moves = PieceHandler.getAllCaptures(board, color);
-		captures_moves.sort((move1, move2) -> Integer.compare(
-        	heuristicScore(board, move2, color),
-        	heuristicScore(board, move1, color)
-    	));
+		sortMoves(board, captures_moves, color);
 
 		int best_eval = static_eval;
 		for (int moves : captures_moves) {
@@ -160,10 +173,7 @@ public class Scoria {
 		}
     	
 		ArrayList<Integer> possible_moves = PieceHandler.getAllMoves(board, color);
-    	possible_moves.sort((move1, move2) -> Integer.compare(
-        	heuristicScore(board, move2, color),
-        	heuristicScore(board, move1, color)
-    	));
+		sortMoves(board, possible_moves, color);
 
 		int best_score = Integer.MIN_VALUE;
     	int parent_alpha = alpha;
@@ -200,7 +210,7 @@ public class Scoria {
 
         	alpha = Math.max(eval, alpha);
         	if (beta <= alpha) {
-            	history_table[color >> 3][move & 0xFFFF] += depth * depth;
+				history_table[color >> 3][move & 0xFFF] += depth * depth;		
             	break;
         	}
     	}

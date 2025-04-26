@@ -51,7 +51,7 @@ public abstract class Interface {
     }
 
     public static String moveToUci(int move) {
-        String move_string = posToSquare((move >> 8) & MoveHandler.POS_MASK) + posToSquare(move & MoveHandler.POS_MASK);
+        String move_string = posToSquare((move >> 6) & MoveHandler.POS_MASK) + posToSquare(move & MoveHandler.POS_MASK);
         
         if ((move & MoveHandler.PROMO_MASK) != 0) move_string += "q";
         return move_string;
@@ -61,7 +61,7 @@ public abstract class Interface {
         int origin_pos = squareToPos(uci.substring(0, 2));
         int target_pos = squareToPos(uci.substring(2, 4));
 
-        int move = origin_pos << 8 | target_pos;
+        int move = origin_pos << 6 | target_pos;
         byte piece = Game.board[origin_pos];
         byte captured = Game.board[target_pos];
 

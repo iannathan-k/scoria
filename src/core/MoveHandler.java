@@ -12,16 +12,16 @@ public class MoveHandler {
      * flags --> double move, promotion, castle, passant
      */
 
-    public static final int POS_MASK     = 0b00111111;
-    public static final int PASSANT_MASK = 1 << 16;
-    public static final int CASTLE_MASK  = 1 << 17;
-    public static final int PROMO_MASK   = 1 << 18;
-    public static final int DOUBLE_MASK  = 1 << 19;
+    public static final int POS_MASK     = 0b111111;
+    public static final int PASSANT_MASK = 1 << 12;
+    public static final int CASTLE_MASK  = 1 << 13;
+    public static final int PROMO_MASK   = 1 << 14;
+    public static final int DOUBLE_MASK  = 1 << 15;
 
-    public static final int ROW_MASK = 0b00111000;
+    public static final int ROW_MASK = 0b111000;
 
     public static byte pseudoMoveState(byte[] board, int move) {
-        int origin_pos = (move >> 8) & POS_MASK;
+        int origin_pos = (move >> 6) & POS_MASK;
         int target_pos = move & POS_MASK;
         byte piece = board[origin_pos];
         byte captured = board[target_pos];
@@ -43,7 +43,7 @@ public class MoveHandler {
     }
 
     public static void pseudoUndoState(byte[] board, int move, byte captured) {
-        int origin_pos = (move >> 8) & POS_MASK;
+        int origin_pos = (move >> 6) & POS_MASK;
         int target_pos = move & POS_MASK;
         byte piece = board[target_pos];
 
@@ -66,7 +66,7 @@ public class MoveHandler {
         Evaluator.incrementPositionTable(hash);
         PieceHandler.clearPassantRights();
 
-        int origin_pos = (move >> 8) & POS_MASK;
+        int origin_pos = (move >> 6) & POS_MASK;
         int target_pos = move & POS_MASK;
         byte piece = board[origin_pos];
         byte captured = board[target_pos];
@@ -124,7 +124,7 @@ public class MoveHandler {
         Evaluator.decrementPositionTable(hash);
         PieceHandler.popPassantRights();
 
-        int origin_pos = (move >> 8) & POS_MASK;
+        int origin_pos = (move >> 6) & POS_MASK;
         int target_pos = move & POS_MASK;
         byte piece = board[target_pos];
 

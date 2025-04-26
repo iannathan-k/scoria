@@ -35,10 +35,10 @@ public abstract class King {
     }
 
     public static ArrayList<Integer> getMoves(byte[] board, int pos, int color) {
-        ArrayList<Integer> possible_moves = new ArrayList<Integer>();
+        ArrayList<Integer> possible_moves = new ArrayList<Integer>(8);
 
         for (int target : PreComputer.KING_PREMOVES[pos]) {
-            int move = pos << 8 | target;
+            int move = pos << 6 | target;
             byte target_piece = board[target];
 
             if (target_piece == PieceData.EMPTY) {
@@ -54,10 +54,10 @@ public abstract class King {
 
         if (!PieceHandler.underAttack(board, color, pos)) {
             if (canCastle(board, 0b01, color, pos, -1)) {
-                possible_moves.add((pos << 8) | (pos - 2) | MoveHandler.CASTLE_MASK);
+                possible_moves.add((pos << 6) | (pos - 2) | MoveHandler.CASTLE_MASK);
             }
             if (canCastle(board, 0b10, color, pos, 1)) {
-                possible_moves.add((pos << 8) | (pos + 2) | MoveHandler.CASTLE_MASK);
+                possible_moves.add((pos << 6) | (pos + 2) | MoveHandler.CASTLE_MASK);
             }
         }
 
@@ -65,10 +65,10 @@ public abstract class King {
     }
 
     public static ArrayList<Integer> getCaptures(byte[] board, int pos, int color) {
-        ArrayList<Integer> capture_moves = new ArrayList<Integer>();
+        ArrayList<Integer> capture_moves = new ArrayList<Integer>(4);
 
         for (int target : PreComputer.KING_PREMOVES[pos]) {
-            int move = pos << 8 | target;
+            int move = pos << 6 | target;
             byte target_piece = board[target];
 
             if (target_piece == PieceData.EMPTY) {
@@ -89,11 +89,11 @@ public abstract class King {
             byte target_piece = board[target];
 
             if (target_piece == PieceData.EMPTY) {
-                if (!PieceHandler.kingCheck(board, pos << 8 | target, color)) {
+                if (!PieceHandler.kingCheck(board, pos << 6 | target, color)) {
                     return true;
                 }
             } else if ((target_piece & PieceData.COLOR_MASK) != color) {
-                if (!PieceHandler.kingCheck(board, pos << 8 | target, color)) {
+                if (!PieceHandler.kingCheck(board, pos << 6 | target, color)) {
                     return true;
                 }
             }
@@ -117,11 +117,11 @@ public abstract class King {
             byte target_piece = board[target];
 
             if (target_piece == PieceData.EMPTY) {
-                if (!PieceHandler.kingCheck(board, pos << 8 | target, color)) {
+                if (!PieceHandler.kingCheck(board, pos << 6 | target, color)) {
                     mobility++;
                 }
             } else if ((target_piece & PieceData.COLOR_MASK) != color) {
-                if (!PieceHandler.kingCheck(board, pos << 8 | target, color)) {
+                if (!PieceHandler.kingCheck(board, pos << 6 | target, color)) {
                     mobility++;
                 }
             }

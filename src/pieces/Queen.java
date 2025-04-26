@@ -9,7 +9,7 @@ public abstract class Queen {
 
         for (int[] dir : PreComputer.QUEEN_PREMOVES[pos]) {
             for (int target : dir) {
-                int move = pos << 8 | target;
+                int move = pos << 6 | target;
                 byte target_piece = board[target];
 
                 if (target_piece == PieceData.EMPTY) {
@@ -32,11 +32,11 @@ public abstract class Queen {
     }
 
     public static ArrayList<Integer> getCaptures(byte[] board, int pos, int color) {
-        ArrayList<Integer> capture_moves = new ArrayList<Integer>();
+        ArrayList<Integer> capture_moves = new ArrayList<Integer>(4);
 
         for (int[] dir : PreComputer.QUEEN_PREMOVES[pos]) {
             for (int target : dir) {
-                int move = pos << 8 | target;
+                int move = pos << 6 | target;
                 byte target_piece = board[target];
 
                 if (target_piece == PieceData.EMPTY) {
@@ -61,14 +61,14 @@ public abstract class Queen {
                 byte target_piece = board[target];
 
                 if (target_piece == PieceData.EMPTY) {
-                    if (!PieceHandler.kingCheck(board, pos << 8 | target, color)) {
+                    if (!PieceHandler.kingCheck(board, pos << 6 | target, color)) {
                         return true;
                     }
                 } else {
                     if ((target_piece & PieceData.COLOR_MASK) == color) {
                         break;
                     }
-                    if (!PieceHandler.kingCheck(board, pos << 8 | target, color)) {
+                    if (!PieceHandler.kingCheck(board, pos << 6 | target, color)) {
                         return true;
                     }
                     break;
@@ -86,14 +86,14 @@ public abstract class Queen {
                 byte target_piece = board[target];
 
                 if (target_piece == PieceData.EMPTY) {
-                    if (!PieceHandler.kingCheck(board, pos << 8 | target, color)) {
+                    if (!PieceHandler.kingCheck(board, pos << 6 | target, color)) {
                         mobility++;
                     }
                 } else {
                     if ((target_piece & PieceData.COLOR_MASK) == color) {
                         break;
                     }
-                    if (!PieceHandler.kingCheck(board, pos << 8 | target, color)) {
+                    if (!PieceHandler.kingCheck(board, pos << 6 | target, color)) {
                         mobility++;
                     }
                     break;

@@ -24,14 +24,14 @@ public abstract class Pawn{
     }
 
     public static ArrayList<Integer> getMoves(byte[] board, int pos, int color) {
-        ArrayList<Integer> possible_moves = new ArrayList<Integer>();
+        ArrayList<Integer> possible_moves = new ArrayList<Integer>(4);
 
         int[] straight_moves = (color == PieceData.WHITE) 
             ? PreComputer.WHITE_PAWN_PREMOVES[pos] 
             : PreComputer.BLACK_PAWN_PREMOVES[pos];
 
         for (int target : straight_moves) {
-            int move = pos << 8 | target;
+            int move = pos << 6 | target;
             if (board[target & MoveHandler.POS_MASK] != PieceData.EMPTY) {
                 break;
             }
@@ -47,7 +47,7 @@ public abstract class Pawn{
 
         for (int target : capture_moves) {
             byte piece = board[target & MoveHandler.POS_MASK];
-            int move = pos << 8 | target;
+            int move = pos << 6 | target;
 
             if (passantCheck(board, color, pos, target, move, passant_rights)) {
                 possible_moves.add(move | MoveHandler.PASSANT_MASK);
@@ -69,7 +69,7 @@ public abstract class Pawn{
     }
 
     public static ArrayList<Integer> getCaptures(byte[] board, int pos, int color) {
-        ArrayList<Integer> possible_moves = new ArrayList<Integer>();
+        ArrayList<Integer> possible_moves = new ArrayList<Integer>(2);
 
         int passant_rights = PieceHandler.peekPassantRights();
         int[] capture_moves = (color == PieceData.WHITE)
@@ -78,7 +78,7 @@ public abstract class Pawn{
 
         for (int target : capture_moves) {
             byte piece = board[target & MoveHandler.POS_MASK];
-            int move = pos << 8 | target;
+            int move = pos << 6 | target;
 
             if (passantCheck(board, color, pos, target, move, passant_rights)) {
                 possible_moves.add(move | MoveHandler.PASSANT_MASK);
@@ -104,7 +104,7 @@ public abstract class Pawn{
             : PreComputer.BLACK_PAWN_PREMOVES[pos];
 
         for (int target : straight_moves) {
-            int move = pos << 8 | target;
+            int move = pos << 6 | target;
             if (board[target & MoveHandler.POS_MASK] != PieceData.EMPTY) {
                 break;
             }
@@ -121,7 +121,7 @@ public abstract class Pawn{
         for (int target : capture_moves) {
             byte piece = board[target & MoveHandler.POS_MASK];
 
-            if (passantCheck(board, color, pos, target, pos << 8 | target, passant_rights)) {
+            if (passantCheck(board, color, pos, target, pos << 6 | target, passant_rights)) {
                 return true;
             }
 
@@ -131,7 +131,7 @@ public abstract class Pawn{
             if ((piece & PieceData.COLOR_MASK) == color) {
                 continue;
             }
-            if (!PieceHandler.kingCheck(board, pos << 8 | target, color)) {
+            if (!PieceHandler.kingCheck(board, pos << 6 | target, color)) {
                 return true;
             }
         }
