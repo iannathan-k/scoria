@@ -1,6 +1,5 @@
 package src.scoria;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import src.core.DebugLogger;
@@ -8,6 +7,7 @@ import src.core.Game;
 import src.core.Interface;
 import src.core.MoveHandler;
 import src.pieces.*;
+import src.utils.MoveList;
 
 public class Scoria {
 	private static final int INFINITY = Integer.MAX_VALUE - 1;
@@ -85,7 +85,7 @@ public class Scoria {
     	return score;
 	}
 
-	private static void sortMoves(byte[] board, ArrayList<Integer> possible_moves, int color) {
+	private static void sortMoves(byte[] board, MoveList possible_moves, int color) {
 		long[] scored_moves = new long[possible_moves.size()];
 		for (int i = 0; i < scored_moves.length; i++) {
 			int move = possible_moves.get(i);
@@ -118,14 +118,15 @@ public class Scoria {
 		if (alpha < static_eval) alpha = static_eval;
 
 		int color = (turn == 1) ? PieceData.WHITE : PieceData.BLACK;
-		ArrayList<Integer> captures_moves = PieceHandler.getAllCaptures(board, color);
+		MoveList captures_moves = PieceHandler.getAllCaptures(board, color);
 		sortMoves(board, captures_moves, color);
 
 		int best_eval = static_eval;
-		for (int moves : captures_moves) {
-			byte captured = MoveHandler.moveState(board, moves, board_hash);
+		for (int i = 0; i < captures_moves.size(); i++) {
+			int move = captures_moves.get(i);
+			byte captured = MoveHandler.moveState(board, move, board_hash);
 			int eval = -quiescence(board, -beta, -alpha, -turn, depth);
-			MoveHandler.undoState(board, moves, captured, board_hash);
+			MoveHandler.undoState(board, move, captured, board_hash);
 
 			if (eval >= beta) return eval;
 			best_eval = Math.max(eval, best_eval);
@@ -172,7 +173,7 @@ public class Scoria {
 			if (null_eval >= beta) return beta;
 		}
     	
-		ArrayList<Integer> possible_moves = PieceHandler.getAllMoves(board, color);
+		MoveList possible_moves = PieceHandler.getAllMoves(board, color);
 		sortMoves(board, possible_moves, color);
 
 		int best_score = Integer.MIN_VALUE;
@@ -181,7 +182,8 @@ public class Scoria {
 
 		int[] child_variation = new int[current_depth];
 
-    	for (int move : possible_moves) {
+    	for (int i = 0; i < possible_moves.size(); i++) {
+			int move = possible_moves.get(i);
         	byte captured = MoveHandler.moveState(board, move, board_hash);
 
 			int eval;

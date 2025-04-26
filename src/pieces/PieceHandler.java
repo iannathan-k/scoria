@@ -3,6 +3,7 @@ package src.pieces;
 import java.util.*;
 
 import src.core.MoveHandler;
+import src.utils.MoveList;
 
 public abstract class PieceHandler {
     private static int[] king_positions = new int[2]; // {white, black}
@@ -70,7 +71,7 @@ public abstract class PieceHandler {
         return (row | col) > -1 && (row | col) < 8;
     }
 
-    public static ArrayList<Integer> generateMoves(byte[] board, int type, int color, int pos) {
+    public static MoveList generateMoves(byte[] board, int type, int color, int pos) {
         return switch(type) {
             case PieceData.PAWN -> Pawn.getMoves(board, pos, color);
             case PieceData.KNIGHT -> Knight.getMoves(board, pos, color);
@@ -106,7 +107,7 @@ public abstract class PieceHandler {
         };
     }
 
-    public static ArrayList<Integer> getAttacks(byte[] board, int type, int color, int pos) {
+    public static MoveList getAttacks(byte[] board, int type, int color, int pos) {
         return switch(type) {
             case PieceData.PAWN -> Pawn.getCaptures(board, pos, color);
             case PieceData.KNIGHT -> Knight.getCaptures(board, pos, color);
@@ -134,8 +135,8 @@ public abstract class PieceHandler {
         return false;
     }
 
-    public static ArrayList<Integer> getAllMoves(byte[] board, int color) {
-        ArrayList<Integer> possible_moves = new ArrayList<Integer>();
+    public static MoveList getAllMoves(byte[] board, int color) {
+        MoveList possible_moves = new MoveList(0);
 
         for (int i = 0; i < 64; i++) {
             byte piece = board[i];
@@ -150,8 +151,8 @@ public abstract class PieceHandler {
         return possible_moves;
     }
 
-    public static ArrayList<Integer> getAllCaptures(byte[] board, int color) {
-        ArrayList<Integer> capture_moves = new ArrayList<Integer>();
+    public static MoveList getAllCaptures(byte[] board, int color) {
+        MoveList capture_moves = new MoveList(0);
 
         for (int i = 0; i < 64; i++) {
             byte piece = board[i];

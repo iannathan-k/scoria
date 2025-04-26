@@ -1,8 +1,7 @@
 package src.pieces;
 
-import java.util.*;
-
 import src.core.MoveHandler;
+import src.utils.MoveList;
 
 public abstract class King {
 
@@ -34,8 +33,8 @@ public abstract class King {
 
     }
 
-    public static ArrayList<Integer> getMoves(byte[] board, int pos, int color) {
-        ArrayList<Integer> possible_moves = new ArrayList<Integer>(8);
+    public static MoveList getMoves(byte[] board, int pos, int color) {
+        MoveList possible_moves = new MoveList(8);
 
         for (int target : PreComputer.KING_PREMOVES[pos]) {
             int move = pos << 6 | target;
@@ -64,8 +63,8 @@ public abstract class King {
         return possible_moves;
     }
 
-    public static ArrayList<Integer> getCaptures(byte[] board, int pos, int color) {
-        ArrayList<Integer> capture_moves = new ArrayList<Integer>(4);
+    public static MoveList getCaptures(byte[] board, int pos, int color) {
+        MoveList capture_moves = new MoveList(4);
 
         for (int target : PreComputer.KING_PREMOVES[pos]) {
             int move = pos << 6 | target;

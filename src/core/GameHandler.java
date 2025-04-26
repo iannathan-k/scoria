@@ -1,9 +1,9 @@
 package src.core;
 
-import java.util.ArrayList;
 import src.pieces.PieceData;
 import src.pieces.PieceHandler;
 import src.scoria.Evaluator;
+import src.utils.MoveList;
 
 public class GameHandler {
 
@@ -11,11 +11,12 @@ public class GameHandler {
     	if (depth == 0) return 1;
 
     	int color = (turn == 1) ? PieceData.WHITE : PieceData.BLACK;
-    	ArrayList<Integer> possible_moves = PieceHandler.getAllMoves(board, color);
+    	MoveList possible_moves = PieceHandler.getAllMoves(board, color);
 
     	int node_count = 0;
 
-    	for (int move : possible_moves) {
+    	for (int i = 0; i < possible_moves.size(); i++) {
+			int move = possible_moves.get(i);
         	byte captured = MoveHandler.moveState(board, move, -1);
         	node_count += perftCount(board, depth - 1, -turn);
         	MoveHandler.undoState(board, move, captured, -1);
@@ -25,13 +26,14 @@ public class GameHandler {
 
 	public static void perft(int depth) {
     	int color = (Game.turn == 1) ? PieceData.WHITE : PieceData.BLACK;
-    	ArrayList<Integer> first_moves = PieceHandler.getAllMoves(Game.board, color);
+    	MoveList first_moves = PieceHandler.getAllMoves(Game.board, color);
 
     	long total_nodes = 0;
 
     	long start = System.currentTimeMillis();
 
-    	for (int move : first_moves) {
+    	for (int i = 0; i < first_moves.size(); i++) {
+			int move = first_moves.get(i);
         	byte captured = MoveHandler.moveState(Game.board, move, -1);
         	int move_count = perftCount(Game.board, depth - 1, -Game.turn);
         	MoveHandler.undoState(Game.board, move, captured, -1);

@@ -1,8 +1,7 @@
 package src.pieces;
 
-import java.util.*;
-
 import src.core.MoveHandler;
+import src.utils.MoveList;
 
 public abstract class Pawn{
 
@@ -23,8 +22,8 @@ public abstract class Pawn{
         return !PieceHandler.kingCheck(board, move | MoveHandler.PASSANT_MASK, color);
     }
 
-    public static ArrayList<Integer> getMoves(byte[] board, int pos, int color) {
-        ArrayList<Integer> possible_moves = new ArrayList<Integer>(4);
+    public static MoveList getMoves(byte[] board, int pos, int color) {
+        MoveList possible_moves = new MoveList(4);
 
         int[] straight_moves = (color == PieceData.WHITE) 
             ? PreComputer.WHITE_PAWN_PREMOVES[pos] 
@@ -68,8 +67,8 @@ public abstract class Pawn{
         return possible_moves;
     }
 
-    public static ArrayList<Integer> getCaptures(byte[] board, int pos, int color) {
-        ArrayList<Integer> possible_moves = new ArrayList<Integer>(2);
+    public static MoveList getCaptures(byte[] board, int pos, int color) {
+       MoveList possible_moves = new MoveList(2);
 
         int passant_rights = PieceHandler.peekPassantRights();
         int[] capture_moves = (color == PieceData.WHITE)

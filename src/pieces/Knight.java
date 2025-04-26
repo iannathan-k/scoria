@@ -1,11 +1,11 @@
 package src.pieces;
 
-import java.util.ArrayList;
+import src.utils.MoveList;
 
 public abstract class Knight {
 
-    public static ArrayList<Integer> getMoves(byte[] board, int pos, int color) {
-        ArrayList<Integer> possible_moves = new ArrayList<Integer>(8);
+    public static MoveList getMoves(byte[] board, int pos, int color) {
+        MoveList possible_moves = new MoveList(8);
 
         for (int target : PreComputer.KNIGHT_PREMOVES[pos]) {
             byte target_piece = board[target];
@@ -26,8 +26,8 @@ public abstract class Knight {
 
     }
 
-    public static ArrayList<Integer> getCaptures(byte[] board, int pos, int color) {
-        ArrayList<Integer> capture_moves = new ArrayList<Integer>(4);
+    public static MoveList getCaptures(byte[] board, int pos, int color) {
+       MoveList capture_moves = new MoveList(4);
 
         for (int target : PreComputer.KNIGHT_PREMOVES[pos]) {
             byte target_piece = board[target];
