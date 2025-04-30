@@ -10,7 +10,7 @@ import src.pieces.*;
 import src.utils.MoveList;
 
 public class Scoria {
-	private static final int INFINITY = Integer.MAX_VALUE - 1;
+	private static final int INFINITY = Integer.MAX_VALUE - 1000;
 
 	public static long cancel_time;
 	public static int current_depth;
@@ -101,13 +101,6 @@ public class Scoria {
 
 	}
 
-	private static boolean canNullPrune(byte[] board, int turn, int beta, int color) {
-		if (PieceHandler.kingUnderAttack(board, color)) return false;
-		if (Evaluator.staticEval(board, turn) >= beta) return false;
-
-		return true;
-	}
-
 	// Might want to use ply instead of depth as if mate is found within it will not return
 	// A proper evaluation because depth is no longer weighted, it is static. Use ply instead
 	private static int quiescence(byte[] board, int alpha, int beta, int turn, int depth) {
@@ -157,6 +150,15 @@ public class Scoria {
 			return quiescence(board, alpha, beta, turn, depth);
 		}
 
+		int color = (turn == 1) ? PieceData.WHITE : PieceData.BLACK;
+		int static_eval = Evaluator.staticEval(board, turn);
+		boolean in_check = PieceHandler.kingUnderAttack(board, color);
+
+		if (depth == 1 && static_eval < alpha - 100 && !in_check) {
+			Game.node_count++;
+			return quiescence(board, alpha, beta, turn, depth);
+		}
+
 		/* It might be worth noting a few of these conditions required
 		 * 1. You should not do a consecutive null move, so if you made a null move you should not make another one.
 		 * 2. Ply from root should be greater than 2.
@@ -167,8 +169,7 @@ public class Scoria {
 		 * Best is r2 with beta guard
 		 */
 		
-		int color = (turn == 1) ? PieceData.WHITE : PieceData.BLACK;
-		if (depth > 2 && canNullPrune(board, turn, beta, color)) {
+		if (depth > 2 && static_eval >= beta && !in_check) {
 			int null_eval = -negascout(board, depth - 3, -beta, -beta + 1, -turn, variation);
 			if (null_eval >= beta) return beta;
 		}
