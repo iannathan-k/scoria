@@ -18,6 +18,8 @@ public class Scoria {
 
 	private static int[][] history_table = new int[2][4095];
 
+	private static int[] razor_margin = {0, 100, 250, 500};
+
 	public static void preventCancel() {
     	cancel_time = Long.MAX_VALUE;
 	}
@@ -154,19 +156,14 @@ public class Scoria {
 		int static_eval = Evaluator.staticEval(board, turn);
 		boolean in_check = PieceHandler.kingUnderAttack(board, color);
 
-		if (depth == 1 && static_eval < alpha - 100 && !in_check) {
+		if (depth < 4 && static_eval < alpha - razor_margin[depth] && !in_check) {
 			Game.node_count++;
 			return quiescence(board, alpha, beta, turn, depth);
 		}
 
 		/* It might be worth noting a few of these conditions required
 		 * 1. You should not do a consecutive null move, so if you made a null move you should not make another one.
-		 * 2. Ply from root should be greater than 2.
-		 * 3. The board should not only have pawns and kings left.
-		 * 4. Static evaluation should be greater than beta.
-		 * 5. It might be worth noting to play around with the reduction value, anywhere from 3-4
-		 * 
-		 * Best is r2 with beta guard
+		 * 2. The board should not only have pawns and kings left.
 		 */
 		
 		if (depth > 2 && static_eval >= beta && !in_check) {
