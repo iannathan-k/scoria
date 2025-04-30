@@ -41,6 +41,8 @@ public class Scoria {
 			int[] move = new int[current_depth];
 			int eval = negascout(board, current_depth, start_alpha, start_beta, turn, move);
 
+			if (eval == Integer.MIN_VALUE) continue;
+
 			if (eval <= start_alpha || eval >= start_beta) {
 				start_alpha = -INFINITY;
 				start_beta = INFINITY;
@@ -50,17 +52,28 @@ public class Scoria {
 
 			start_alpha = eval - 70;
 			start_beta = eval + 70;
-       	 
-        	if (eval != Integer.MIN_VALUE) {
-				principle_variation = move;
-            	DebugLogger.logOut(
+			principle_variation = move;
+
+			if (Math.abs(eval) > 9000) {
+				int distance = (10001 - Math.abs(eval)) >> 1;
+				if (eval < 0) distance = -distance;
+
+				DebugLogger.logOut(
                 	"info depth " + current_depth +
-                	" score cp " + eval +
+                	" score mate " + distance +
                 	" nodes " + Game.node_count +
                 	" time " + (System.currentTimeMillis() - start) +
                 	" pv " + Interface.getVariationString(move)
             	);
-        	}
+			} else {
+				DebugLogger.logOut(
+					"info depth " + current_depth +
+					" score cp " + eval +
+					" nodes " + Game.node_count +
+					" time " + (System.currentTimeMillis() - start) +
+					" pv " + Interface.getVariationString(move)
+				);
+			}
     	}
 
 		Game.node_count = 0;
@@ -105,9 +118,9 @@ public class Scoria {
 
 	// Might want to use ply instead of depth as if mate is found within it will not return
 	// A proper evaluation because depth is no longer weighted, it is static. Use ply instead
-	private static int quiescence(byte[] board, int alpha, int beta, int turn, int depth) {
+	private static int quiescence(byte[] board, int alpha, int beta, int turn, int ply) {
 		long board_hash = Zobrist.manualHash(board, turn);
-		int static_eval = turn * Evaluator.boardEval(board, turn, board_hash, depth);
+		int static_eval = turn * Evaluator.boardEval(board, turn, board_hash, ply);
 		
 		if (static_eval >= beta) return static_eval;
 		if (alpha < static_eval) alpha = static_eval;
@@ -120,7 +133,7 @@ public class Scoria {
 		for (int i = 0; i < captures_moves.size(); i++) {
 			int move = captures_moves.get(i);
 			byte captured = MoveHandler.moveState(board, move, board_hash);
-			int eval = -quiescence(board, -beta, -alpha, -turn, depth);
+			int eval = -quiescence(board, -beta, -alpha, -turn, ply + 1);
 			MoveHandler.undoState(board, move, captured, board_hash);
 
 			if (eval >= beta) return eval;
@@ -149,7 +162,7 @@ public class Scoria {
 		
 		if (depth == 0 || Evaluator.isGameOver(board, turn, board_hash)) {
 			Game.node_count++;
-			return quiescence(board, alpha, beta, turn, depth);
+			return quiescence(board, alpha, beta, turn, current_depth - depth);
 		}
 
 		int color = (turn == 1) ? PieceData.WHITE : PieceData.BLACK;
@@ -158,7 +171,7 @@ public class Scoria {
 
 		if (depth < 4 && static_eval < alpha - razor_margin[depth] && !in_check) {
 			Game.node_count++;
-			return quiescence(board, alpha, beta, turn, depth);
+			return quiescence(board, alpha, beta, turn, current_depth - depth);
 		}
 
 		/* It might be worth noting a few of these conditions required

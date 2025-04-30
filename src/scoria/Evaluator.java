@@ -59,11 +59,11 @@ public class Evaluator {
         return PieceData.NULL;
     }
 
-    public static int boardEval(byte[] board, int turn, long hash, int depth) {
+    public static int boardEval(byte[] board, int turn, long hash, int ply) {
         switch (gameWinner(board, turn, hash)) {
             case NOT_OVER: break;
-            case PieceData.WHITE: return 10000 * (depth + 1);
-            case PieceData.BLACK: return -10000 * (depth + 1);
+            case PieceData.WHITE: return 10000 - ply;
+            case PieceData.BLACK: return -10000 + ply;
             case PieceData.NULL: return 0;
         }
 
