@@ -10,7 +10,7 @@ import src.pieces.*;
 import src.utils.MoveList;
 
 public class Scoria {
-	private static final int INFINITY = Integer.MAX_VALUE - 1000;
+	private static final int INFINITY = Integer.MAX_VALUE - 2000;
 
 	public static long cancel_time;
 	public static int current_depth;
@@ -18,7 +18,7 @@ public class Scoria {
 
 	private static int[][] history_table = new int[2][4095];
 
-	private static int[] razor_margin = {0, 100, 250, 500};
+	private static int[] razor_margin = {0, 100, 1000};
 
 	public static void preventCancel() {
     	cancel_time = Long.MAX_VALUE;
@@ -169,7 +169,7 @@ public class Scoria {
 		int static_eval = Evaluator.staticEval(board, turn);
 		boolean in_check = PieceHandler.kingUnderAttack(board, color);
 
-		if (depth < 4 && static_eval < alpha - razor_margin[depth] && !in_check) {
+		if (depth < 3 && static_eval < alpha - razor_margin[depth] && !in_check) {
 			Game.node_count++;
 			return quiescence(board, alpha, beta, turn, current_depth - depth);
 		}
