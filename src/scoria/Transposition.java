@@ -28,15 +28,15 @@ public class Transposition {
         }
 
         public boolean isExact() {
-            return this.node_type == EXACT_NODE;
+            return node_type == EXACT_NODE;
         }
 
         public boolean isAlpha() {
-            return this.node_type == ALPHA_NODE;
+            return node_type == ALPHA_NODE;
         }
 
         public boolean isBeta() {
-            return this.node_type == BETA_NODE;
+            return node_type == BETA_NODE;
         }
     }
     

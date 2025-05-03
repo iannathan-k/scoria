@@ -32,11 +32,11 @@ public class Command {
 
     private static final String uci_string = 
         """
-        id name Scoria_v3.5.40
+        id name Scoria_v3.5.41
         id author iannathan-k (Ian Nathan Kusmiantoro)
 
         option name Debug Log File type string default <empty>
-        option name Move Overhead type spin default 0 min 0 max 100
+        option name Move Overhead type spin default 0 min 0 max 1000
         option name Clear Hash type button
         option name Ponder type check default false
         uciok
@@ -52,7 +52,7 @@ public class Command {
         /____/\\___/\\____/_/  /_/\\__,_/  
         
         Ian Nathan Kusmiantoro
-        Version 3.5.40
+        Version 3.5.41
     ========================================
     """;
 
@@ -97,9 +97,10 @@ public class Command {
         }
     }
 
-    private static long calculateTime(long remaining_time) {
-        int remaining_moves = Math.max(60 - (Game.move_number >> 1), 10);
-        return Math.max(150, remaining_time / remaining_moves);
+    private static int calculateTime(int remaining_time) {
+        int remaining_moves = Math.max(60 - (Game.move_number >> 1), 22);
+        int temp_time = remaining_time / remaining_moves;
+        return Math.max(60, temp_time - latency);
     }
 
     private static void goCommand(String command) {
@@ -127,8 +128,6 @@ public class Command {
                 }
             }
         }
-
-        max_time -= latency;
        
         if (!ponder_hit) {
             ListenerThread.ponderhit_time = max_time;
