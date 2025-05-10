@@ -13,7 +13,7 @@ public class Main {
     public static void main(String args[]) {
         
         DebugLogger.logOut(Command.scoria_logo);
-        Game.initGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
+        Game.initGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
         PreComputer.initializePremoves();
 
         Scanner scanner = ListenerThread.scanner;

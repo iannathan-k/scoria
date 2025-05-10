@@ -82,5 +82,9 @@ public abstract class Setup {
             int color = fen_stream[3].charAt(1) == '6' ? PieceData.BLACK : PieceData.WHITE;
             PieceHandler.setPassantRights(col, color);
         }
+
+        if (fen_stream.length == 6) {
+            Game.move_number = Integer.parseInt(fen_stream[5]) << 1;
+        }
     }
 }
