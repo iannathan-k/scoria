@@ -7,7 +7,7 @@ import src.core.Game;
 import src.core.Interface;
 import src.core.MoveHandler;
 import src.pieces.*;
-import src.utils.MoveList;
+import src.utils.*;
 
 public class Scoria {
 	private static final int INFINITY = Integer.MAX_VALUE - 2000;
@@ -148,7 +148,7 @@ public class Scoria {
     	long board_hash = Zobrist.manualHash(board, turn);
     	Transposition.BoardState entry = Transposition.getTransposition(board_hash);
     	if (entry != null && entry.getDepth() >= depth) {
-			Arrays.fill(variation, depth, current_depth, 0);
+			System.arraycopy(entry.getBestLine(), 0, variation, current_depth - depth, depth);
         	if (entry.isExact()) {
             	return entry.getBestScore();
         	}
@@ -233,7 +233,7 @@ public class Scoria {
     	(best_score <= parent_alpha) ? Transposition.ALPHA_NODE :
     	Transposition.EXACT_NODE;
 
-    	Transposition.addTransposition(board_hash, new Transposition.BoardState(depth, best_score, node_type));
+    	Transposition.addTransposition(board_hash, new Transposition.BoardState(depth, best_score, node_type, Arrays.copyOfRange(variation, current_depth - depth, variation.length)));
 
         return best_score;
 	}

@@ -1,9 +1,5 @@
 package src.core;
 
-import src.scoria.Evaluator;
-import src.scoria.Scoria;
-import src.scoria.Zobrist;
-
 public class Game {
     
     // Game Attributes
@@ -18,9 +14,6 @@ public class Game {
 
     public static void initGame(String fen) {
         Setup.setUp(board, fen);
-        Zobrist.initTable();
-        Scoria.clearHistoryTable();
-        Evaluator.clearPositionTable();
 
         node_count = 0;
         move_number = 0;

@@ -7,6 +7,7 @@ import src.core.DebugLogger;
 import src.core.Game;
 import src.core.ListenerThread;
 import src.pieces.PreComputer;
+import src.scoria.Zobrist;
 
 public class Main {
 
@@ -15,6 +16,7 @@ public class Main {
         DebugLogger.logOut(Command.scoria_logo);
         Game.initGame("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
         PreComputer.initializePremoves();
+        Zobrist.initTable();
 
         Scanner scanner = ListenerThread.scanner;
 
