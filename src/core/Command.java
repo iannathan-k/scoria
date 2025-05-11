@@ -115,6 +115,8 @@ public class Command {
                 case "depth" -> max_depth = Integer.parseInt(args[i + 1]);
                 case "btime" -> max_time = (Game.turn == -1) ? calculateTime(Integer.parseInt(args[i + 1])) : max_time;
                 case "wtime" -> max_time = (Game.turn == 1) ? calculateTime(Integer.parseInt(args[i + 1])) : max_time;
+                case "binc" -> max_time += (Game.turn == -1) ? Integer.parseInt(args[i + 1]) : 0;
+                case "winc" -> max_time += (Game.turn == 1) ? Integer.parseInt(args[i + 1]) : 0;
                 case "infinite" -> new ListenerThread().start();
                 case "ponder" -> {
                     new ListenerThread().start();
