@@ -18,7 +18,8 @@ public class Scoria {
 
 	private static int[][] history_table = new int[2][4095];
 
-	private static int[] razor_margin = {0, 100, 1000};
+	private static int[] razor_margin = {0, 200, 1000};
+	private static int[] futility_margin = {0, 100, 600};
 
 	public static void preventCancel() {
     	cancel_time = Long.MAX_VALUE;
@@ -174,6 +175,15 @@ public class Scoria {
 			return quiescence(board, alpha, beta, turn, current_depth - depth);
 		}
 
+		if (depth < 3 && static_eval >= beta + futility_margin[depth] && !in_check) {
+			return quiescence(board, alpha, beta, turn, current_depth - depth);
+		}
+
+		boolean is_futile = false;
+		if (depth < 3 && static_eval < alpha - futility_margin[depth] && !in_check) {
+			is_futile = true;
+		}
+
 		/* It might be worth noting a few of these conditions required
 		 * 1. You should not do a consecutive null move, so if you made a null move you should not make another one.
 		 * 2. The board should not only have pawns and kings left.
@@ -195,6 +205,12 @@ public class Scoria {
 
     	for (int i = 0; i < possible_moves.size(); i++) {
 			int move = possible_moves.get(i);
+			boolean is_quiet = board[move & MoveHandler.POS_MASK] == PieceData.EMPTY;
+
+			if (!first_move && is_futile && is_quiet) {
+				continue;
+			}
+
         	byte captured = MoveHandler.moveState(board, move, board_hash);
 
 			int eval;
