@@ -17,7 +17,7 @@ public class Evaluator {
     }
 
     public static void decrementPositionTable(long hash) {
-        position_table.put(hash, position_table.get(hash) - 1);
+        position_table.put(hash, position_table.getOrDefault(hash, 1) - 1);
     }
 
     public static void clearPositionTable() {

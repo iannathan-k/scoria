@@ -32,7 +32,7 @@ public class Command {
 
     private static final String uci_string = 
         """
-        id name Scoria_v3.6.43
+        id name Scoria_v3.6.44
         id author iannathan-k (Ian Nathan Kusmiantoro)
 
         option name Debug Log File type string default <empty>
@@ -52,7 +52,7 @@ public class Command {
         /____/\\___/\\____/_/  /_/\\__,_/  
         
         Ian Nathan Kusmiantoro
-        Version 3.6.43
+        Version 3.6.44
     ========================================
     """;
 
@@ -91,6 +91,7 @@ public class Command {
         for (String uci_move : move_args) {
             long hash = Zobrist.manualHash(Game.board, Game.turn);
             int bot_move = Interface.uciToMove(uci_move);
+            Evaluator.decrementPositionTable(hash);
             MoveHandler.moveState(Game.board, bot_move, hash);
             Game.turn = -Game.turn;
             Game.move_number++;

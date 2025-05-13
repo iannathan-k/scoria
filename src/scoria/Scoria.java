@@ -19,7 +19,7 @@ public class Scoria {
 	private static int[][] history_table = new int[2][4095];
 
 	private static int[] razor_margin = {0, 200, 1000};
-	private static int[] futility_margin = {0, 100, 600};
+	private static int[] futility_margin = {0, 150, 750};
 
 	public static void preventCancel() {
     	cancel_time = Long.MAX_VALUE;
