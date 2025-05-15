@@ -81,7 +81,7 @@ public class Scoria {
     	return principle_variation;
 	}
 
-	private static int heuristicScore(byte[] board, int move, int color) {
+	private static int heuristicScore(byte[] board, int move, int color, int depth) {
     	int origin_pos = (move >> 6) & MoveHandler.POS_MASK;
     	int target_pos = move & MoveHandler.POS_MASK;
     	int piece_type = board[origin_pos] & PieceData.TYPE_MASK;
@@ -98,14 +98,16 @@ public class Scoria {
 		
     	score += Math.min(history_table[color >> 3][move & 0xFFF], 80);
 
+		if (depth > 2 && principle_variation[current_depth - depth] == move) score += 1000;
+
     	return score;
 	}
 
-	private static void sortMoves(byte[] board, MoveList possible_moves, int color) {
+	private static void sortMoves(byte[] board, MoveList possible_moves, int color, int depth) {
 		long[] scored_moves = new long[possible_moves.size()];
 		for (int i = 0; i < scored_moves.length; i++) {
 			int move = possible_moves.get(i);
-			scored_moves[i] = (0xFFFL - (long) heuristicScore(board, move, color)) << 40 | (long) i << 32 | move;
+			scored_moves[i] = (0xFFFL - (long) heuristicScore(board, move, color, depth)) << 40 | (long) i << 32 | move;
 		}
 
 		Arrays.sort(scored_moves);
@@ -117,8 +119,6 @@ public class Scoria {
 
 	}
 
-	// Might want to use ply instead of depth as if mate is found within it will not return
-	// A proper evaluation because depth is no longer weighted, it is static. Use ply instead
 	private static int quiescence(byte[] board, int alpha, int beta, int turn, int ply) {
 		long board_hash = Zobrist.manualHash(board, turn);
 		int static_eval = turn * Evaluator.boardEval(board, turn, board_hash, ply);
@@ -128,21 +128,26 @@ public class Scoria {
 
 		int color = (turn == 1) ? PieceData.WHITE : PieceData.BLACK;
 		MoveList captures_moves = PieceHandler.getAllCaptures(board, color);
-		sortMoves(board, captures_moves, color);
+		sortMoves(board, captures_moves, color, -1);
 
-		int best_eval = static_eval;
 		for (int i = 0; i < captures_moves.size(); i++) {
 			int move = captures_moves.get(i);
 			byte captured = MoveHandler.moveState(board, move, board_hash);
+
+			int gain = Evaluator.piece_points[captured & PieceData.TYPE_MASK];
+			if (static_eval + gain + 100 < alpha) {
+				MoveHandler.undoState(board, move, captured, board_hash);
+				continue;
+			}
+
 			int eval = -quiescence(board, -beta, -alpha, -turn, ply + 1);
 			MoveHandler.undoState(board, move, captured, board_hash);
 
 			if (eval >= beta) return eval;
-			best_eval = Math.max(eval, best_eval);
 			alpha = Math.max(eval, alpha);
 		}
 
-		return best_eval;
+		return alpha;
 	}
 
 	public static int negascout(byte[] board, int depth, int alpha, int beta, int turn, int[] variation) {
@@ -195,7 +200,7 @@ public class Scoria {
 		}
     	
 		MoveList possible_moves = PieceHandler.getAllMoves(board, color);
-		sortMoves(board, possible_moves, color);
+		sortMoves(board, possible_moves, color, depth);
 
 		int best_score = Integer.MIN_VALUE;
     	int parent_alpha = alpha;
@@ -237,9 +242,12 @@ public class Scoria {
             	variation[current_depth - depth] = move;
         	}
 
+			if (eval >= beta && is_quiet) {
+				history_table[color >> 3][move & 0xFFF] += depth * depth;	
+			}
+
         	alpha = Math.max(eval, alpha);
         	if (beta <= alpha) {
-				history_table[color >> 3][move & 0xFFF] += depth * depth;		
             	break;
         	}
     	}
