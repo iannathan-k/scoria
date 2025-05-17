@@ -17,6 +17,7 @@ public class Scoria {
 	public static int[] principle_variation;
 
 	private static int[][] history_table = new int[2][4095];
+	// private static int[][] killer_table = new int[64][2];
 
 	private static int[] razor_margin = {0, 200, 1000};
 	private static int[] futility_margin = {0, 150, 750};
@@ -81,7 +82,9 @@ public class Scoria {
     	return principle_variation;
 	}
 
-	private static int heuristicScore(byte[] board, int move, int color, int depth) {
+	private static int heuristicScore(byte[] board, int move, int color, int depth, int hash_move) {
+		if (hash_move == move) return 10000;
+
     	int origin_pos = (move >> 6) & MoveHandler.POS_MASK;
     	int target_pos = move & MoveHandler.POS_MASK;
     	int piece_type = board[origin_pos] & PieceData.TYPE_MASK;
@@ -98,16 +101,23 @@ public class Scoria {
 		
     	score += Math.min(history_table[color >> 3][move & 0xFFF], 80);
 
-		if (depth > 2 && principle_variation[current_depth - depth] == move) score += 1000;
+		// if (depth > 2 && principle_variation[current_depth - depth] == move) score += 1000;
+
+		// if (killer_table[current_depth - depth][0] == move) score += 100;
+		// else if (killer_table[current_depth - depth][1] == move) score += 80;
 
     	return score;
 	}
 
-	private static void sortMoves(byte[] board, MoveList possible_moves, int color, int depth) {
+	private static void sortMoves(byte[] board, MoveList possible_moves, int color, int depth, long hash) {
+		int hash_move = -1;
+		Transposition.BoardState hash_entry = Transposition.getTransposition(hash);
+		if (hash_entry != null) hash_move = hash_entry.getBestMove();
+
 		long[] scored_moves = new long[possible_moves.size()];
 		for (int i = 0; i < scored_moves.length; i++) {
 			int move = possible_moves.get(i);
-			scored_moves[i] = (0xFFFL - (long) heuristicScore(board, move, color, depth)) << 40 | (long) i << 32 | move;
+			scored_moves[i] = (0xFFFFL - (long) heuristicScore(board, move, color, depth, hash_move)) << 40 | (long) i << 32 | move;
 		}
 
 		Arrays.sort(scored_moves);
@@ -128,8 +138,9 @@ public class Scoria {
 
 		int color = (turn == 1) ? PieceData.WHITE : PieceData.BLACK;
 		MoveList captures_moves = PieceHandler.getAllCaptures(board, color);
-		sortMoves(board, captures_moves, color, -1);
+		sortMoves(board, captures_moves, color, -1, board_hash);
 
+		int best_eval = static_eval;
 		for (int i = 0; i < captures_moves.size(); i++) {
 			int move = captures_moves.get(i);
 			byte captured = MoveHandler.moveState(board, move, board_hash);
@@ -144,10 +155,11 @@ public class Scoria {
 			MoveHandler.undoState(board, move, captured, board_hash);
 
 			if (eval >= beta) return eval;
+			best_eval = Math.max(eval, best_eval);
 			alpha = Math.max(eval, alpha);
 		}
 
-		return alpha;
+		return best_eval;
 	}
 
 	public static int negascout(byte[] board, int depth, int alpha, int beta, int turn, int[] variation) {
@@ -200,7 +212,7 @@ public class Scoria {
 		}
     	
 		MoveList possible_moves = PieceHandler.getAllMoves(board, color);
-		sortMoves(board, possible_moves, color, depth);
+		sortMoves(board, possible_moves, color, depth, board_hash);
 
 		int best_score = Integer.MIN_VALUE;
     	int parent_alpha = alpha;
@@ -243,7 +255,13 @@ public class Scoria {
         	}
 
 			if (eval >= beta && is_quiet) {
-				history_table[color >> 3][move & 0xFFF] += depth * depth;	
+				history_table[color >> 3][move & 0xFFF] += depth * depth;
+
+				// int ply = current_depth - depth;
+				// if (killer_table[ply][0] != move) {
+				// 	killer_table[ply][1] = killer_table[ply][0];
+				// 	killer_table[ply][0] = move;
+				// }
 			}
 
         	alpha = Math.max(eval, alpha);

@@ -33,6 +33,10 @@ public class Transposition {
             return best_line;
         }
 
+        public int getBestMove() {
+            return best_line[0];
+        }
+
         public boolean isExact() {
             return node_type == EXACT_NODE;
         }
