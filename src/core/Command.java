@@ -32,7 +32,7 @@ public class Command {
 
     private static final String uci_string = 
         """
-        id name Scoria_v3.7.44
+        id name Scoria_v3.7.45
         id author iannathan-k (Ian Nathan Kusmiantoro)
 
         option name Debug Log File type string default <empty>
@@ -52,7 +52,7 @@ public class Command {
         /____/\\___/\\____/_/  /_/\\__,_/  
         
         Ian Nathan Kusmiantoro
-        Version 3.7.44
+        Version 3.7.45
     ========================================
     """;
 
