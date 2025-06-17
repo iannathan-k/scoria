@@ -41,7 +41,7 @@ public class Scoria {
     	while (System.currentTimeMillis() < cancel_time && current_depth < MAX_DEPTH) {
         	current_depth++;
 			int[] move = new int[current_depth];
-			int eval = negascout(board, current_depth, start_alpha, start_beta, turn, move);
+			int eval = negascout(board, current_depth, start_alpha, start_beta, turn, move, true);
 
 			if (eval == Integer.MIN_VALUE) continue;
 
@@ -162,7 +162,7 @@ public class Scoria {
 		return best_eval;
 	}
 
-	public static int negascout(byte[] board, int depth, int alpha, int beta, int turn, int[] variation) {
+	public static int negascout(byte[] board, int depth, int alpha, int beta, int turn, int[] variation, boolean allow_null) {
     	long board_hash = Zobrist.manualHash(board, turn);
     	Transposition.BoardState entry = Transposition.getTransposition(board_hash);
     	if (entry != null && entry.getDepth() >= depth) {
@@ -206,8 +206,8 @@ public class Scoria {
 		 * 2. The board should not only have pawns and kings left.
 		 */
 		
-		if (depth > 2 && static_eval >= beta && !in_check) {
-			int null_eval = -negascout(board, depth - 3, -beta, -beta + 1, -turn, variation);
+		if (depth > 2 && static_eval >= beta && !in_check && allow_null) {
+			int null_eval = -negascout(board, depth - 3, -beta, -beta + 1, -turn, variation, false);
 			if (null_eval >= beta) return beta;
 		}
     	
@@ -232,13 +232,13 @@ public class Scoria {
 
 			int eval;
 			if (first_move) {
-				eval = -negascout(board, depth - 1, -beta, -alpha, -turn, child_variation);
+				eval = -negascout(board, depth - 1, -beta, -alpha, -turn, child_variation, allow_null);
 				first_move = false;
 			} else {
-				eval = -negascout(board, depth - 1, -alpha - 1, -alpha, -turn, child_variation);
+				eval = -negascout(board, depth - 1, -alpha - 1, -alpha, -turn, child_variation, allow_null);
 
 				if (eval > alpha && eval < beta) {
-					eval = -negascout(board, depth - 1, -beta, -alpha, -turn, child_variation);
+					eval = -negascout(board, depth - 1, -beta, -alpha, -turn, child_variation, allow_null);
 				}
 			}
 
