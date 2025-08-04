@@ -99,12 +99,10 @@ public class Scoria {
         	score -= Evaluator.piece_points[piece_type];
     	}
 		
-    	score += Math.min(history_table[color >> 3][move & 0xFFF], 80);
+		// score += history_table[color >> 3][move & 0xFFF];
+		score += Math.min(history_table[color >> 3][move & 0xFFF], 80);
 
 		// if (depth > 2 && principle_variation[current_depth - depth] == move) score += 1000;
-
-		// if (killer_table[current_depth - depth][0] == move) score += 100;
-		// else if (killer_table[current_depth - depth][1] == move) score += 80;
 
     	return score;
 	}
@@ -228,6 +226,11 @@ public class Scoria {
 				continue;
 			}
 
+			int reduction = 0;
+			if (depth > 2 && i > 3 && is_quiet && !in_check) {
+				reduction = 1;
+			}
+
         	byte captured = MoveHandler.moveState(board, move, board_hash);
 
 			int eval;
@@ -235,7 +238,7 @@ public class Scoria {
 				eval = -negascout(board, depth - 1, -beta, -alpha, -turn, child_variation, allow_null);
 				first_move = false;
 			} else {
-				eval = -negascout(board, depth - 1, -alpha - 1, -alpha, -turn, child_variation, allow_null);
+				eval = -negascout(board, depth - 1 - reduction, -alpha - 1, -alpha, -turn, child_variation, allow_null);
 
 				if (eval > alpha && eval < beta) {
 					eval = -negascout(board, depth - 1, -beta, -alpha, -turn, child_variation, allow_null);
@@ -269,6 +272,13 @@ public class Scoria {
             	break;
         	}
     	}
+
+		// if (depth >= 4) {
+		// 	for (int i = 0; i < 4095; i++) {
+		// 		history_table[0][i] >>= 1;
+		// 		history_table[1][i] >>= 1;
+		// 	}
+		// }
 
 		int node_type = 
         (best_score >= beta) ? Transposition.BETA_NODE :
