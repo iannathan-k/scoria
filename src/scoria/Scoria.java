@@ -18,6 +18,7 @@ public class Scoria {
 
 	private static int[][] history_table = new int[2][4095];
 	// private static int[][] killer_table = new int[64][2];
+	private static int MAX_HISTORY = 512;
 
 	private static int[] razor_margin = {0, 200, 1000};
 	private static int[] futility_margin = {0, 150, 750};
@@ -97,10 +98,9 @@ public class Scoria {
         	score += 100;
         	score += 3 * Evaluator.piece_points[captured & PieceData.TYPE_MASK];
         	score -= Evaluator.piece_points[piece_type];
-    	}
-		
-		// score += history_table[color >> 3][move & 0xFFF];
-		score += Math.min(history_table[color >> 3][move & 0xFFF], 80);
+    	} else {
+			score += history_table[color >> 3][move & 0xFFF];
+		}
 
 		// if (depth > 2 && principle_variation[current_depth - depth] == move) score += 1000;
 
@@ -228,7 +228,7 @@ public class Scoria {
 
 			int reduction = 0;
 			if (depth > 2 && i > 3 && is_quiet && !in_check) {
-				reduction = 1;
+				reduction = (int) (Math.log(depth) * Math.log(i)) >> 1;
 			}
 
         	byte captured = MoveHandler.moveState(board, move, board_hash);
@@ -258,8 +258,10 @@ public class Scoria {
         	}
 
 			if (eval >= beta && is_quiet) {
-				history_table[color >> 3][move & 0xFFF] += depth * depth;
-
+				int current = history_table[color >> 3][move & 0xFFF];
+				int bonus = depth * depth;
+				history_table[color >> 3][move & 0xFFF] += bonus - current * bonus / MAX_HISTORY;
+				
 				// int ply = current_depth - depth;
 				// if (killer_table[ply][0] != move) {
 				// 	killer_table[ply][1] = killer_table[ply][0];
@@ -273,12 +275,12 @@ public class Scoria {
         	}
     	}
 
-		// if (depth >= 4) {
-		// 	for (int i = 0; i < 4095; i++) {
-		// 		history_table[0][i] >>= 1;
-		// 		history_table[1][i] >>= 1;
-		// 	}
-		// }
+		if (depth >= 4) {
+			for (int i = 0; i < 4095; i++) {
+				history_table[0][i] >>= 1;
+				history_table[1][i] >>= 1;
+			}
+		}
 
 		int node_type = 
         (best_score >= beta) ? Transposition.BETA_NODE :
