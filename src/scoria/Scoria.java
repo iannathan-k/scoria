@@ -102,8 +102,6 @@ public class Scoria {
 			score += history_table[color >> 3][move & 0xFFF];
 		}
 
-		// if (depth > 2 && principle_variation[current_depth - depth] == move) score += 1000;
-
     	return score;
 	}
 
@@ -275,7 +273,7 @@ public class Scoria {
         	}
     	}
 
-		if (depth >= 4) {
+		if (Game.node_count % 10000 == 0) {
 			for (int i = 0; i < 4095; i++) {
 				history_table[0][i] >>= 1;
 				history_table[1][i] >>= 1;
