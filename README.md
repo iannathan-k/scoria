@@ -40,11 +40,11 @@ An estimation of Scoria's rating was determined by playing against the different
 
 ```
 Rank Name             Elo    +    - games score oppo. draws
-   1 skill-master 5   142   70   69    50   52%   127   12%
+   1 master-skill-5   142   70   69    50   52%   127   12%
    2 Scoria_v3.8.49   127   38   37   200   70%   -32   13%
-   3 skill-master-4    17   68   71    50   35%   127   18%
-   4 skill-master-3   -85   71   80    50   22%   127   16%
-   5 skill-master-2  -201   83  105    50   13%   127    6%
+   3 master-skill-4    17   68   71    50   35%   127   18%
+   4 master-skill-3   -85   71   80    50   22%   127   16%
+   5 master-skill-2  -201   83  105    50   13%   127    6%
 ```
 
 The results were adjusted relative to the official [Skill Level Ratings](https://github.com/official-stockfish/Stockfish/commit/a08b8d4) provided by Stockfish, which itself was calibrated against [CCRL](https://computerchess.org.uk/ccrl/4040/).
