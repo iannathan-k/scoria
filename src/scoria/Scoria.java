@@ -11,17 +11,16 @@ import src.utils.*;
 
 public class Scoria {
 	private static final int INFINITY = Integer.MAX_VALUE - 2000;
+	private static final int MAX_HISTORY = 512;
+
+	private static final int[] RAZOR_MARGIN = {0, 200, 1000};
+	private static final int[] FUTILITY_MARGIN = {0, 150, 750};
 
 	public static long cancel_time;
 	public static int current_depth;
 	public static int[] principle_variation;
 
 	private static int[][] history_table = new int[2][4095];
-	// private static int[][] killer_table = new int[64][2];
-	private static int MAX_HISTORY = 512;
-
-	private static int[] razor_margin = {0, 200, 1000};
-	private static int[] futility_margin = {0, 150, 750};
 
 	public static void preventCancel() {
     	cancel_time = Long.MAX_VALUE;
@@ -161,6 +160,8 @@ public class Scoria {
 	public static int negascout(byte[] board, int depth, int alpha, int beta, int turn, int[] variation, boolean allow_null) {
     	long board_hash = Zobrist.manualHash(board, turn);
     	Transposition.BoardState entry = Transposition.getTransposition(board_hash);
+
+		// Transposition Table
     	if (entry != null && entry.getDepth() >= depth) {
 			System.arraycopy(entry.getBestLine(), 0, variation, current_depth - depth, depth);
         	if (entry.isExact()) {
@@ -183,25 +184,24 @@ public class Scoria {
 		int static_eval = Evaluator.staticEval(board, turn);
 		boolean in_check = PieceHandler.kingUnderAttack(board, color);
 
-		if (depth < 3 && static_eval < alpha - razor_margin[depth] && !in_check) {
+		// Razoring & Deep Razoring
+		if (depth < 3 && static_eval < alpha - RAZOR_MARGIN[depth] && !in_check) {
 			Game.node_count++;
 			return quiescence(board, alpha, beta, turn, current_depth - depth);
 		}
 
-		if (depth < 3 && static_eval >= beta + futility_margin[depth] && !in_check) {
+		// Reverse Futility Pruning
+		if (depth < 3 && static_eval >= beta + FUTILITY_MARGIN[depth] && !in_check) {
 			return quiescence(board, alpha, beta, turn, current_depth - depth);
 		}
 
+		// Futility Pruning
 		boolean is_futile = false;
-		if (depth < 3 && static_eval < alpha - futility_margin[depth] && !in_check) {
+		if (depth < 3 && static_eval < alpha - FUTILITY_MARGIN[depth] && !in_check) {
 			is_futile = true;
 		}
-
-		/* It might be worth noting a few of these conditions required
-		 * 1. You should not do a consecutive null move, so if you made a null move you should not make another one.
-		 * 2. The board should not only have pawns and kings left.
-		 */
 		
+		// Null Move Pruning
 		if (depth > 2 && static_eval >= beta && !in_check && allow_null) {
 			int null_eval = -negascout(board, depth - 3, -beta, -beta + 1, -turn, variation, false);
 			if (null_eval >= beta) return beta;
@@ -224,6 +224,7 @@ public class Scoria {
 				continue;
 			}
 
+			// Late Move Reduction
 			int reduction = 0;
 			if (depth > 2 && i > 3 && is_quiet && !in_check) {
 				reduction = (int) (Math.log(depth) * Math.log(i)) >> 1;
@@ -231,6 +232,7 @@ public class Scoria {
 
         	byte captured = MoveHandler.moveState(board, move, board_hash);
 
+			// Null Window
 			int eval;
 			if (first_move) {
 				eval = -negascout(board, depth - 1, -beta, -alpha, -turn, child_variation, allow_null);
@@ -255,16 +257,11 @@ public class Scoria {
             	variation[current_depth - depth] = move;
         	}
 
+			// History Heuristic
 			if (eval >= beta && is_quiet) {
 				int current = history_table[color >> 3][move & 0xFFF];
 				int bonus = depth * depth;
 				history_table[color >> 3][move & 0xFFF] += bonus - current * bonus / MAX_HISTORY;
-				
-				// int ply = current_depth - depth;
-				// if (killer_table[ply][0] != move) {
-				// 	killer_table[ply][1] = killer_table[ply][0];
-				// 	killer_table[ply][0] = move;
-				// }
 			}
 
         	alpha = Math.max(eval, alpha);
@@ -280,7 +277,7 @@ public class Scoria {
 			}
 		}
 
-		int node_type = 
+		byte node_type = 
         (best_score >= beta) ? Transposition.BETA_NODE :
     	(best_score <= parent_alpha) ? Transposition.ALPHA_NODE :
     	Transposition.EXACT_NODE;

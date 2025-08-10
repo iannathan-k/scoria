@@ -6,8 +6,8 @@ import src.scoria.Evaluator;
 public class MoveHandler {
     /* 
      * Move
-     * 00000000 00000000 00000000 00000000
-     *          flags    origin   target
+     * 00000000 00000000 0000   000000   000000
+     *                   flags  origin   target
      * 
      * flags --> double move, promotion, castle, passant
      */

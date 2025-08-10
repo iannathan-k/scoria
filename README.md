@@ -41,7 +41,7 @@ An estimation of Scoria's rating was determined by playing against the different
 ```
 Rank Name             Elo    +    - games score oppo. draws
    1 skill-master 5   142   70   69    50   52%   127   12%
-   2 Scoria_v3.8.48   127   38   37   200   70%   -32   13%
+   2 Scoria_v3.8.49   127   38   37   200   70%   -32   13%
    3 skill-master-4    17   68   71    50   35%   127   18%
    4 skill-master-3   -85   71   80    50   22%   127   16%
    5 skill-master-2  -201   83  105    50   13%   127    6%
@@ -53,7 +53,7 @@ The results were adjusted relative to the official [Skill Level Ratings](https:/
 ```
    # PLAYER             :  RATING   ERROR   PLAYED
    1 master-skill-5     :  2203.7    25.3     5422
-   2 Scoria_v3.8.48     :  2028.1   126.1      200
+   2 Scoria_v3.8.49     :  2028.1   126.1      200
    3 master-skill-4     :  1922.9    25.9     5399
    4 master-skill-3     :  1742.3    27.8     4439
    5 master-skill-2     :  1608.4    29.4     4389

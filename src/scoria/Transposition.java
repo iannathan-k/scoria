@@ -4,17 +4,17 @@ import java.util.*;
 
 public class Transposition {
 
-    public static final int EXACT_NODE = 0;
-    public static final int ALPHA_NODE = 1;
-    public static final int BETA_NODE = 2;
+    public static final byte EXACT_NODE = 0;
+    public static final byte ALPHA_NODE = 1;
+    public static final byte BETA_NODE = 2;
 
     public static class BoardState {
         private int depth;
         private int best_score;
-        private int node_type;
+        private byte node_type;
         private int[] best_line;
 
-        public BoardState(int depth, int best_score, int node_type, int[] best_line) {
+        public BoardState(int depth, int best_score, byte node_type, int[] best_line) {
             this.depth = depth;
             this.best_score = best_score;
             this.node_type = node_type;
