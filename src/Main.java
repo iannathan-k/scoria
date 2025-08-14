@@ -1,10 +1,12 @@
 package src;
 
 import src.game.Precomputer;
+import src.utils.GameStack;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Scoria v4.0.0");
         Precomputer.initAllMoveTables();
+        GameStack.initGameStack();
+        System.out.println("Scoria v4.0.1");
     }
 }
