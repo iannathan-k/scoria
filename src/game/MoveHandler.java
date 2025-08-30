@@ -9,7 +9,7 @@ public class MoveHandler {
      *             flags     origin target
      * 
      * flags --> double move, en passant, castle K, castle Q,
-     *           capture, promo N, promo B, promo R, promo Q
+     *           promo N, promo B, promo R, promo Q
      */
 
     public static final int POSITION_MASK           = 0x3F;

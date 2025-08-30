@@ -8,8 +8,6 @@ public class Precomputer {
 
     public static final long[] WHITE_PAWN_ATTACK_TABLE = new long[64];
     public static final long[] BLACK_PAWN_ATTACK_TABLE = new long[64];
-    public static final long[] WHITE_PAWN_MOVE_TABLE = new long[64];
-    public static final long[] BLACK_PAWN_MOVE_TABLE = new long[64];
 
     public static final long[] ROOK_MASKS = new long[64];
     public static final long[] ROOK_SHIFTS = new long[64];
@@ -99,36 +97,6 @@ public class Precomputer {
             }
 
             BLACK_PAWN_ATTACK_TABLE[i] = attacks;
-        }
-    }
-
-    private static void generatePawnMoveTable() {
-        // White Pawns
-        for (int i = 8; i < 56; i++) {
-            long map = 0L;
-            int row = i >> 3;
-            int col = i & 7;
-
-            map |= 1L << ((row + 1) << 3 | col);
-            if (row == 1) {
-                map |= 1L << ((row + 2) << 3 | col);
-            }
-
-            WHITE_PAWN_MOVE_TABLE[i] = map;
-        }
-
-        // Black Pawns
-        for (int i = 8; i < 56; i++) {
-            long map = 0L;
-            int row = i >> 3;
-            int col = i & 7;
-
-            map |= 1L << ((row - 1) << 3 | col);
-            if (row == 6) {
-                map |= 1L << ((row - 2) << 3 | col);
-            }
-
-            BLACK_PAWN_MOVE_TABLE[i] = map;
         }
     }
 
@@ -354,6 +322,5 @@ public class Precomputer {
         generateRookMoveTable();
         generateBishopMoveTable();
         generatePawnAttackTable();
-        generatePawnMoveTable();
     }
 }
