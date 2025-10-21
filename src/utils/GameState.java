@@ -1,4 +1,4 @@
-package src.game;
+package src.utils;
 
 public class GameState {
     public int next_move;

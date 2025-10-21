@@ -1,7 +1,5 @@
 package src.utils;
 
-import src.game.GameState;
-
 public class GameStack {
     private static GameState[] stack = new GameState[256];
     private static int top_pointer = 0;

@@ -6,9 +6,6 @@ public class Precomputer {
     public static final long[][] ROOK_MOVE_TABLE = new long[64][];
     public static final long[][] BISHOP_MOVE_TABLE = new long[64][];
 
-    public static final long[] WHITE_PAWN_ATTACK_TABLE = new long[64];
-    public static final long[] BLACK_PAWN_ATTACK_TABLE = new long[64];
-
     public static final long[] ROOK_MASKS = new long[64];
     public static final long[] ROOK_SHIFTS = new long[64];
     public static final long[] BISHOP_MASKS = new long[64];
@@ -64,40 +61,6 @@ public class Precomputer {
 
     private static boolean inRange(int row, int col) {
         return (row | col) > -1 && (row | col) < 8;
-    }
-
-    private static void generatePawnAttackTable() {
-        // White Pawns
-        for (int i = 0; i < 64; i++) {
-            long attacks = 0L;
-            int row = i >> 3;
-            int col = i & 7;
-
-            if (col > 0) {
-                attacks |= 1L << ((row + 1) << 3 | (col - 1));
-            }
-            if (col < 7) {
-                attacks |= 1L << ((row + 1) << 3 | (col + 1));
-            }
-
-            WHITE_PAWN_ATTACK_TABLE[i] = attacks;
-        }
-
-        // Black Pawns
-        for (int i = 0; i < 64; i++) {
-            long attacks = 0L;
-            int row = i >> 3;
-            int col = i & 7;
-
-            if (col > 0) {
-                attacks |= 1L << ((row - 1) << 3 | (col - 1));
-            }
-            if (col < 7) {
-                attacks |= 1L << ((row - 1) << 3 | (col + 1));
-            }
-
-            BLACK_PAWN_ATTACK_TABLE[i] = attacks;
-        }
     }
 
     private static void generateKnightMoveTable() {
@@ -203,10 +166,10 @@ public class Precomputer {
 
             int[] blocker_squares = new int[bits];
             int index = 0;
-            for (int j = 0; j < 64; j++) {
-                if ((mask & (1L << j)) != 0) {
-                    blocker_squares[index++] = j;
-                }
+            while (mask != 0L) {
+                int square = Long.numberOfTrailingZeros(mask);
+                blocker_squares[index++] = square;
+                mask &= mask - 1;
             }
 
             long[] table = new long[permutations];
@@ -291,17 +254,21 @@ public class Precomputer {
             BISHOP_MASKS[i] = mask;
             BISHOP_SHIFTS[i] = 64 - bits;
 
+            // Collect all attacker positions
             int[] blocker_squares = new int[bits];
             int index = 0;
-            for (int j = 0; j < 64; j++) {
-                if ((mask & (1L << j)) != 0) {
-                    blocker_squares[index++] = j;
-                }
+            while (mask != 0L) {
+                int square = Long.numberOfTrailingZeros(mask);
+                blocker_squares[index++] = square;
+                mask &= mask - 1;
             }
 
+            // Loop through every permutation
             long[] table = new long[permutations];
             for (int j = 0; j < permutations; j++) {
                 long blocker_map = 0L;
+
+                // Set bits in permutation
                 for (int k = 0; k < bits; k++) {
                     if ((j & (1 << k)) != 0) {
                         blocker_map |= 1L << blocker_squares[k];
@@ -321,6 +288,5 @@ public class Precomputer {
         generateKingMoveTable();
         generateRookMoveTable();
         generateBishopMoveTable();
-        generatePawnAttackTable();
     }
 }
