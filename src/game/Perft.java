@@ -6,12 +6,9 @@ import src.utils.MoveList;
 
 public class Perft {
     public static long perft(int side, int depth) {
-        // if (depth == 0) return 1;
+        if (depth == 0) return 1;
         
         long nodes = 0;
-
-        if (depth == 0) return 1;
-
         MoveList possible_moves = MoveGenerator.generateAllMoves(side);
 
         if (depth == 1) return possible_moves.size();
@@ -28,14 +25,14 @@ public class Perft {
     }
 
     public static void main(String[] args) {
-        BitBoard.initBoardByFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
-        // BitBoard.initBoardByFen("8/3kp3/8/4K3/8/8/8/8");
+        BitBoard.initBoardByFen("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8");
+        // BitBoard.initBoardByFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
         BitBoard.printBoard();
         Precomputer.initAllMoveTables();
         GameStack.initGameStack();
 
-        int depth = 7;
-        int side = BitBoard.BLACK;
+        int depth = 3;
+        int side = BitBoard.WHITE;
         long total = 0;
 
         long start = System.nanoTime();

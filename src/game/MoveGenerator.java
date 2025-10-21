@@ -4,6 +4,32 @@ import src.utils.MoveList;
 
 public class MoveGenerator {
 
+    public static final int SQUARE_A1 = 0;
+    public static final int SQUARE_C1 = 2;
+    public static final int SQUARE_D1 = 3;
+    public static final int SQUARE_E1 = 4;
+    public static final int SQUARE_F1 = 5;
+    public static final int SQUARE_G1 = 6;
+    public static final int SQUARE_H1 = 7;
+    public static final int SQUARE_A8 = 56;
+    public static final int SQUARE_C8 = 58;
+    public static final int SQUARE_D8 = 59;
+    public static final int SQUARE_E8 = 60;
+    public static final int SQUARE_F8 = 61;
+    public static final int SQUARE_G8 = 62;
+    public static final int SQUARE_H8 = 63;
+
+    private static final int SQUARE_B1 = 1;
+    private static final int SQUARE_B8 = 57;
+    
+    public static int encodeMove(int origin, int target, int piece) {
+        return (piece << 12) | (origin << 6) | target;
+    }
+
+    public static int encodeMove(int origin, int target, int piece, int flag) {
+        return flag | (piece << 12) | (origin << 6) | target;
+    }
+
     public static boolean isUnderAttack(int pos, int color) {
         int enemy_offset = (color ^ 1) * 6;
 
@@ -76,8 +102,6 @@ public class MoveGenerator {
         MoveList move_list = new MoveList(20);
         int offset = color * 6; // 0 or 1
 
-        // FIXME: Add Check Handling
-
         // Pawn
         long pawn_board = BitBoard.piece_bitboards[BitBoard.WHITE_PAWN + offset];
 
@@ -122,9 +146,19 @@ public class MoveGenerator {
             int target = Long.numberOfTrailingZeros(single_push);
             int origin = (color == BitBoard.WHITE) ? target - 8 : target + 8;
 
-            int move = origin << 6 | target;
-            if (!isKingInCheck(move, color)) {
-                move_list.add(origin << 6 | target);
+            if (target >= SQUARE_A8 || target <= SQUARE_H1) {
+                int move = encodeMove(origin, target, BitBoard.WHITE_PAWN + offset, (BitBoard.WHITE_QUEEN + offset) << 16);
+                if (!isKingInCheck(move, color)) {
+                    move_list.add(move);
+                    move_list.add(encodeMove(origin, target, BitBoard.WHITE_PAWN + offset, (BitBoard.WHITE_ROOK + offset) << 16));
+                    move_list.add(encodeMove(origin, target, BitBoard.WHITE_PAWN + offset, (BitBoard.WHITE_BISHOP + offset) << 16));
+                    move_list.add(encodeMove(origin, target, BitBoard.WHITE_PAWN + offset, (BitBoard.WHITE_KNIGHT + offset) << 16));
+                }
+            } else {
+                int move = encodeMove(origin, target, BitBoard.WHITE_PAWN + offset);
+                if (!isKingInCheck(move, color)) {
+                    move_list.add(move);
+                }
             }
            
             single_push &= single_push - 1;
@@ -134,9 +168,9 @@ public class MoveGenerator {
             int target = Long.numberOfTrailingZeros(double_push);
             int origin = (color == BitBoard.WHITE) ? target - 16 : target + 16;
             
-            int move = origin << 6 | target;
+            int move = encodeMove(origin, target, BitBoard.WHITE_PAWN + offset, MoveHandler.DOUBLE_FLAG);
             if (!isKingInCheck(move, color)) {
-                move_list.add(origin << 6 | target);
+                move_list.add(move);
             }
 
             double_push &= double_push - 1;
@@ -146,9 +180,19 @@ public class MoveGenerator {
             int target = Long.numberOfTrailingZeros(left_capture);
             int origin = (color == BitBoard.WHITE) ? target - 7 : target + 9;
 
-            int move = origin << 6 | target;
-            if (!isKingInCheck(move, color)) {
-                move_list.add(origin << 6 | target);
+            if (target >= SQUARE_A8 || target <= SQUARE_H1) {
+                int move = encodeMove(origin, target, BitBoard.WHITE_PAWN + offset, (BitBoard.WHITE_QUEEN + offset) << 16);
+                if (!isKingInCheck(move, color)) {
+                    move_list.add(move);
+                    move_list.add(encodeMove(origin, target, BitBoard.WHITE_PAWN + offset, (BitBoard.WHITE_ROOK + offset) << 16));
+                    move_list.add(encodeMove(origin, target, BitBoard.WHITE_PAWN + offset, (BitBoard.WHITE_BISHOP + offset) << 16));
+                    move_list.add(encodeMove(origin, target, BitBoard.WHITE_PAWN + offset, (BitBoard.WHITE_KNIGHT + offset) << 16));
+                }
+            } else {
+                int move = encodeMove(origin, target, BitBoard.WHITE_PAWN + offset);
+                if (!isKingInCheck(move, color)) {
+                    move_list.add(move);
+                }
             }
 
             left_capture &= left_capture - 1;
@@ -158,9 +202,19 @@ public class MoveGenerator {
             int target = Long.numberOfTrailingZeros(right_capture);
             int origin = (color == BitBoard.WHITE) ? target - 9 : target + 7;
            
-            int move = origin << 6 | target;
-            if (!isKingInCheck(move, color)) {
-                move_list.add(origin << 6 | target);
+            if (target >= SQUARE_A8 || target <= SQUARE_H1) {
+                int move = encodeMove(origin, target, BitBoard.WHITE_PAWN + offset, (BitBoard.WHITE_QUEEN + offset) << 16);
+                if (!isKingInCheck(move, color)) {
+                    move_list.add(move);
+                    move_list.add(encodeMove(origin, target, BitBoard.WHITE_PAWN + offset, (BitBoard.WHITE_ROOK + offset) << 16));
+                    move_list.add(encodeMove(origin, target, BitBoard.WHITE_PAWN + offset, (BitBoard.WHITE_BISHOP + offset) << 16));
+                    move_list.add(encodeMove(origin, target, BitBoard.WHITE_PAWN + offset, (BitBoard.WHITE_KNIGHT + offset) << 16));
+                }
+            } else {
+                int move = encodeMove(origin, target, BitBoard.WHITE_PAWN + offset);
+                if (!isKingInCheck(move, color)) {
+                    move_list.add(move);
+                }
             }
             
             right_capture &= right_capture - 1;
@@ -175,9 +229,9 @@ public class MoveGenerator {
             while (moves != 0L) {
                 int target = Long.numberOfTrailingZeros(moves);
 
-                int move = square << 6 | target;
+                int move = encodeMove(square, target, BitBoard.WHITE_KNIGHT + offset);
                 if (!isKingInCheck(move, color)) {
-                    move_list.add(square << 6 | target);
+                    move_list.add(move);
                 }
 
                 moves &= moves - 1;
@@ -197,15 +251,62 @@ public class MoveGenerator {
             while (moves != 0L) {
                 int target = Long.numberOfTrailingZeros(moves);
                 
-                int move = square << 6 | target;
+                int move = encodeMove(square, target, BitBoard.WHITE_KING + offset);
                 if (!isKingInCheck(move, color)) {
-                    move_list.add(square << 6 | target);
+                    move_list.add(move);
                 }
 
                 moves &= moves - 1;
             }
             
             king_board &= king_board - 1;
+        }
+
+        // Castling
+        if (color == BitBoard.WHITE) {
+            if (!isUnderAttack(SQUARE_E1, BitBoard.WHITE)) {
+                if ((BitBoard.castle_rights & BitBoard.WHITE_KING_ROOK_MASK) != 0
+                    && BitBoard.isEmpty(SQUARE_F1)
+                    && BitBoard.isEmpty(SQUARE_G1)
+                    && !isUnderAttack(SQUARE_F1, BitBoard.WHITE)
+                    && !isUnderAttack(SQUARE_G1, BitBoard.WHITE)) {
+
+                    int move = encodeMove(SQUARE_E1, SQUARE_G1, BitBoard.WHITE_KING, MoveHandler.CASTLE_FLAG);
+                    move_list.add(move);
+                }
+                if ((BitBoard.castle_rights & BitBoard.WHITE_QUEEN_ROOK_MASK) != 0
+                    && BitBoard.isEmpty(SQUARE_B1)
+                    && BitBoard.isEmpty(SQUARE_C1)
+                    && BitBoard.isEmpty(SQUARE_D1)
+                    && !isUnderAttack(SQUARE_C1, BitBoard.WHITE)
+                    && !isUnderAttack(SQUARE_D1, BitBoard.WHITE)) {
+
+                    int move = encodeMove(SQUARE_E1, SQUARE_C1, BitBoard.WHITE_KING, MoveHandler.CASTLE_FLAG);
+                    move_list.add(move);
+                }
+            }
+        } else {
+            if (!isUnderAttack(SQUARE_E8, BitBoard.BLACK)) {
+                if ((BitBoard.castle_rights & BitBoard.BLACK_KING_ROOK_MASK) != 0
+                    && BitBoard.isEmpty(SQUARE_F8)
+                    && BitBoard.isEmpty(SQUARE_G8)
+                    && !isUnderAttack(SQUARE_F8, BitBoard.BLACK)
+                    && !isUnderAttack(SQUARE_G8, BitBoard.BLACK)) {
+
+                    int move = encodeMove(SQUARE_E8, SQUARE_G8, BitBoard.BLACK_KING, MoveHandler.CASTLE_FLAG);
+                    move_list.add(move);
+                }
+                if ((BitBoard.castle_rights & BitBoard.BLACK_QUEEN_ROOK_MASK) != 0
+                    && BitBoard.isEmpty(SQUARE_B8)
+                    && BitBoard.isEmpty(SQUARE_C8)
+                    && BitBoard.isEmpty(SQUARE_D8)
+                    && !isUnderAttack(SQUARE_C8, BitBoard.BLACK)
+                    && !isUnderAttack(SQUARE_D8, BitBoard.BLACK)) {
+
+                    int move = encodeMove(SQUARE_E8, SQUARE_C8, BitBoard.BLACK_KING, MoveHandler.CASTLE_FLAG);
+                    move_list.add(move);
+                }
+            }
         }
 
         // Bishop
@@ -224,9 +325,9 @@ public class MoveGenerator {
             while (moves != 0L) {
                 int target = Long.numberOfTrailingZeros(moves);
                 
-                int move = square << 6 | target;
+                int move = encodeMove(square, target, BitBoard.WHITE_BISHOP + offset);
                 if (!isKingInCheck(move, color)) {
-                    move_list.add(square << 6 | target);
+                    move_list.add(move);
                 }
 
                 moves &= moves - 1;
@@ -249,9 +350,9 @@ public class MoveGenerator {
             while (moves != 0L) {
                 int target = Long.numberOfTrailingZeros(moves);
                 
-                int move = square << 6 | target;
+                int move = encodeMove(square, target, BitBoard.WHITE_ROOK + offset);
                 if (!isKingInCheck(move, color)) {
-                    move_list.add(square << 6 | target);
+                    move_list.add(move);
                 }
 
                 moves &= moves - 1;
@@ -284,9 +385,9 @@ public class MoveGenerator {
             while (moves != 0L) {
                 int target = Long.numberOfTrailingZeros(moves);
                 
-                int move = square << 6 | target;
+                int move = encodeMove(square, target, BitBoard.WHITE_QUEEN + offset);
                 if (!isKingInCheck(move, color)) {
-                    move_list.add(square << 6 | target);
+                    move_list.add(move);
                 }
 
                 moves &= moves - 1;

@@ -1,5 +1,6 @@
 package src.engine;
 
+import src.game.BitBoard;
 import src.game.MoveHandler;
 
 public class Uci {
@@ -19,6 +20,19 @@ public class Uci {
         int origin = (move >> 6) & MoveHandler.POSITION_MASK;
         int target = move & MoveHandler.POSITION_MASK;
 
-        return SQUARE_MAP[origin] + SQUARE_MAP[target];
+        String uci = SQUARE_MAP[origin] + SQUARE_MAP[target];
+
+        int promotion_piece = (move & MoveHandler.PROMOTED_MASK) >>> 16;
+        if (promotion_piece == BitBoard.WHITE_KNIGHT || promotion_piece == BitBoard.BLACK_KNIGHT) {
+            uci += "n";
+        } else if (promotion_piece == BitBoard.WHITE_BISHOP || promotion_piece == BitBoard.BLACK_BISHOP) {
+            uci += "b";
+        } else if (promotion_piece == BitBoard.WHITE_ROOK || promotion_piece == BitBoard.BLACK_ROOK) {
+            uci += "r";
+        } else if (promotion_piece == BitBoard.WHITE_QUEEN || promotion_piece == BitBoard.BLACK_QUEEN) {
+            uci += "q";
+        }
+
+        return uci;
     }
 }

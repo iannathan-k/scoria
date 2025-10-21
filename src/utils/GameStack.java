@@ -1,7 +1,7 @@
 package src.utils;
 
 public class GameStack {
-    private static GameState[] stack = new GameState[256];
+    private static GameState[] stack = new GameState[128];
     private static int top_pointer = 0;
 
     public static void initGameStack() {

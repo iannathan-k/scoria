@@ -39,22 +39,38 @@ public class BitBoard {
     public static final long COL_G = 0x4040404040404040L;
     public static final long COL_H = 0x8080808080808080L;
 
+    public static final int WHITE_KING_ROOK_MASK    = 0b1000;
+    public static final int WHITE_QUEEN_ROOK_MASK   = 0b0100;
+    public static final int BLACK_KING_ROOK_MASK    = 0b0010;
+    public static final int BLACK_QUEEN_ROOK_MASK   = 0b0001;
+    public static final int WHITE_KING_CASTLE_MASK  = 0b1100;
+    public static final int BLACK_KING_CASTLE_MASK  = 0b0011;
+
     public static long[] piece_bitboards = new long[12];
     public static long[] color_bitboards = new long[2];
     public static long occupancy_bitboard;
     
     public static int moving_side = 0;
-    public static int castle_rights;
+    public static int castle_rights = 0b1111;
     public static int passant_rights;
 
-    // Could optimize by only checking opponent bitboards
-    // For any capture moves in a seperate function
+    public static boolean isEmpty(int square) {
+        long mask = 1L << square;
+        return (occupancy_bitboard & mask) == 0;
+    }
+
     public static int getPieceAt(int square) {
         long mask = 1L << square;
         for (int i = 0; i < 12; i++) {
-            if ((piece_bitboards[i] & mask) != 0) {
-                return i;
-            }
+            if ((piece_bitboards[i] & mask) != 0) return i;
+        }
+        return -1;
+    }
+
+    public static int getPieceAt(int square, int color) {
+        long mask = 1L << square;
+        for (int i = color * 6; i < color * 6 + 6; i++) {
+            if ((piece_bitboards[i] & mask) != 0) return i;
         }
         return -1;
     }

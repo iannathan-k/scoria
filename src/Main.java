@@ -3,7 +3,6 @@ package src;
 import src.engine.Uci;
 import src.game.BitBoard;
 import src.game.MoveGenerator;
-import src.game.MoveHandler;
 import src.game.Precomputer;
 import src.utils.GameStack;
 import src.utils.MoveList;
@@ -12,7 +11,7 @@ public class Main {
     public static void main(String[] args) {
         Precomputer.initAllMoveTables();
         GameStack.initGameStack();
-        System.out.println("Scoria v4.0.3");
+        System.out.println("Scoria v4.0.4");
 
         BitBoard.initBoardByFen("8/8/8/4r3/8/8/8/8 b");
         BitBoard.printBoard();
