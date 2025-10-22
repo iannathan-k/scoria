@@ -25,13 +25,13 @@ public class Perft {
     }
 
     public static void main(String[] args) {
-        BitBoard.initBoardByFen("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8");
-        // BitBoard.initBoardByFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+        // BitBoard.initBoardByFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R");
+        BitBoard.initBoardByFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
         BitBoard.printBoard();
         Precomputer.initAllMoveTables();
         GameStack.initGameStack();
 
-        int depth = 3;
+        int depth = 6;
         int side = BitBoard.WHITE;
         long total = 0;
 

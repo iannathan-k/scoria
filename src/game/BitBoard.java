@@ -52,7 +52,7 @@ public class BitBoard {
     
     public static int moving_side = 0;
     public static int castle_rights = 0b1111;
-    public static int passant_rights;
+    public static int passant_rights = -1;
 
     public static boolean isEmpty(int square) {
         long mask = 1L << square;
