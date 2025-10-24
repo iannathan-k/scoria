@@ -1,32 +1,30 @@
 package src;
 
-import src.engine.Uci;
+import java.util.Scanner;
+
+import src.user.Command;
 import src.game.BitBoard;
-import src.game.MoveGenerator;
 import src.game.Precomputer;
+import src.game.Zobrist;
 import src.utils.GameStack;
-import src.utils.MoveList;
 
 public class Main {
     public static void main(String[] args) {
+        BitBoard.initBoardByFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
         Precomputer.initAllMoveTables();
         GameStack.initGameStack();
-        System.out.println("Scoria v4.1.4");
+        Zobrist.initZobristTable();
 
-        BitBoard.initBoardByFen("8/8/8/4r3/8/8/8/8 b");
-        BitBoard.printBoard();
-        System.out.println();
-        MoveList moves = MoveGenerator.generateAllMoves(1);
-        for (int i = 0; i < moves.size(); i++) {
-            // MoveHandler.doMove(moves.get(i));
-            // BitBoard.printBoard();
-            System.out.println(Uci.moveToUci(moves.get(i)));
-            
-            // MoveHandler.undoMove();
+        System.out.println("Scoria v4.2.4");
 
-            // System.out.println("-----------------");
+        Scanner scanner = new Scanner(System.in);
+
+        String input_command = "";
+        while (!input_command.equals("quit")) {
+            input_command = scanner.nextLine();
+            Command.parseCommand(input_command);
         }
 
-        System.out.println(moves.size());
+        scanner.close();
     }
 }

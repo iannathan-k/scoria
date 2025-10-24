@@ -115,6 +115,8 @@ public class MoveHandler {
         int moving_side = BitBoard.getPieceColor(piece);
         int capture = BitBoard.getPieceAt(target, moving_side ^ 1);
 
+        Zobrist.updateZobristHash(move);
+
         // En Passant
         if ((move & PASSANT_FLAG) != 0) {
             int passant_capture_square = (moving_side == BitBoard.WHITE) ? target - 8 : target + 8;
@@ -283,5 +285,7 @@ public class MoveHandler {
 
         BitBoard.castle_rights = state.castle_rights;
         BitBoard.passant_rights = state.passant_rights;
+
+        Zobrist.updateZobristHash(state.next_move);
     }
 }

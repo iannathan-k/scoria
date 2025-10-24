@@ -26,7 +26,7 @@ public class MoveGenerator {
         return (piece << 12) | (origin << 6) | target;
     }
 
-    public static int encodeMove(int origin, int target, int piece, int flag) {
+    private static int encodeMove(int origin, int target, int piece, int flag) {
         return flag | (piece << 12) | (origin << 6) | target;
     }
 

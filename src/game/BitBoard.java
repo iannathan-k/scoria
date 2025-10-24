@@ -2,7 +2,7 @@ package src.game;
 
 import java.util.Arrays;
 
-import src.utils.MoveList;
+import src.user.Uci;
 
 public class BitBoard {
     public static final int WHITE           = 0;
@@ -50,7 +50,7 @@ public class BitBoard {
     public static long[] color_bitboards = new long[2];
     public static long occupancy_bitboard;
     
-    public static int moving_side = 0;
+    public static int moving_side = WHITE;
     public static int castle_rights = 0b1111;
     public static int passant_rights = -1;
 
@@ -79,19 +79,27 @@ public class BitBoard {
         return (piece < 6) ? WHITE : BLACK;
     }
 
+    // FIXME: Handle half and full moves
     public static void initBoardByFen(String fen) {
-        int index = 56;
+        String[] fen_array = fen.split("\\s");
 
         Arrays.fill(piece_bitboards, 0L);
-        for (int i = 0; i < fen.length(); i++) {
-            char piece_char = fen.charAt(i);
+        Arrays.fill(color_bitboards, 0L);
+        occupancy_bitboard = 0L;
+
+        int row = 7;
+        int col = 0;
+        for (int i = 0; i < fen_array[0].length(); i++) {
+            char piece_char = fen_array[0].charAt(i);
+
             if (piece_char == '/') {
-                index -= 16;
+                row--;
+                col = 0;
                 continue;
             }
 
             if (Character.isDigit(piece_char)) {
-                index += Character.getNumericValue(piece_char);
+                col += Character.getNumericValue(piece_char);
                 continue;
             }
 
@@ -111,78 +119,31 @@ public class BitBoard {
                 case 'k' -> piece_val = BLACK_KING;
             }
 
-            piece_bitboards[piece_val] |= 1L << index;
-            occupancy_bitboard |= 1L << index;
-            color_bitboards[(piece_val < 6) ? 0 : 1] |= 1L << index;
-            index++;
-        }
-    }
+            int square = row << 3 | col;
+            piece_bitboards[piece_val] |= 1L << square;
+            occupancy_bitboard |= 1L << square;
+            color_bitboards[getPieceColor(piece_val)] |= 1L << square;
 
-    public static void printBoard() {
-        for (int row = 7; row >= 0; row--) {
-            for (int col = 0; col < 8; col++) {
-                int piece_val = getPieceAt(row << 3 | col);
-                char piece_char = '-';
-
-                switch (piece_val) {
-                    case WHITE_PAWN     -> piece_char = 'P';
-                    case WHITE_KNIGHT   -> piece_char = 'N';
-                    case WHITE_BISHOP   -> piece_char = 'B';
-                    case WHITE_ROOK     -> piece_char = 'R';
-                    case WHITE_QUEEN    -> piece_char = 'Q';
-                    case WHITE_KING     -> piece_char = 'K';
-                    case BLACK_PAWN     -> piece_char = 'p';
-                    case BLACK_KNIGHT   -> piece_char = 'n';
-                    case BLACK_BISHOP   -> piece_char = 'b';
-                    case BLACK_ROOK     -> piece_char = 'r';
-                    case BLACK_QUEEN    -> piece_char = 'q';
-                    case BLACK_KING     -> piece_char = 'k';
-                }
-
-                System.out.print(piece_char + " ");
-            }
-            
-            System.out.println();
-        }
-    }
-
-    public static void printOccupancy(long bitboard) {
-        for (int rank = 7; rank >= 0; rank--) { // rank 8 down to 1
-            for (int file = 0; file < 8; file++) { // file a to h
-                int square = rank * 8 + file;      // square index in bitboard
-                long mask = 1L << square;
-                System.out.print((bitboard & mask) != 0 ? "1 " : ". ");
-            }
-            System.out.println();
-        }
-        System.out.println();
-    }
-
-    public static void printMap() {
-
-    }
-
-    public static void printMoveMap(MoveList move_list) {
-        long map = 0L;
-        int origin = (move_list.get(0) >> 6) & MoveHandler.POSITION_MASK;
-        for (int i = 0; i < move_list.size(); i++) {
-            int move = move_list.get(i);
-            int target = move & MoveHandler.POSITION_MASK;
-            map |= 1L << target;
+            col++;
         }
 
-        for (int row = 7; row >= 0; row--) {
-            for (int col = 0; col < 8; col++) {
-                int square = row << 3 | col;
-                long mask = 1L << square;
-                if (square != origin) {
-                    System.out.print((map & mask) != 0 ? "1 " : ". ");
-                } else {
-                    System.out.print("A ");
-                }
-            }
-            System.out.println();
+        passant_rights = -1;
+        castle_rights = 0;
+        moving_side = BLACK;
+
+        if (fen_array.length > 1 && fen_array[1].equals("w")) {
+            moving_side = WHITE;
         }
-        System.out.println();
+
+        if (fen_array.length > 2) {
+            if (fen_array[2].contains("K")) castle_rights |= WHITE_KING_ROOK_MASK;
+            if (fen_array[2].contains("Q")) castle_rights |= WHITE_QUEEN_ROOK_MASK;
+            if (fen_array[2].contains("k")) castle_rights |= BLACK_KING_ROOK_MASK;
+            if (fen_array[2].contains("q")) castle_rights |= BLACK_QUEEN_ROOK_MASK;
+        }
+
+        if (fen_array.length > 3 && !fen_array[3].equals("-")) {
+            passant_rights = Uci.algebraicToSquare(fen_array[3]);
+        }
     }
 }
