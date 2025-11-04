@@ -2,10 +2,6 @@ package src.game;
 
 import java.util.Random;
 
-import src.user.Uci;
-import src.utils.GameStack;
-import src.utils.MoveList;
-
 public class Zobrist {
     private static long[][] piece_table = new long[64][12];
     private static long[] castle_table = new long[4];
@@ -15,7 +11,8 @@ public class Zobrist {
     private static long zobrist_hash = 0L;
 
     public static void initZobristTable() {
-        Random random = new Random();
+        // FIXME: Find optimal seed
+        Random random = new Random(21);
 
         for (int i = 0; i < 64; i++) {
             for (int j = 0; j < 12; j++) {
@@ -36,7 +33,7 @@ public class Zobrist {
         manualZobristHash();
     }
 
-    // FIXME: Integrate into manual Zobrist Hash
+    // FIXME: Integrate into init Zobrist Hash
     public static void manualZobristHash() {
         zobrist_hash = 0L;
         
@@ -62,36 +59,32 @@ public class Zobrist {
             zobrist_hash ^= castle_table[3];
         }   
         
-        if (BitBoard.passant_rights != -1) {
+        if (BitBoard.passant_rights != BitBoard.NO_PASSANT) {
             zobrist_hash ^= passant_table[BitBoard.passant_rights & 7];
         }
 
-        // FIXME: Could use multiplication
         if (BitBoard.moving_side == BitBoard.BLACK) {
             zobrist_hash ^= turn_table;
         }
     }
 
-    // FIXME: No need the undo, as it will cancel itself out
-    // FIXME: Call at the Beginning of the doMove function to clear passant and castle rights
-    // FIXME: Call at the End of the undoMove function to restore passant and castle rights
     // FIXME: Could be incrementally updated inside the move function
     public static void updateZobristHash(int move) {
         int origin = (move >> 6) & MoveHandler.POSITION_MASK;
         int target = move & MoveHandler.POSITION_MASK;
         int piece = (move >> 12) & MoveHandler.PIECE_MASK;
-        int moving_side = BitBoard.getPieceColor(piece); // FIXME: Could be passed directly
-        int capture = BitBoard.getPieceAt(target, moving_side ^ 1); // FIXME: Could be passed directly
+        int moving_side = piece & BitBoard.COLOR_MASK;
+        int capture = BitBoard.getPieceAt(target, moving_side ^ 1);
 
         // Remove passant piece
         if ((move & MoveHandler.PASSANT_FLAG) != 0) {
             int passant_capture_square = (moving_side == BitBoard.WHITE) ? target - 8 : target + 8;
-            int passant_capture = BitBoard.getPieceAt(passant_capture_square, moving_side ^ 1);
+            int passant_capture = BitBoard.getPieceAt(passant_capture_square, moving_side ^ 1); // FIXME: CAN CHANGE THIS
             zobrist_hash ^= piece_table[passant_capture_square][passant_capture];
         }
 
         // Clear Passant Rights
-        if (BitBoard.passant_rights != -1) {
+        if (BitBoard.passant_rights != BitBoard.NO_PASSANT) {
             zobrist_hash ^= passant_table[BitBoard.passant_rights & 7];
         }
 
@@ -100,7 +93,7 @@ public class Zobrist {
         zobrist_hash ^= piece_table[target][piece];
 
         // Remove capture
-        if (capture != -1) {
+        if (capture != BitBoard.NO_PIECE) {
             zobrist_hash ^= piece_table[target][capture];
         }
 
@@ -150,10 +143,8 @@ public class Zobrist {
             zobrist_hash ^= castle_table[2];
             zobrist_hash ^= castle_table[3];
         }
-
-        if (moving_side == BitBoard.BLACK) {
-            zobrist_hash ^= turn_table;
-        }
+        
+        zobrist_hash ^= turn_table;
     }
 
     public static long getZobristHash() {

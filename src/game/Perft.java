@@ -4,7 +4,7 @@ import src.user.Uci;
 import src.utils.MoveList;
 
 public class Perft {
-    // FIXME: Clean this up
+
     private static long perft(int side, int depth) {
         if (depth == 0) return 1;
         
@@ -24,7 +24,6 @@ public class Perft {
         return nodes;
     }
 
-    // FIXME: Change all System prints to debugger prints instead
     public static void runPerftTest(int side, int depth) {
         long start_time = System.currentTimeMillis();
         long nodes = 0L;

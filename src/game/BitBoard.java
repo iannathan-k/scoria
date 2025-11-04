@@ -8,19 +8,22 @@ public class BitBoard {
     public static final int WHITE           = 0;
     public static final int BLACK           = 1;
 
-    public static final int NO_PIECE        = -1;
-    public static final int WHITE_PAWN      = 0;
-    public static final int WHITE_KNIGHT    = 1;
-    public static final int WHITE_BISHOP    = 2;
-    public static final int WHITE_ROOK      = 3;
-    public static final int WHITE_QUEEN     = 4;
-    public static final int WHITE_KING      = 5;
-    public static final int BLACK_PAWN      = 6;
-    public static final int BLACK_KNIGHT    = 7;
-    public static final int BLACK_BISHOP    = 8;
-    public static final int BLACK_ROOK      = 9;
-    public static final int BLACK_QUEEN     = 10;
-    public static final int BLACK_KING      = 11;
+    public static final int NO_PIECE        = 15; // -1 FIXME: May be an issue
+    public static final int WHITE_PAWN      = 0b0000; //  0
+    public static final int WHITE_KNIGHT    = 0b0010; //  2
+    public static final int WHITE_BISHOP    = 0b0100; //  4
+    public static final int WHITE_ROOK      = 0b0110; //  6
+    public static final int WHITE_QUEEN     = 0b1000; //  8
+    public static final int WHITE_KING      = 0b1010; // 10
+    public static final int BLACK_PAWN      = 0b0001; //  1
+    public static final int BLACK_KNIGHT    = 0b0011; //  3
+    public static final int BLACK_BISHOP    = 0b0101; //  5
+    public static final int BLACK_ROOK      = 0b0111; //  7
+    public static final int BLACK_QUEEN     = 0b1001; //  9
+    public static final int BLACK_KING      = 0b1011; // 11
+
+    public static final int PIECE_MASK = 0b1110;
+    public static final int COLOR_MASK = 0b0001;
 
     public static final long ROW_1 = 0x00000000000000FFL;
     public static final long ROW_2 = 0x000000000000FF00L;
@@ -46,13 +49,25 @@ public class BitBoard {
     public static final int WHITE_KING_CASTLE_MASK  = 0b1100;
     public static final int BLACK_KING_CASTLE_MASK  = 0b0011;
 
+    public static final int NO_PASSANT = -1;
+
+    /* Current Bitboard
+     * P N B R Q K p n b r q k
+     * 
+     * New Bitboard
+     * P p N n B b R r Q q K k
+     * Color check --> piece & 1 (odd or even)
+     * Piece check --> start from 0 or 1, increment by 2
+     * Offset --> add color
+     */
+
     public static long[] piece_bitboards = new long[12];
     public static long[] color_bitboards = new long[2];
     public static long occupancy_bitboard;
     
     public static int moving_side = WHITE;
-    public static int castle_rights = 0b1111;
-    public static int passant_rights = -1;
+    public static int castle_rights = WHITE_KING_CASTLE_MASK | BLACK_KING_CASTLE_MASK;
+    public static int passant_rights = NO_PASSANT;
 
     public static boolean isEmpty(int square) {
         long mask = 1L << square;
@@ -64,19 +79,15 @@ public class BitBoard {
         for (int i = 0; i < 12; i++) {
             if ((piece_bitboards[i] & mask) != 0) return i;
         }
-        return -1;
+        return NO_PIECE;
     }
 
     public static int getPieceAt(int square, int color) {
         long mask = 1L << square;
-        for (int i = color * 6; i < color * 6 + 6; i++) {
-            if ((piece_bitboards[i] & mask) != 0) return i;
+        for (int i = color; i < 12; i += 2) {
+            if ((piece_bitboards[i] & mask) != 0) return i; 
         }
-        return -1;
-    }
-
-    public static int getPieceColor(int piece) {
-        return (piece < 6) ? WHITE : BLACK;
+        return NO_PIECE;
     }
 
     // FIXME: Handle half and full moves
@@ -103,7 +114,7 @@ public class BitBoard {
                 continue;
             }
 
-            int piece_val = -1;
+            int piece_val = NO_PIECE;
             switch (piece_char) {
                 case 'P' -> piece_val = WHITE_PAWN;
                 case 'N' -> piece_val = WHITE_KNIGHT;
@@ -122,12 +133,12 @@ public class BitBoard {
             int square = row << 3 | col;
             piece_bitboards[piece_val] |= 1L << square;
             occupancy_bitboard |= 1L << square;
-            color_bitboards[getPieceColor(piece_val)] |= 1L << square;
+            color_bitboards[piece_val & COLOR_MASK] |= 1L << square;
 
             col++;
         }
 
-        passant_rights = -1;
+        passant_rights = BitBoard.NO_PASSANT;
         castle_rights = 0;
         moving_side = BLACK;
 

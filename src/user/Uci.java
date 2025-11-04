@@ -4,6 +4,7 @@ import src.game.BitBoard;
 import src.game.MoveGenerator;
 import src.game.MoveHandler;
 import src.game.Zobrist;
+import src.utils.MoveList;
 
 public class Uci {
     
@@ -54,6 +55,16 @@ public class Uci {
         // Castling
 
         return move;
+    }
+
+    public static String moveListToUciString(MoveList move_list) {
+        String uci = "";
+
+        for (int i = 0; i < move_list.size(); i++) {
+            uci += moveToUci(move_list.get(i)) + " ";
+        }
+
+        return uci;
     }
 
     public static String getCurrentFen() {
@@ -110,7 +121,7 @@ public class Uci {
 
         // Passant Rights
 
-        if (BitBoard.passant_rights != -1) {
+        if (BitBoard.passant_rights != BitBoard.NO_PASSANT) {
             fen += " " + squareToAlgebraic(BitBoard.passant_rights) + " ";
         } else {
             fen += " - ";

@@ -33,6 +33,14 @@ public class MoveList {
         return size;
     }
 
+    public void clear() {
+        size = 0;
+    }
+
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
     public void addAll(MoveList move_list) {
         if (size + move_list.size >= data.length) {
             grow(move_list.size);

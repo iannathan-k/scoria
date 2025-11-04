@@ -1,5 +1,6 @@
 package src.user;
 
+import src.engine.Search;
 import src.game.BitBoard;
 import src.game.MoveHandler;
 import src.game.Perft;
@@ -7,14 +8,12 @@ import src.game.Zobrist;
 
 public class Command {
 
-    // FIXME: Update when full fen parsing
     private static void positionCommand(String args[]) {
         if (args[1].equals("startpos")) {
             BitBoard.initBoardByFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
             for (int i = 3; i < args.length; i++) {
                 int move = Uci.uciToMove(args[i]);
-                System.out.println(Uci.moveToUci(move));
                 MoveHandler.doMove(move);
                 BitBoard.moving_side ^= 1;
             }
@@ -40,9 +39,13 @@ public class Command {
         Zobrist.manualZobristHash();
     }
 
+    // FIXME: Change to looping condition
+    // FIXME: Add TimeMan
     private static void goCommand(String args[]) {
         switch(args[1]) {
             case "perft" -> Perft.runPerftTest(BitBoard.moving_side, Integer.parseInt(args[2]));
+            case "depth" -> Search.iterativeDeepener(Integer.parseInt(args[2]), Integer.MAX_VALUE);
+            case "movetime" -> Search.iterativeDeepener(Integer.MAX_VALUE, Integer.parseInt(args[2]));
         }
     }
 

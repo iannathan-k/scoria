@@ -6,16 +6,14 @@ import src.user.Command;
 import src.game.BitBoard;
 import src.game.Precomputer;
 import src.game.Zobrist;
-import src.utils.GameStack;
 
 public class Main {
     public static void main(String[] args) {
-        BitBoard.initBoardByFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        BitBoard.initBoardByFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"); 
         Precomputer.initAllMoveTables();
-        GameStack.initGameStack();
         Zobrist.initZobristTable();
 
-        System.out.println("Scoria v4.2.4");
+        System.out.println("Scoria v4.3.4");
 
         Scanner scanner = new Scanner(System.in);
 
