@@ -8,7 +8,7 @@ public class BitBoard {
     public static final int WHITE           = 0;
     public static final int BLACK           = 1;
 
-    public static final int NO_PIECE        = 15; // -1 FIXME: May be an issue
+    public static final int NO_PIECE        = -1;
     public static final int WHITE_PAWN      = 0b0000; //  0
     public static final int WHITE_KNIGHT    = 0b0010; //  2
     public static final int WHITE_BISHOP    = 0b0100; //  4
@@ -51,6 +51,8 @@ public class BitBoard {
 
     public static final int NO_PASSANT = -1;
 
+    public static final int KING_VALUE = 10000;
+
     /* Current Bitboard
      * P N B R Q K p n b r q k
      * 
@@ -88,6 +90,13 @@ public class BitBoard {
             if ((piece_bitboards[i] & mask) != 0) return i; 
         }
         return NO_PIECE;
+    }
+
+    public static boolean hasNonPawnPiece(int color) {
+        return (color_bitboards[color] 
+                & ~piece_bitboards[WHITE_PAWN | color] 
+                & ~piece_bitboards[WHITE_KING | color]) 
+                != 0;
     }
 
     // FIXME: Handle half and full moves

@@ -67,4 +67,16 @@ Java 14+ is required to compile and execute Scoria, due to usage of the newer [S
 
 Static evaluation of board positions are done using an [HCE](https://www.chessprogramming.org/Simplified_Evaluation_Function) (Handcrafted Evaluation), which accounts for piece values, positions and mobility. There is no use of [NNUE](https://www.chessprogramming.org/NNUE) (Efficiently Updatable Neural Network).
 
-##### Ian Nathan Kusmiantoro, 2025
+## Changelog
+
+Scoria v4.3.5
+
+1. Added Mobility
+2. History Heuristic
+3. Killer Moves
+4. Fixed UCI to Move
+5. Pseudo Legal Moves
+6. Static Exchange Evaluation
+7. Incremental Evaluation
+
+##### Ian Nathan Kusmiantoro, 2026

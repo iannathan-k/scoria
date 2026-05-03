@@ -147,7 +147,19 @@ public class Zobrist {
         zobrist_hash ^= turn_table;
     }
 
+    public static void updateZobristHashNull() {
+        zobrist_hash ^= turn_table;
+
+        if (BitBoard.passant_rights != BitBoard.NO_PASSANT) {
+            zobrist_hash ^= passant_table[BitBoard.passant_rights & 7];
+        }
+    }
+
     public static long getZobristHash() {
         return zobrist_hash;
+    }
+
+    public static void setZobristHash(long hash) {
+        zobrist_hash = hash;
     }
 }

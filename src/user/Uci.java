@@ -9,8 +9,12 @@ import src.utils.MoveList;
 public class Uci {
     
     private static final char[] PIECE_CHARS = {
-        'P', 'N', 'B', 'R', 'Q', 'K',
-        'p', 'n', 'b', 'r', 'q', 'k'
+        'P', 'p',
+        'N', 'n',
+        'B', 'b',
+        'R', 'r',
+        'Q', 'q',
+        'K', 'k'
     };
 
     private static String squareToAlgebraic(int pos) {
@@ -42,17 +46,47 @@ public class Uci {
         return uci;
     }
 
-    // FIXME: Implement this
     public static int uciToMove(String uci) {
         int origin = algebraicToSquare(uci.substring(0, 2));
         int target = algebraicToSquare(uci.substring(2, 4));
         int piece = BitBoard.getPieceAt(origin);
+        int capture = BitBoard.getPieceAt(target);
         int move = MoveGenerator.encodeMove(origin, target, piece);
 
         // Double pawn push
+        if ((piece & BitBoard.PIECE_MASK) == BitBoard.WHITE_PAWN
+            && Math.abs(target - origin) >= 16) {
+
+            move |= MoveHandler.DOUBLE_FLAG;
+        }
+
         // En passant
+        if ((piece & BitBoard.PIECE_MASK) == BitBoard.WHITE_PAWN
+            && capture == BitBoard.NO_PIECE
+            && (origin & 7) != (target & 7)) {
+
+            move |= MoveHandler.PASSANT_FLAG;
+        }
+
         // Promotion
+        if (uci.length() == 5) {
+            int color = piece & BitBoard.COLOR_MASK;
+            char promoted_char = uci.charAt(4);
+
+            switch (promoted_char) {
+                case 'q' -> move |= (BitBoard.WHITE_QUEEN + color << 16);
+                case 'r' -> move |= (BitBoard.WHITE_ROOK + color << 16);
+                case 'b' -> move |= (BitBoard.WHITE_BISHOP + color << 16);
+                case 'n' -> move |= (BitBoard.WHITE_KNIGHT + color << 16);
+            }
+        }
+
         // Castling
+        if ((piece & BitBoard.PIECE_MASK) == BitBoard.WHITE_KING
+            && Math.abs((origin & 7) - (target & 7)) >= 2) {
+
+            move |= MoveHandler.CASTLE_FLAG;
+        }
 
         return move;
     }

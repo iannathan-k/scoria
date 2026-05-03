@@ -15,13 +15,14 @@ public class Transposition {
     private static int current_gen = 0;
 
     private static final int MAX_GENERATION = 63;
+    private static final int GENERATION_BOUND = 24;
     
     private static final int TYPE_MASK = 0b11;
 
     private static final int BUCKET_SIZE = 2;
 
     private static long[] tt_hash   = new long[tt_size * BUCKET_SIZE];
-    private static byte[] tt_depth  = new byte[tt_size * BUCKET_SIZE]; // FIXME: MAY BE AN ISSUE WITH OVERFLOW
+    private static byte[] tt_depth  = new byte[tt_size * BUCKET_SIZE];
     private static byte[] tt_info   = new byte[tt_size * BUCKET_SIZE];
     private static short[] tt_score = new short[tt_size * BUCKET_SIZE];
     private static int[] tt_move    = new int[tt_size * BUCKET_SIZE];
@@ -51,7 +52,23 @@ public class Transposition {
         return (current_gen - entry_gen) & MAX_GENERATION;
     }
 
-    // FIXME: Figure out a better replacement policy
+    public static int countHashFull() {
+        int count = 0;
+
+        for (int i = 0; i < 1000; i++) {
+            if (tt_hash[i] == 0) {
+                continue;
+            }
+            if (relativeAge(tt_info[i] >>> 2) > GENERATION_BOUND) {
+                continue;
+            }
+
+            count++;
+        }
+
+        return count;
+    }
+
     public static void addTransposition(long hash, int depth, int score, byte type, int best_move, int ply) {
         int i = (int) (hash & tt_mask) * BUCKET_SIZE;
 
@@ -61,7 +78,9 @@ public class Transposition {
             score += ply;
         }
 
-        if (relativeAge(tt_info[i] >>> 2) > 24 || depth > tt_depth[i]) {
+        if (relativeAge(tt_info[i] >>> 2) > GENERATION_BOUND 
+            || depth > tt_depth[i]) {
+            
             tt_hash[i] = hash;
             tt_depth[i] = (byte) depth;
             tt_info[i] = (byte) (current_gen << 2 | type);

@@ -1,5 +1,6 @@
 package src.game;
 
+import src.engine.Evaluator;
 import src.utils.GameStack;
 
 public class MoveHandler {
@@ -21,95 +22,16 @@ public class MoveHandler {
     private static final long SQUARE_D8_MAP = 1L << MoveGenerator.SQUARE_D8;
     private static final long SQUARE_A8_MAP = 1L << MoveGenerator.SQUARE_A8;
 
+   
     public static final int POSITION_MASK   = 0x3F;
     public static final int PIECE_MASK      = 0xF;
     public static final int PROMOTED_MASK   = 0xF << 16;
     public static final int DOUBLE_FLAG     = 1 << 20;
     public static final int PASSANT_FLAG    = 1 << 21;
     public static final int CASTLE_FLAG     = 1 << 22;
-    
-    // The implementation for getPieceAt() and getPieceColor()
-    // May be quite slow as they both make use of loops
-    // Pseudo does not need Promotion, as it is no different for checks than a pawn
-    // I.E only blocking or pawn capture can happen, which pawn is doing
-    public static void doPseudoMove(int move) {
-        int origin = (move >> 6) & POSITION_MASK;
-        int target = move & POSITION_MASK;
-        int piece = (move >> 12) & PIECE_MASK;
-        int turn = piece & BitBoard.COLOR_MASK;
-        int capture = BitBoard.getPieceAt(target, turn ^ 1);
 
-        // En Passant
-        if ((move & PASSANT_FLAG) != 0) {
-            int passant_capture_square = (turn == BitBoard.WHITE) ? target - 8 : target + 8;
-            capture = BitBoard.getPieceAt(passant_capture_square, turn ^ 1);
-            long passant_capture_mask = 1L << passant_capture_square;
-            BitBoard.piece_bitboards[capture] &= ~passant_capture_mask;
-            BitBoard.color_bitboards[turn ^ 1] &= ~passant_capture_mask;
-            BitBoard.occupancy_bitboard &= ~passant_capture_mask;
-        }
-
-        // Fix the zobrist hash later
-        GameStack.push(move, turn, BitBoard.castle_rights, BitBoard.passant_rights, capture, -1);
-
-        // Remove piece from origin
-        long origin_mask = 1L << origin;
-        BitBoard.piece_bitboards[piece] &= ~origin_mask;
-        BitBoard.color_bitboards[turn] &= ~origin_mask;
-        BitBoard.occupancy_bitboard &= ~origin_mask;
-
-        // Place piece at target
-        long target_mask = 1L << target;
-        BitBoard.piece_bitboards[piece] |= target_mask;
-        BitBoard.color_bitboards[turn] |= target_mask;
-        BitBoard.occupancy_bitboard |= target_mask;
-
-        // Remove capture from target
-        if (capture != BitBoard.NO_PIECE) {
-            BitBoard.piece_bitboards[capture] &= ~target_mask;
-            BitBoard.color_bitboards[turn ^ 1] &= ~target_mask;
-        }
-    }
-
-    public static void undoPseudoMove() {
-        int move = GameStack.peekMove();
-        int turn = GameStack.peekTurn();
-        int captured = GameStack.peekCaptured();
-        int origin = (move >> 6) & POSITION_MASK;
-        int target = move & POSITION_MASK;
-        int piece = (move >> 12) & PIECE_MASK;
-
-        // En Passant
-        if ((move & PASSANT_FLAG) != 0) {
-            int passant_capture_square = (turn == BitBoard.WHITE) ? target - 8 : target + 8;
-            long passant_capture_mask = 1L << passant_capture_square;
-            BitBoard.piece_bitboards[captured] |= passant_capture_mask;
-            BitBoard.color_bitboards[turn ^ 1] |= passant_capture_mask;
-            BitBoard.occupancy_bitboard |= passant_capture_mask;
-            captured = BitBoard.NO_PIECE;
-        }
-
-        // Remove piece from target
-        long target_mask = 1L << target;
-        BitBoard.piece_bitboards[piece] &= ~target_mask;
-        BitBoard.color_bitboards[turn] &= ~target_mask;
-        BitBoard.occupancy_bitboard &= ~target_mask;
-
-        // Replace piece at origin
-        long origin_mask = 1L << origin;
-        BitBoard.piece_bitboards[piece] |= origin_mask;
-        BitBoard.color_bitboards[turn] |= origin_mask;
-        BitBoard.occupancy_bitboard |= origin_mask;
-
-        // Replace capture at target
-        if (captured != BitBoard.NO_PIECE) {
-            BitBoard.piece_bitboards[captured] |= target_mask;
-            BitBoard.color_bitboards[turn ^ 1] |= target_mask;
-            BitBoard.occupancy_bitboard |= target_mask;
-        }
-
-        GameStack.pop();
-    }
+    private static final int NULL_MOVE = -1;
+    private static final int NULL_TURN = -1;
 
     public static void doMove(int move) {
         int origin = (move >> 6) & POSITION_MASK;
@@ -137,8 +59,12 @@ public class MoveHandler {
             BitBoard.castle_rights, 
             BitBoard.passant_rights, 
             capture, 
-            old_hash
+            old_hash,
+            Evaluator.getBaseEvaluation()
         );
+
+        // Update Evaluation
+        Evaluator.updateEvaluation(move);
 
         // Clear Passant Rights
         BitBoard.passant_rights = BitBoard.NO_PASSANT;
@@ -300,7 +226,31 @@ public class MoveHandler {
         BitBoard.castle_rights = GameStack.peekCastlingRights();
         BitBoard.passant_rights = GameStack.peekPassantRights();
 
-        Zobrist.updateZobristHash(move);
+        Zobrist.setZobristHash(GameStack.peekHash());
+        Evaluator.setBaseEvaluation(GameStack.peekEvaluation());
+        GameStack.pop();
+    }
+
+    public static void doNullMove() {
+        GameStack.push(
+            NULL_MOVE, 
+            NULL_TURN, 
+            BitBoard.castle_rights, 
+            BitBoard.passant_rights, 
+            BitBoard.NO_PIECE, 
+            Zobrist.getZobristHash(),
+            Evaluator.NULL_EVAL
+        );
+
+        Zobrist.updateZobristHashNull();
+
+        BitBoard.passant_rights = BitBoard.NO_PASSANT;
+    }
+
+    public static void undoNullMove() {
+        BitBoard.passant_rights = GameStack.peekPassantRights();
+
+        Zobrist.setZobristHash(GameStack.peekHash());
         GameStack.pop();
     }
 }
