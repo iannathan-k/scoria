@@ -8,7 +8,14 @@ public class BitBoard {
     public static final int WHITE           = 0;
     public static final int BLACK           = 1;
 
-    public static final int NO_PIECE        = -1;
+    public static final int NO_PIECE  = -1;
+    public static final int PAWN      = 0b0000; //  0
+    public static final int KNIGHT    = 0b0010; //  2
+    public static final int BISHOP    = 0b0100; //  4
+    public static final int ROOK      = 0b0110; //  6
+    public static final int QUEEN     = 0b1000; //  8
+    public static final int KING      = 0b1010; // 10
+
     public static final int WHITE_PAWN      = 0b0000; //  0
     public static final int WHITE_KNIGHT    = 0b0010; //  2
     public static final int WHITE_BISHOP    = 0b0100; //  4
@@ -51,7 +58,22 @@ public class BitBoard {
 
     public static final int NO_PASSANT = -1;
 
-    public static final int KING_VALUE = 10000;
+    public static final int NORTH       = 8;
+    public static final int SOUTH       = -8;
+    public static final int EAST        = 1;
+    public static final int WEST        = -1;
+    public static final int NORTH_EAST  = 9;
+    public static final int NORTH_WEST  = 7;
+    public static final int SOUTH_EAST  = -7;
+    public static final int SOUTH_WEST  = -9;
+    public static final int NORTH_2     = 16;
+    public static final int SOUTH_2     = -16;
+    public static final int N_SHIFT     = 8;
+    public static final int S_SHIFT     = 8;
+    public static final int NE_SHIFT    = 9;
+    public static final int NW_SHIFT    = 7;
+    public static final int SE_SHIFT    = 7;
+    public static final int SW_SHIFT    = 9;
 
     /* Current Bitboard
      * P N B R Q K p n b r q k
@@ -94,8 +116,8 @@ public class BitBoard {
 
     public static boolean hasNonPawnPiece(int color) {
         return (color_bitboards[color] 
-                & ~piece_bitboards[WHITE_PAWN | color] 
-                & ~piece_bitboards[WHITE_KING | color]) 
+                & ~piece_bitboards[PAWN | color] 
+                & ~piece_bitboards[KING | color]) 
                 != 0;
     }
 

@@ -19,7 +19,6 @@ public class Command {
             for (int i = 3; i < args.length; i++) {
                 int move = Uci.uciToMove(args[i]);
                 MoveHandler.doMove(move);
-                BitBoard.moving_side ^= 1;
             }
         } else {
             String fen = "";
@@ -36,11 +35,10 @@ public class Command {
             for (int j = i + 1; j < args.length; j++) {
                 int move = Uci.uciToMove(args[j]);
                 MoveHandler.doMove(move);
-                BitBoard.moving_side ^= 1;
             }
         }
 
-        Evaluator.manualBaseEvaluation();
+        Evaluator.manualEvaluation();
         Zobrist.manualZobristHash();
     }
 
@@ -55,7 +53,6 @@ public class Command {
         }
     }
 
-    // FIXME: Remove Paw
     public static void parseCommand(String command) {
         String[] args = command.split("\\s");
 

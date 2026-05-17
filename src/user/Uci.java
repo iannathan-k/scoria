@@ -36,11 +36,11 @@ public class Uci {
         String uci = squareToAlgebraic(origin) + squareToAlgebraic(target);
 
         int promotion_piece = (move & MoveHandler.PROMOTED_MASK) >>> 16;
-        switch (promotion_piece) {
-            case BitBoard.WHITE_KNIGHT, BitBoard.BLACK_KNIGHT -> uci += "n";
-            case BitBoard.WHITE_BISHOP, BitBoard.BLACK_BISHOP -> uci += "b";
-            case BitBoard.WHITE_ROOK, BitBoard.BLACK_ROOK -> uci += "r";
-            case BitBoard.WHITE_QUEEN, BitBoard.BLACK_QUEEN -> uci += "q";
+        switch (promotion_piece & BitBoard.PIECE_MASK) {
+            case BitBoard.KNIGHT    -> uci += "n";
+            case BitBoard.BISHOP    -> uci += "b";
+            case BitBoard.ROOK      -> uci += "r";
+            case BitBoard.QUEEN     -> uci += "q";
         }
 
         return uci;
@@ -54,14 +54,14 @@ public class Uci {
         int move = MoveGenerator.encodeMove(origin, target, piece);
 
         // Double pawn push
-        if ((piece & BitBoard.PIECE_MASK) == BitBoard.WHITE_PAWN
+        if ((piece & BitBoard.PIECE_MASK) == BitBoard.PAWN
             && Math.abs(target - origin) >= 16) {
 
             move |= MoveHandler.DOUBLE_FLAG;
         }
 
         // En passant
-        if ((piece & BitBoard.PIECE_MASK) == BitBoard.WHITE_PAWN
+        if ((piece & BitBoard.PIECE_MASK) == BitBoard.PAWN
             && capture == BitBoard.NO_PIECE
             && (origin & 7) != (target & 7)) {
 
@@ -74,15 +74,15 @@ public class Uci {
             char promoted_char = uci.charAt(4);
 
             switch (promoted_char) {
-                case 'q' -> move |= (BitBoard.WHITE_QUEEN + color << 16);
-                case 'r' -> move |= (BitBoard.WHITE_ROOK + color << 16);
-                case 'b' -> move |= (BitBoard.WHITE_BISHOP + color << 16);
-                case 'n' -> move |= (BitBoard.WHITE_KNIGHT + color << 16);
+                case 'q' -> move |= (BitBoard.QUEEN + color << 16);
+                case 'r' -> move |= (BitBoard.ROOK + color << 16);
+                case 'b' -> move |= (BitBoard.BISHOP + color << 16);
+                case 'n' -> move |= (BitBoard.KNIGHT + color << 16);
             }
         }
 
         // Castling
-        if ((piece & BitBoard.PIECE_MASK) == BitBoard.WHITE_KING
+        if ((piece & BitBoard.PIECE_MASK) == BitBoard.KING
             && Math.abs((origin & 7) - (target & 7)) >= 2) {
 
             move |= MoveHandler.CASTLE_FLAG;
@@ -204,5 +204,25 @@ public class Uci {
         System.out.println();
         System.out.println("hash: " + Long.toHexString(Zobrist.getZobristHash()));
         System.out.println("fen: " + getCurrentFen());
+    }
+
+    public static void printBoardIndexes() {
+        System.out.println("    a  b  c  d  e  f  g  h");
+        System.out.println();
+
+        for (int i = 7; i >= 0; i--) {
+            System.out.print(i + 1 + "   ");
+
+            for (int j = 0; j < 8; j++) {
+                int square = (i << 3) | j;
+                if (square < 10) {
+                    System.out.print(" ");
+                }
+
+                System.out.print(square + " ");
+            }
+
+            System.out.println();
+        }
     }
 }

@@ -1,6 +1,6 @@
 # Overview
 
-Introducing Scoria, an open source uci engine programmed completely in Java, with an estimated rating of approximately ~2000 elo.
+Introducing Scoria, an open source uci engine programmed completely in Java, with an estimated rating of approximately ~2200 elo.
 
 ## Compiling
 
@@ -22,61 +22,34 @@ However, Scoria does not include any form of GUI (Graphical User Interface) and 
 
 ## Supported Options
 
-**Debug Log File**\
-~ Path to the file should be specified
-
-**Set Move Overhead**\
-~ Any time within 0 to 1000 milliseconds
-
-**Ponder**\
-~ Ability to think during opponents time
-
-**Clear Hash Table**\
-~ Clear all entries in the hash table
+No options are supported at the moment, as Scoria 4 is still a work in progress.
 
 ## Rating Estimate
 
-An estimation of Scoria's rating was determined by playing against the different Stockfish 17.1 skill levels over a total of 200 games, with 1 second per move for each side. The results were run through [Bayeselo](https://www.remi-coulom.fr/Bayesian-Elo/) to determine a relative elo rating. 
-
-```
-Rank Name             Elo    +    - games score oppo. draws
-   1 master-skill-5   142   70   69    50   52%   127   12%
-   2 Scoria_v3.8.49   127   38   37   200   70%   -32   13%
-   3 master-skill-4    17   68   71    50   35%   127   18%
-   4 master-skill-3   -85   71   80    50   22%   127   16%
-   5 master-skill-2  -201   83  105    50   13%   127    6%
-```
-
-The results were adjusted relative to the official [Skill Level Ratings](https://github.com/official-stockfish/Stockfish/commit/a08b8d4) provided by Stockfish, which itself was calibrated against [CCRL](https://computerchess.org.uk/ccrl/4040/).
-
-
-```
-   # PLAYER             :  RATING   ERROR   PLAYED
-   1 master-skill-5     :  2203.7    25.3     5422
-   2 Scoria_v3.8.49     :  2028.1   126.1      200
-   3 master-skill-4     :  1922.9    25.9     5399
-   4 master-skill-3     :  1742.3    27.8     4439
-   5 master-skill-2     :  1608.4    29.4     4389
-```
+Through rudimentary self-testing, Scoria 4 is currently estimated to be around ~2200 ELO, being able to hold its own against bots rated there on CCRL. More information and proper testing coming in future updates.
 
 ## Disclaimers
 
-Scoria does not support the 50 Move Rule which states that 50 moves without any pawn move or capture will result in a draw. As well as underpromotion which means promoting to a knight, bishop or rook for both the player and itself. All promotions are automatically assumed to be to a queen.
+Scoria does not support the 50 Move Rule which states that 50 moves without any pawn move or capture will result in a draw. However, Scoria 4 now supports underpromotion which is an improvement over Scoria 3 which assumed all promotions were queen promotions.
 
 Java 14+ is required to compile and execute Scoria, due to usage of the newer [Switch Expressions](https://docs.oracle.com/en/java/javase/17/language/switch-expressions-and-statements.html) ("case L ->" Labels) not supported by older Java versions.
 
-Static evaluation of board positions are done using an [HCE](https://www.chessprogramming.org/Simplified_Evaluation_Function) (Handcrafted Evaluation), which accounts for piece values, positions and mobility. There is no use of [NNUE](https://www.chessprogramming.org/NNUE) (Efficiently Updatable Neural Network).
+Static evaluation of board positions are done using an [HCE](https://www.chessprogramming.org/Simplified_Evaluation_Function) (Handcrafted Evaluation), which accounts for piece values, positions, mobility as well as structure. There is no use of [NNUE](https://www.chessprogramming.org/NNUE) (Efficiently Updatable Neural Network).
 
 ## Changelog
 
-Scoria v4.3.5
+Scoria v4.4.5
 
-1. Added Mobility
-2. History Heuristic
-3. Killer Moves
-4. Fixed UCI to Move
-5. Pseudo Legal Moves
-6. Static Exchange Evaluation
-7. Incremental Evaluation
+1. Counter Move Heuristic
+2. History Gravity Maluses
+3. Follow-Up Move Heuristic
+4. Late Move Reduction
+5. Tapered Evaluation
+6. Reworked Max History and Bonus
+7. History Pruning
+8. Fixed Castling and Zobrist Bug
+9. Check Extensions
+10. Improved Evaluation Function
+11. Tuned Evaluation Weights
 
 ##### Ian Nathan Kusmiantoro, 2026

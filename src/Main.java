@@ -13,7 +13,7 @@ public class Main {
         Precomputer.initAllMoveTables();
         Zobrist.initZobristTable();
 
-        System.out.println("Scoria v4.3.5");
+        System.out.println("Scoria v4.4.5");
 
         Scanner scanner = new Scanner(System.in);
 

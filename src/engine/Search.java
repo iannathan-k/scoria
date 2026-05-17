@@ -8,6 +8,7 @@ import src.game.MoveHandler;
 import src.game.Precomputer;
 import src.game.Zobrist;
 import src.user.Uci;
+import src.utils.GameStack;
 import src.utils.MoveList;
 
 public class Search {
@@ -15,21 +16,25 @@ public class Search {
     private static final int INFINITY = 1 << 30;
     private static final int BIG_DELTA = 975;
     private static final int TO_FROM_MASK = 0xFFF;
-    private static final int HISTORY_AGE = 8191;
-    private static final int MAX_HISTORY = 512;
+    private static final int MAX_HISTORY = 16384;
+    private static final int CONT_SIZE = 768;
     
-    private static final int[] RAZOR_MARGIN = {0, 200, 1000};
-    private static final int[] FUTILITY_MARGIN = {0, 150, 750};
+    private static final int[] RAZOR_MARGIN = {0, 200, 900};
+    private static final int[] FUTILITY_MARGIN = {0, 150, 800};
 
     private static final int[][] HISTORY_TABLE = new int[2][TO_FROM_MASK];
-    private static final int[][] KILLER_TABLE = new int[128][2];
+    private static final int[][] KILLER_TABLE = new int[64][2];
+    private static final int[][] CMH_TABLE = new int[CONT_SIZE][CONT_SIZE];
+    private static final int[][] FMH_TABLE = new int[CONT_SIZE][CONT_SIZE];
+
+    private static final int[][] SEARCHED_QUIETS = new int[64][256];
 
     private static long cancel_time;
     private static long node_count;
 
     // FIXME: Lazily implemented
     // FIXME: Add can return, to break when finding mate or using book in actual games
-    // Only break when we are giving checkmate, as opponent may miss it, which we want to keep playing in
+    // FIXME: Only break when we are giving checkmate, as opponent may miss it, which we want to keep playing in
     public static void iterativeDeepener(int max_depth, int max_time) {
         int start_alpha = -INFINITY;
         int start_beta = INFINITY;
@@ -48,7 +53,7 @@ public class Search {
                 break;
             }
 
-            // Aspiration Windows
+            // Finish Aspiration Windows
             if (eval <= start_alpha || eval >= start_beta) {
                 // FIXME: Remove Later
                 System.out.println("RESTART");
@@ -110,8 +115,7 @@ public class Search {
         int captured_value;
         if ((move & MoveHandler.PASSANT_FLAG) != 0) {
             captured_value = 100; 
-        } 
-        else {
+        } else {
             captured_value = Evaluator.PIECE_VALUES[captured & BitBoard.PIECE_MASK];
         }
         
@@ -166,13 +170,13 @@ public class Search {
     // Hash Move > Winning Captures > Killer Moves > Losing Captures > Non-Captures
     private static int heuristicScore(int move, int hash_move, int ply) {
         if (move == hash_move) {
-            return 10000;
+            return 1000000;
         }
         if (move == KILLER_TABLE[ply][0]) {
-            return 5000;
+            return 500000;
         }
         if (move == KILLER_TABLE[ply][1]) {
-            return 4000;
+            return 400000;
         }
 
         int origin = (move >> 6) & MoveHandler.POSITION_MASK;
@@ -181,9 +185,9 @@ public class Search {
         int captured = BitBoard.getPieceAt(target);
         int turn = piece & BitBoard.COLOR_MASK;
         
-        int score = 2000;
-        score += Evaluator.getPositionalWeight(piece, target);
-        score -= Evaluator.getPositionalWeight(piece, origin);
+        int score = 0;
+        score += Evaluator.getMGWeights(piece, target);
+        score -= Evaluator.getMGWeights(piece, origin);
 
         if (captured != BitBoard.NO_PIECE) {
             // score += 1000;
@@ -193,11 +197,27 @@ public class Search {
             // FIXME: Consider disabling SEE at high depths
             int seeScore = see(move);
             if (seeScore >= 0) {
-                score += 5000;
+                score += 700000;
             }
             score += seeScore;
         } else {
             score += HISTORY_TABLE[turn][move & TO_FROM_MASK];
+
+            if (GameStack.size() > 0 && GameStack.peekMove() != MoveHandler.NULL_MOVE) {
+                int prev_move = GameStack.peekMove();
+                int prev_piece = (prev_move >> 12) & MoveHandler.PIECE_MASK;
+                int prev_target = prev_move & MoveHandler.POSITION_MASK;
+                score += CMH_TABLE[prev_piece << 6 | prev_target][piece << 6 | target];
+            }
+
+            if (GameStack.size() > 1) {
+                int prev_move = GameStack.getMoveAt(GameStack.size() - 2);
+                if (prev_move != MoveHandler.NULL_MOVE) {
+                    int prev_piece = (prev_move >> 12) & MoveHandler.PIECE_MASK;
+                    int prev_target = prev_move & MoveHandler.POSITION_MASK;
+                    score += FMH_TABLE[prev_piece << 6 | prev_target][piece << 6 | target];
+                }
+            }
         }
 
         return score;
@@ -301,6 +321,41 @@ public class Search {
 
         int static_eval = Evaluator.getRelativeEvaluation(turn);
         boolean in_check = MoveGenerator.isKingInCheck(turn);
+        // boolean is_pv = beta - alpha > 1;
+
+        // ProbCut
+        // if (!is_pv
+        //     && !in_check
+        //     && depth > 4
+        //     && Math.abs(beta) < Evaluator.MATE_BOUND) {
+
+        //     int margin = 200;
+        //     int prob_beta = beta + margin;
+        //     int prob_depth = depth - 4;
+
+        //     if (Transposition.doesExist(board_hash) && Transposition.getDepth(board_hash) >= prob_depth) {
+        //         int tt_score = Transposition.getScore(board_hash, ply);
+
+        //         if (tt_score >= prob_beta && (Transposition.isExact(board_hash) || Transposition.isBeta(board_hash))) {
+        //             return beta;
+        //         }
+        //     }
+
+        //     int prob_eval = negascout(prob_depth, ply, prob_beta - 1, prob_beta, turn);
+
+        //     if (prob_eval >= prob_beta) {
+        //         return beta;
+        //     }
+        // }
+
+        // Internal Iterative Reduction
+        // if (depth > 3
+        //     && !in_check
+        //     && !is_pv
+        //     && !Transposition.doesExist(board_hash)) {
+            
+        //     depth--;
+        // }
 
         // Razoring & Deep Razoring
         if (depth < 3
@@ -312,6 +367,7 @@ public class Search {
         }
 
         // Reverse Futility Pruning
+        // FIXME: no need to return quiescence here because we are alreading winning so much
         if (depth < 3
             && static_eval >= beta + FUTILITY_MARGIN[depth]
             && !in_check) {
@@ -357,28 +413,60 @@ public class Search {
         MoveList move_list = MoveGenerator.generateAllMoves(turn);
         sortMoveList(move_list, ply);
 
+        int quiet_count = 0;
+        int legal_count = 0;
         for (int i = 0; i < move_list.size(); i++) {
             int move = move_list.get(i);
             boolean is_quiet = BitBoard.getPieceAt(move & MoveHandler.POSITION_MASK, turn ^ 1) == BitBoard.NO_PIECE;
 
+            int history_score = 0;
+
+            if (is_quiet
+                && !in_check
+                && legal_count > 1) {
+
+                history_score = HISTORY_TABLE[turn][move & TO_FROM_MASK];
+                boolean has_cmh = GameStack.size() > 0 && GameStack.peekMove() != MoveHandler.NULL_MOVE;
+                boolean has_fmh = GameStack.size() > 1 && GameStack.getMoveAt(GameStack.size() - 2) != MoveHandler.NULL_MOVE;
+
+                int curr_piece = (move >> 12) & MoveHandler.PIECE_MASK;
+                int curr_target = move & MoveHandler.POSITION_MASK;
+                int curr_index = curr_piece << 6 | curr_target;
+
+                if (has_cmh) {
+                    int prev_move = GameStack.peekMove();
+                    int prev_piece = (prev_move >> 12) & MoveHandler.PIECE_MASK;
+                    int prev_target = prev_move & MoveHandler.POSITION_MASK;
+
+                    history_score += CMH_TABLE[prev_piece << 6 | prev_target][curr_index];
+                }
+
+                if (has_fmh) {
+                    int prev_move = GameStack.getMoveAt(GameStack.size() - 2);
+                    int prev_piece = (prev_move >> 12) & MoveHandler.PIECE_MASK;
+                    int prev_target = prev_move & MoveHandler.POSITION_MASK;
+
+                    history_score += FMH_TABLE[prev_piece << 6 | prev_target][curr_index];
+                }
+            }
+
+            // History Pruning
+            if (depth <= 3
+                && is_quiet
+                && !in_check
+                && legal_count > 1) {
+
+                if (history_score < -2000 * depth) {
+                    continue;
+                }
+            }
+
             // Futility Pruning
-            // if (i != 0
+            // if (legal_count > 3
             //     && is_futile
             //     && is_quiet) {
 
             //     continue;
-            // }
-
-            // Late Move Reduction
-            // Consider Precalculating the Logs
-            int reduction = 0;
-            // if (depth > 2
-            //     && i > 3
-            //     && is_quiet
-            //     && !in_check) {
-
-            //     // reduction = (int) (Math.log(depth) * Math.log(i)) >> 1;
-            //     reduction = 1;
             // }
 
             MoveHandler.doMove(move);
@@ -389,19 +477,50 @@ public class Search {
                 continue;
             }
 
+            // Check Extenstions
+            // FIXME: Test whether this actually improves performance
+            int extension = 0;
+            boolean gives_check = MoveGenerator.isKingInCheck(turn ^ 1);
+            if (gives_check) {
+                extension = 1;
+            }
+
+            // Late Move Reduction
+            // FIXME: Consider Precalculating the Logs
+            // FIXME: Don't reduce killers, captures, etc.
+            int reduction = 0;
+            if (depth > 2
+                && legal_count > 3
+                && is_quiet
+                && !in_check
+                && !gives_check) {
+
+                double r = 0.8 + Math.log(depth) * Math.log(legal_count) / 4;
+
+                reduction = (int) r;
+                reduction = Math.max(0, reduction);
+                reduction = Math.min(reduction, depth - 2);
+            }
+
             // Null Window Search
             int eval;
-            if (i == 0) {
+            if (legal_count == 0) {
                 eval = -negascout(depth - 1, ply + 1, -beta, -alpha, turn ^ 1);
             } else {
-                eval = -negascout(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha, turn ^ 1);
+                eval = -negascout(depth - 1 - reduction + extension, ply + 1, -alpha - 1, -alpha, turn ^ 1);
+
+                // LMR Research
+                if (reduction > 0 && eval > alpha) {
+                    eval = -negascout(depth - 1 + extension, ply + 1, -alpha - 1, -alpha, turn ^ 1);
+                }
 
                 if (eval > alpha && eval < beta) {
-                    eval = -negascout(depth - 1, ply + 1, -beta, -alpha, turn ^ 1);
+                    eval = -negascout(depth - 1 + extension, ply + 1, -beta, -alpha, turn ^ 1);
                 }
             }
 
             MoveHandler.undoMove();
+            legal_count++;
 
             if (System.currentTimeMillis() > cancel_time) {
                 return Integer.MIN_VALUE;
@@ -417,30 +536,81 @@ public class Search {
             if (alpha >= beta) {
                 if (is_quiet) {
                     int current = HISTORY_TABLE[turn][move & TO_FROM_MASK];
-                    int bonus = depth * depth;
+                    int bonus = 300 * depth - 250;
 
+                    // History Heuristic
                     HISTORY_TABLE[turn][move & TO_FROM_MASK] += bonus - current * bonus / MAX_HISTORY;
 
+                    // Killer Moves
                     if (KILLER_TABLE[ply][0] != move) {
                         KILLER_TABLE[ply][1] = KILLER_TABLE[ply][0];
                         KILLER_TABLE[ply][0] = move;
+                    }
+
+                    // Counter Move Heuristic
+                    int curr_piece = (move >> 12) & MoveHandler.PIECE_MASK;
+                    int curr_target = move & MoveHandler.POSITION_MASK;
+                    int curr_index = curr_piece << 6 | curr_target;
+
+                    boolean has_cmh = GameStack.size() > 0 && GameStack.peekMove() != MoveHandler.NULL_MOVE;
+                    boolean has_fmh = GameStack.size() > 1 && GameStack.getMoveAt(GameStack.size() - 2) != MoveHandler.NULL_MOVE;
+                    int c_index = -1;
+                    int f_index = -1;
+
+                    if (has_cmh) {
+                        int prev_move = GameStack.peekMove();
+                        int prev_piece = (prev_move >> 12) & MoveHandler.PIECE_MASK;
+                        int prev_target = prev_move & MoveHandler.POSITION_MASK;
+
+                        c_index = prev_piece << 6 | prev_target;
+                        current = CMH_TABLE[c_index][curr_index];
+                        CMH_TABLE[c_index][curr_index] += bonus - current * bonus / MAX_HISTORY;
+                    }
+
+                    // Follow Move Heuristic
+                    if (has_fmh) {
+                        int prev_move = GameStack.getMoveAt(GameStack.size() - 2);
+                        int prev_piece = (prev_move >> 12) & MoveHandler.PIECE_MASK;
+                        int prev_target = prev_move & MoveHandler.POSITION_MASK;
+
+                        f_index = prev_piece << 6 | prev_target;
+                        current = FMH_TABLE[f_index][curr_index];
+                        FMH_TABLE[f_index][curr_index] += bonus - current * bonus / MAX_HISTORY;
+                    }
+
+                    // History Maluses
+                    for (int j = 0; j < quiet_count; j++) {
+                        int failed_move = SEARCHED_QUIETS[ply][j];
+                        int failed_piece = (failed_move >> 12) & MoveHandler.PIECE_MASK;
+                        int failed_target = failed_move & MoveHandler.POSITION_MASK;
+                        int failed_index = failed_piece << 6 | failed_target;
+
+                        current = HISTORY_TABLE[turn][failed_move & TO_FROM_MASK];
+                        HISTORY_TABLE[turn][failed_move & TO_FROM_MASK] -= bonus + current * bonus / MAX_HISTORY;
+                        
+                        if (has_cmh) {
+                            current = CMH_TABLE[c_index][failed_index];
+                            CMH_TABLE[c_index][failed_index] -= bonus + current * bonus / MAX_HISTORY;
+                        }
+
+                        if (has_fmh) {
+                            current = FMH_TABLE[f_index][failed_index];
+                            FMH_TABLE[f_index][failed_index] -= bonus + current * bonus / MAX_HISTORY;
+                        }
                     }
                 }
 
                 break;
             }
+
+            if (is_quiet) {
+                SEARCHED_QUIETS[ply][quiet_count++] = move;
+            }
         }
 
-        // Checkmate Condition
-        if (best_move == 0) {
+        // Checkmate & Stalemate Condition
+        if (legal_count == 0) {
             return Evaluator.getMateScore(turn, ply);
-        }
-       
-        if ((node_count & HISTORY_AGE) == 0) {
-            for (int i = 0; i < TO_FROM_MASK; i++) {
-                HISTORY_TABLE[0][i] >>= 1;
-                HISTORY_TABLE[1][i] >>= 1;
-            }
         }
 
         byte node_type;

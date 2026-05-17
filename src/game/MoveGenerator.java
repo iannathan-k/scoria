@@ -36,10 +36,10 @@ public class MoveGenerator {
         // Slider Attacks
 
         // Queen
-        long enemy_queen_board = BitBoard.piece_bitboards[BitBoard.WHITE_QUEEN | enemy_color];
+        long enemy_queen_board = BitBoard.piece_bitboards[BitBoard.QUEEN | enemy_color];
 
         // Bishop
-        long enemy_bishop_board = BitBoard.piece_bitboards[BitBoard.WHITE_BISHOP | enemy_color];
+        long enemy_bishop_board = BitBoard.piece_bitboards[BitBoard.BISHOP | enemy_color];
         int index = (int) (((
             BitBoard.occupancy_bitboard 
             & Precomputer.BISHOP_MASKS[pos]) 
@@ -50,7 +50,7 @@ public class MoveGenerator {
         if ((moves & (enemy_bishop_board | enemy_queen_board)) != 0) return true;
 
         // Rook
-        long enemy_rook_board = BitBoard.piece_bitboards[BitBoard.WHITE_ROOK | enemy_color];
+        long enemy_rook_board = BitBoard.piece_bitboards[BitBoard.ROOK | enemy_color];
         index = (int) (((
             BitBoard.occupancy_bitboard 
             & Precomputer.ROOK_MASKS[pos]) 
@@ -62,26 +62,26 @@ public class MoveGenerator {
 
         // Knight Attacks
 
-        long enemy_knight_board = BitBoard.piece_bitboards[BitBoard.WHITE_KNIGHT | enemy_color];
+        long enemy_knight_board = BitBoard.piece_bitboards[BitBoard.KNIGHT | enemy_color];
         if ((enemy_knight_board & Precomputer.KNIGHT_MOVE_TABLE[pos]) != 0) return true;
 
         // Pawn Attacks
 
         long pawn_attacks;
-        long enemy_pawn_board = BitBoard.piece_bitboards[BitBoard.WHITE_PAWN | enemy_color];
+        long enemy_pawn_board = BitBoard.piece_bitboards[BitBoard.PAWN | enemy_color];
         if (victim_color == BitBoard.WHITE) {
-            pawn_attacks = ((enemy_pawn_board >>> 7) & ~BitBoard.COL_A) 
-                        | ((enemy_pawn_board >>> 9) & ~BitBoard.COL_H);
+            pawn_attacks = ((enemy_pawn_board >>> BitBoard.SE_SHIFT) & ~BitBoard.COL_A) 
+                        | ((enemy_pawn_board >>> BitBoard.SW_SHIFT) & ~BitBoard.COL_H);
         } else {
-            pawn_attacks = ((enemy_pawn_board << 7) & ~BitBoard.COL_H) 
-                        | ((enemy_pawn_board << 9) & ~BitBoard.COL_A);
+            pawn_attacks = ((enemy_pawn_board << BitBoard.NW_SHIFT) & ~BitBoard.COL_H) 
+                        | ((enemy_pawn_board << BitBoard.NE_SHIFT) & ~BitBoard.COL_A);
         }
 
         if ((pawn_attacks & (1L << pos)) != 0) return true;
 
         // King Attacks
 
-        long enemy_king_board = BitBoard.piece_bitboards[BitBoard.WHITE_KING | enemy_color];
+        long enemy_king_board = BitBoard.piece_bitboards[BitBoard.KING | enemy_color];
         if ((enemy_king_board & Precomputer.KING_MOVE_TABLE[pos]) != 0) return true;
 
         return false;
@@ -89,19 +89,18 @@ public class MoveGenerator {
 
     public static boolean isKingInCheck(int color) {
         int square = Long.numberOfTrailingZeros(
-            BitBoard.piece_bitboards[BitBoard.WHITE_KING | color]
+            BitBoard.piece_bitboards[BitBoard.KING | color]
         );
 
         return isUnderAttack(square, color);
     }
 
     // FIXME: Perhaps save own bitboard in var first
-    // FIXME: King board doesn't need a loop
     public static MoveList generateAllMoves(int color) {
         MoveList move_list = new MoveList(20);
 
         // Pawn
-        long pawn_board = BitBoard.piece_bitboards[BitBoard.WHITE_PAWN | color];
+        long pawn_board = BitBoard.piece_bitboards[BitBoard.PAWN | color];
 
         long single_push = 0L;
         long double_push = 0L;
@@ -109,34 +108,33 @@ public class MoveGenerator {
         long right_capture = 0L;
 
         if (color == BitBoard.WHITE) {
-            single_push = (pawn_board << 8) & ~BitBoard.occupancy_bitboard;
-            double_push = ((single_push & BitBoard.ROW_3) << 8) & ~BitBoard.occupancy_bitboard;
+            single_push = (pawn_board << BitBoard.N_SHIFT) & ~BitBoard.occupancy_bitboard;
+            double_push = ((single_push & BitBoard.ROW_3) << BitBoard.N_SHIFT) & ~BitBoard.occupancy_bitboard;
 
             left_capture = 
-                (pawn_board << 7) 
+                (pawn_board << BitBoard.NW_SHIFT) 
                 & BitBoard.color_bitboards[BitBoard.BLACK] 
                 & ~BitBoard.COL_H;
 
             right_capture = 
-                (pawn_board << 9)
+                (pawn_board << BitBoard.NE_SHIFT)
                 & BitBoard.color_bitboards[BitBoard.BLACK] 
                 & ~BitBoard.COL_A;
 
-            // FIXME: Could be changed to range check SQUARE_A5 to SQUARE_H5
             if (BitBoard.passant_rights != BitBoard.NO_PASSANT) {
                 long left_passant = 
-                    (pawn_board << 7)
+                    (pawn_board << BitBoard.NW_SHIFT)
                     & (1L << BitBoard.passant_rights)
                     & ~BitBoard.COL_H;
 
                 long right_passant =
-                    (pawn_board << 9)
+                    (pawn_board << BitBoard.NE_SHIFT)
                     & (1L << BitBoard.passant_rights)
                     & ~BitBoard.COL_A;
 
                 if (left_passant != 0) {
                     int target = Long.numberOfTrailingZeros(left_passant);
-                    int origin = target - 7;
+                    int origin = target + BitBoard.SOUTH_EAST;
                     
                     move_list.add(
                         encodeMove(origin, target, BitBoard.WHITE_PAWN, MoveHandler.PASSANT_FLAG)
@@ -144,7 +142,7 @@ public class MoveGenerator {
                 }
                 if (right_passant != 0) {
                     int target = Long.numberOfTrailingZeros(right_passant);
-                    int origin = target - 9;
+                    int origin = target + BitBoard.SOUTH_WEST;
                     
                     move_list.add(
                         encodeMove(origin, target, BitBoard.WHITE_PAWN, MoveHandler.PASSANT_FLAG)
@@ -153,33 +151,33 @@ public class MoveGenerator {
             }
                 
         } else {
-            single_push = (pawn_board >>> 8) & ~BitBoard.occupancy_bitboard;
-            double_push = ((single_push & BitBoard.ROW_6) >>> 8) & ~BitBoard.occupancy_bitboard;
+            single_push = (pawn_board >>> BitBoard.S_SHIFT) & ~BitBoard.occupancy_bitboard;
+            double_push = ((single_push & BitBoard.ROW_6) >>> BitBoard.S_SHIFT) & ~BitBoard.occupancy_bitboard;
             
             left_capture = 
-                (pawn_board >>> 9) 
+                (pawn_board >>> BitBoard.SW_SHIFT) 
                 & BitBoard.color_bitboards[BitBoard.WHITE] 
                 & ~BitBoard.COL_H;
 
             right_capture = 
-                (pawn_board >>> 7) 
+                (pawn_board >>> BitBoard.SE_SHIFT)
                 & BitBoard.color_bitboards[BitBoard.WHITE] 
                 & ~BitBoard.COL_A;
 
             if (BitBoard.passant_rights != BitBoard.NO_PASSANT) {
                 long left_passant =
-                    (pawn_board >>> 9)
+                    (pawn_board >>> BitBoard.SW_SHIFT)
                     & (1L << BitBoard.passant_rights)
                     & ~BitBoard.COL_H;
                 
                 long right_passant =
-                    (pawn_board >>> 7)
+                    (pawn_board >>> BitBoard.SE_SHIFT)
                     & (1L << BitBoard.passant_rights)
                     & ~BitBoard.COL_A;
 
                 if (left_passant != 0) {
                     int target = Long.numberOfTrailingZeros(left_passant);
-                    int origin = target + 9;
+                    int origin = target + BitBoard.NORTH_EAST;
 
                     move_list.add(
                         encodeMove(origin, target, BitBoard.BLACK_PAWN, MoveHandler.PASSANT_FLAG)
@@ -187,7 +185,7 @@ public class MoveGenerator {
                 }
                 if (right_passant != 0) {
                     int target = Long.numberOfTrailingZeros(right_passant);
-                    int origin = target + 7;
+                    int origin = target + BitBoard.NORTH_WEST;
 
                     move_list.add(
                         encodeMove(origin, target, BitBoard.BLACK_PAWN, MoveHandler.PASSANT_FLAG)
@@ -198,17 +196,17 @@ public class MoveGenerator {
 
         while (single_push != 0L) {
             int target = Long.numberOfTrailingZeros(single_push);
-            int origin = (color == BitBoard.WHITE) ? target - 8 : target + 8;
+            int origin = (color == BitBoard.WHITE) ? target + BitBoard.SOUTH : target + BitBoard.NORTH;
 
             if (target >= SQUARE_A8 || target <= SQUARE_H1) {
-                int move = encodeMove(origin, target, BitBoard.WHITE_PAWN | color);
-                move_list.add(move | (BitBoard.WHITE_QUEEN + color << 16));
-                move_list.add(move | (BitBoard.WHITE_ROOK + color << 16));
-                move_list.add(move | (BitBoard.WHITE_BISHOP + color << 16));
-                move_list.add(move | (BitBoard.WHITE_KNIGHT + color << 16));
+                int move = encodeMove(origin, target, BitBoard.PAWN | color);
+                move_list.add(move | (BitBoard.QUEEN + color << 16));
+                move_list.add(move | (BitBoard.ROOK + color << 16));
+                move_list.add(move | (BitBoard.BISHOP + color << 16));
+                move_list.add(move | (BitBoard.KNIGHT + color << 16));
             } else {
                 move_list.add(
-                    encodeMove(origin, target, BitBoard.WHITE_PAWN | color)
+                    encodeMove(origin, target, BitBoard.PAWN | color)
                 );
             }
            
@@ -217,10 +215,10 @@ public class MoveGenerator {
 
         while (double_push != 0L) {
             int target = Long.numberOfTrailingZeros(double_push);
-            int origin = (color == BitBoard.WHITE) ? target - 16 : target + 16;
+            int origin = (color == BitBoard.WHITE) ? target + BitBoard.SOUTH_2 : target + BitBoard.NORTH_2;
             
             move_list.add(
-                encodeMove(origin, target, BitBoard.WHITE_PAWN | color, MoveHandler.DOUBLE_FLAG)
+                encodeMove(origin, target, BitBoard.PAWN | color, MoveHandler.DOUBLE_FLAG)
             );
 
             double_push &= double_push - 1;
@@ -228,17 +226,17 @@ public class MoveGenerator {
 
         while (left_capture != 0L) {
             int target = Long.numberOfTrailingZeros(left_capture);
-            int origin = (color == BitBoard.WHITE) ? target - 7 : target + 9;
+            int origin = (color == BitBoard.WHITE) ? target + BitBoard.SOUTH_EAST : target + BitBoard.NORTH_EAST;
 
             if (target >= SQUARE_A8 || target <= SQUARE_H1) {
-                int move = encodeMove(origin, target, BitBoard.WHITE_PAWN | color);
-                move_list.add(move | (BitBoard.WHITE_QUEEN + color << 16));
-                move_list.add(move | (BitBoard.WHITE_ROOK + color << 16));
-                move_list.add(move | (BitBoard.WHITE_BISHOP + color << 16));
-                move_list.add(move | (BitBoard.WHITE_KNIGHT + color << 16));
+                int move = encodeMove(origin, target, BitBoard.PAWN | color);
+                move_list.add(move | (BitBoard.QUEEN + color << 16));
+                move_list.add(move | (BitBoard.ROOK + color << 16));
+                move_list.add(move | (BitBoard.BISHOP + color << 16));
+                move_list.add(move | (BitBoard.KNIGHT + color << 16));
             } else {
                 move_list.add(
-                    encodeMove(origin, target, BitBoard.WHITE_PAWN | color)
+                    encodeMove(origin, target, BitBoard.PAWN | color)
                 );
             }
 
@@ -247,17 +245,17 @@ public class MoveGenerator {
 
         while (right_capture != 0L) {
             int target = Long.numberOfTrailingZeros(right_capture);
-            int origin = (color == BitBoard.WHITE) ? target - 9 : target + 7;
+            int origin = (color == BitBoard.WHITE) ? target + BitBoard.SOUTH_WEST : target + BitBoard.NORTH_WEST;
            
             if (target >= SQUARE_A8 || target <= SQUARE_H1) {
-                int move = encodeMove(origin, target, BitBoard.WHITE_PAWN | color);
-                move_list.add(move | (BitBoard.WHITE_QUEEN + color << 16));
-                move_list.add(move | (BitBoard.WHITE_ROOK + color << 16));
-                move_list.add(move | (BitBoard.WHITE_BISHOP + color << 16));
-                move_list.add(move | (BitBoard.WHITE_KNIGHT + color << 16));
+                int move = encodeMove(origin, target, BitBoard.PAWN | color);
+                move_list.add(move | (BitBoard.QUEEN + color << 16));
+                move_list.add(move | (BitBoard.ROOK + color << 16));
+                move_list.add(move | (BitBoard.BISHOP + color << 16));
+                move_list.add(move | (BitBoard.KNIGHT + color << 16));
             } else {
                 move_list.add(
-                    encodeMove(origin, target, BitBoard.WHITE_PAWN | color)
+                    encodeMove(origin, target, BitBoard.PAWN | color)
                 );
             }
             
@@ -265,7 +263,7 @@ public class MoveGenerator {
         }
 
         // Knight
-        long knight_board = BitBoard.piece_bitboards[BitBoard.WHITE_KNIGHT | color];
+        long knight_board = BitBoard.piece_bitboards[BitBoard.KNIGHT | color];
         while (knight_board != 0L) {
             int square = Long.numberOfTrailingZeros(knight_board);
             long moves = Precomputer.KNIGHT_MOVE_TABLE[square] & ~BitBoard.color_bitboards[color];
@@ -274,7 +272,7 @@ public class MoveGenerator {
                 int target = Long.numberOfTrailingZeros(moves);
 
                 move_list.add(
-                    encodeMove(square, target, BitBoard.WHITE_KNIGHT | color)
+                    encodeMove(square, target, BitBoard.KNIGHT | color)
                 );
 
                 moves &= moves - 1;
@@ -284,24 +282,21 @@ public class MoveGenerator {
         }
 
         // King
-        long king_board = BitBoard.piece_bitboards[BitBoard.WHITE_KING | color];
+        long king_board = BitBoard.piece_bitboards[BitBoard.KING | color];
+        int k_square = Long.numberOfTrailingZeros(king_board);
+        long k_moves = Precomputer.KING_MOVE_TABLE[k_square] & ~BitBoard.color_bitboards[color];
 
-        while (king_board != 0L) {
-            int square = Long.numberOfTrailingZeros(king_board);
-            long moves = Precomputer.KING_MOVE_TABLE[square] & ~BitBoard.color_bitboards[color];
-
-            while (moves != 0L) {
-                int target = Long.numberOfTrailingZeros(moves);
-                
-                move_list.add(
-                    encodeMove(square, target, BitBoard.WHITE_KING | color)
-                );
-
-                moves &= moves - 1;
-            }
+        while (k_moves != 0L) {
+            int target = Long.numberOfTrailingZeros(k_moves);
             
-            king_board &= king_board - 1;
+            move_list.add(
+                encodeMove(k_square, target, BitBoard.KING | color)
+            );
+
+            k_moves &= k_moves - 1;
         }
+        
+        king_board &= king_board - 1;
 
         // Castling
         // FIXME: Could Remove more checks
@@ -352,7 +347,7 @@ public class MoveGenerator {
         }
 
         // Bishop
-        long bishop_board = BitBoard.piece_bitboards[BitBoard.WHITE_BISHOP | color];
+        long bishop_board = BitBoard.piece_bitboards[BitBoard.BISHOP | color];
         while (bishop_board != 0L) {
             int square = Long.numberOfTrailingZeros(bishop_board);
             int index = (int) (((
@@ -366,7 +361,7 @@ public class MoveGenerator {
                 int target = Long.numberOfTrailingZeros(moves);
                 
                 move_list.add(
-                    encodeMove(square, target, BitBoard.WHITE_BISHOP | color)
+                    encodeMove(square, target, BitBoard.BISHOP | color)
                 );
 
                 moves &= moves - 1;
@@ -376,7 +371,7 @@ public class MoveGenerator {
         }
 
         // Rook
-        long rook_board = BitBoard.piece_bitboards[BitBoard.WHITE_ROOK | color];
+        long rook_board = BitBoard.piece_bitboards[BitBoard.ROOK | color];
         while (rook_board != 0L) {
             int square = Long.numberOfTrailingZeros(rook_board);
             int index = (int) (((
@@ -390,7 +385,7 @@ public class MoveGenerator {
                 int target = Long.numberOfTrailingZeros(moves);
                 
                 move_list.add(
-                    encodeMove(square, target, BitBoard.WHITE_ROOK | color)
+                    encodeMove(square, target, BitBoard.ROOK | color)
                 );
 
                 moves &= moves - 1;
@@ -400,7 +395,7 @@ public class MoveGenerator {
         }
 
         // Queen
-        long queen_board = BitBoard.piece_bitboards[BitBoard.WHITE_QUEEN | color];
+        long queen_board = BitBoard.piece_bitboards[BitBoard.QUEEN | color];
         while (queen_board != 0L) {
             int square = Long.numberOfTrailingZeros(queen_board);
 
@@ -424,7 +419,7 @@ public class MoveGenerator {
                 int target = Long.numberOfTrailingZeros(moves);
                 
                 move_list.add(
-                    encodeMove(square, target, BitBoard.WHITE_QUEEN | color)
+                    encodeMove(square, target, BitBoard.QUEEN | color)
                 );
 
                 moves &= moves - 1;
@@ -442,37 +437,36 @@ public class MoveGenerator {
         MoveList move_list = new MoveList(20);
         
         // Pawn
-        long pawn_board = BitBoard.piece_bitboards[BitBoard.WHITE_PAWN | color];
+        long pawn_board = BitBoard.piece_bitboards[BitBoard.PAWN | color];
 
         long left_capture = 0L;
         long right_capture = 0L;
 
         if (color == BitBoard.WHITE) {
             left_capture = 
-                (pawn_board << 7) 
+                (pawn_board << BitBoard.NW_SHIFT) 
                 & BitBoard.color_bitboards[BitBoard.BLACK] 
                 & ~BitBoard.COL_H;
 
             right_capture = 
-                (pawn_board << 9)
+                (pawn_board << BitBoard.NE_SHIFT)
                 & BitBoard.color_bitboards[BitBoard.BLACK] 
                 & ~BitBoard.COL_A;
 
-            // FIXME: Could be changed to range check SQUARE_A5 to SQUARE_H5
             if (BitBoard.passant_rights != BitBoard.NO_PASSANT) {
                 long left_passant = 
-                    (pawn_board << 7)
+                    (pawn_board << BitBoard.NW_SHIFT)
                     & (1L << BitBoard.passant_rights)
                     & ~BitBoard.COL_H;
 
                 long right_passant =
-                    (pawn_board << 9)
+                    (pawn_board << BitBoard.NE_SHIFT)
                     & (1L << BitBoard.passant_rights)
                     & ~BitBoard.COL_A;
 
                 if (left_passant != 0) {
                     int target = Long.numberOfTrailingZeros(left_passant);
-                    int origin = target - 7;
+                    int origin = target + BitBoard.SOUTH_EAST;
                     
                     move_list.add(
                         encodeMove(origin, target, BitBoard.WHITE_PAWN, MoveHandler.PASSANT_FLAG)
@@ -480,7 +474,7 @@ public class MoveGenerator {
                 }
                 if (right_passant != 0) {
                     int target = Long.numberOfTrailingZeros(right_passant);
-                    int origin = target - 9;
+                    int origin = target + BitBoard.SOUTH_WEST;
                     
                     move_list.add(
                         encodeMove(origin, target, BitBoard.WHITE_PAWN, MoveHandler.PASSANT_FLAG)
@@ -490,29 +484,29 @@ public class MoveGenerator {
                 
         } else {
             left_capture = 
-                (pawn_board >>> 9) 
+                (pawn_board >>> BitBoard.SW_SHIFT) 
                 & BitBoard.color_bitboards[BitBoard.WHITE] 
                 & ~BitBoard.COL_H;
 
             right_capture = 
-                (pawn_board >>> 7) 
+                (pawn_board >>> BitBoard.SE_SHIFT) 
                 & BitBoard.color_bitboards[BitBoard.WHITE] 
                 & ~BitBoard.COL_A;
 
             if (BitBoard.passant_rights != BitBoard.NO_PASSANT) {
                 long left_passant =
-                    (pawn_board >>> 9)
+                    (pawn_board >>> BitBoard.SW_SHIFT)
                     & (1L << BitBoard.passant_rights)
                     & ~BitBoard.COL_H;
                 
                 long right_passant =
-                    (pawn_board >>> 7)
+                    (pawn_board >>> BitBoard.SE_SHIFT)
                     & (1L << BitBoard.passant_rights)
                     & ~BitBoard.COL_A;
 
                 if (left_passant != 0) {
                     int target = Long.numberOfTrailingZeros(left_passant);
-                    int origin = target + 9;
+                    int origin = target + BitBoard.NORTH_EAST;
 
                     move_list.add(
                         encodeMove(origin, target, BitBoard.BLACK_PAWN, MoveHandler.PASSANT_FLAG)
@@ -520,7 +514,7 @@ public class MoveGenerator {
                 }
                 if (right_passant != 0) {
                     int target = Long.numberOfTrailingZeros(right_passant);
-                    int origin = target + 7;
+                    int origin = target + BitBoard.NORTH_WEST;
                     
                     move_list.add(
                         encodeMove(origin, target, BitBoard.BLACK_PAWN, MoveHandler.PASSANT_FLAG)
@@ -531,17 +525,17 @@ public class MoveGenerator {
 
         while (left_capture != 0L) {
             int target = Long.numberOfTrailingZeros(left_capture);
-            int origin = (color == BitBoard.WHITE) ? target - 7 : target + 9;
+            int origin = (color == BitBoard.WHITE) ? target + BitBoard.SOUTH_EAST : target + BitBoard.NORTH_EAST;
 
             if (target >= SQUARE_A8 || target <= SQUARE_H1) {
-                int move = encodeMove(origin, target, BitBoard.WHITE_PAWN | color);
-                move_list.add(move | (BitBoard.WHITE_QUEEN + color << 16));
-                move_list.add(move | (BitBoard.WHITE_ROOK + color << 16));
-                move_list.add(move | (BitBoard.WHITE_BISHOP + color << 16));
-                move_list.add(move | (BitBoard.WHITE_KNIGHT + color << 16));
+                int move = encodeMove(origin, target, BitBoard.PAWN | color);
+                move_list.add(move | (BitBoard.QUEEN + color << 16));
+                move_list.add(move | (BitBoard.ROOK + color << 16));
+                move_list.add(move | (BitBoard.BISHOP + color << 16));
+                move_list.add(move | (BitBoard.KNIGHT + color << 16));
             } else {
                 move_list.add(
-                    encodeMove(origin, target, BitBoard.WHITE_PAWN | color)
+                    encodeMove(origin, target, BitBoard.PAWN | color)
                 );
             }
 
@@ -550,17 +544,17 @@ public class MoveGenerator {
 
         while (right_capture != 0L) {
             int target = Long.numberOfTrailingZeros(right_capture);
-            int origin = (color == BitBoard.WHITE) ? target - 9 : target + 7;
+            int origin = (color == BitBoard.WHITE) ? target + BitBoard.SOUTH_WEST : target + BitBoard.NORTH_WEST;
            
             if (target >= SQUARE_A8 || target <= SQUARE_H1) {
-                int move = encodeMove(origin, target, BitBoard.WHITE_PAWN | color);
-                move_list.add(move | (BitBoard.WHITE_QUEEN + color << 16));
-                move_list.add(move | (BitBoard.WHITE_ROOK + color << 16));
-                move_list.add(move | (BitBoard.WHITE_BISHOP + color << 16));
-                move_list.add(move | (BitBoard.WHITE_KNIGHT + color << 16));
+                int move = encodeMove(origin, target, BitBoard.PAWN | color);
+                move_list.add(move | (BitBoard.QUEEN + color << 16));
+                move_list.add(move | (BitBoard.ROOK + color << 16));
+                move_list.add(move | (BitBoard.BISHOP + color << 16));
+                move_list.add(move | (BitBoard.KNIGHT + color << 16));
             } else {
                 move_list.add(
-                    encodeMove(origin, target, BitBoard.WHITE_PAWN | color)
+                    encodeMove(origin, target, BitBoard.PAWN | color)
                 );
             }
             
@@ -568,7 +562,7 @@ public class MoveGenerator {
         }
 
         // Knight
-        long knight_board = BitBoard.piece_bitboards[BitBoard.WHITE_KNIGHT | color];
+        long knight_board = BitBoard.piece_bitboards[BitBoard.KNIGHT | color];
         while (knight_board != 0L) {
             int square = Long.numberOfTrailingZeros(knight_board);
             long moves = Precomputer.KNIGHT_MOVE_TABLE[square] & BitBoard.color_bitboards[color ^ 1];
@@ -577,7 +571,7 @@ public class MoveGenerator {
                 int target = Long.numberOfTrailingZeros(moves);
 
                 move_list.add(
-                    encodeMove(square, target, BitBoard.WHITE_KNIGHT | color)
+                    encodeMove(square, target, BitBoard.KNIGHT | color)
                 );
 
                 moves &= moves - 1;
@@ -587,7 +581,7 @@ public class MoveGenerator {
         }
 
         // King
-        long king_board = BitBoard.piece_bitboards[BitBoard.WHITE_KING | color];
+        long king_board = BitBoard.piece_bitboards[BitBoard.KING | color];
 
         while (king_board != 0L) {
             int square = Long.numberOfTrailingZeros(king_board);
@@ -597,7 +591,7 @@ public class MoveGenerator {
                 int target = Long.numberOfTrailingZeros(moves);
                 
                 move_list.add(
-                    encodeMove(square, target, BitBoard.WHITE_KING | color)
+                    encodeMove(square, target, BitBoard.KING | color)
                 );
 
                 moves &= moves - 1;
@@ -607,7 +601,7 @@ public class MoveGenerator {
         }
 
         // Bishop
-        long bishop_board = BitBoard.piece_bitboards[BitBoard.WHITE_BISHOP | color];
+        long bishop_board = BitBoard.piece_bitboards[BitBoard.BISHOP | color];
         while (bishop_board != 0L) {
             int square = Long.numberOfTrailingZeros(bishop_board);
             int index = (int) (((
@@ -621,7 +615,7 @@ public class MoveGenerator {
                 int target = Long.numberOfTrailingZeros(moves);
                 
                 move_list.add(
-                    encodeMove(square, target, BitBoard.WHITE_BISHOP | color)
+                    encodeMove(square, target, BitBoard.BISHOP | color)
                 );
 
                 moves &= moves - 1;
@@ -631,7 +625,7 @@ public class MoveGenerator {
         }
 
         // Rook
-        long rook_board = BitBoard.piece_bitboards[BitBoard.WHITE_ROOK | color];
+        long rook_board = BitBoard.piece_bitboards[BitBoard.ROOK | color];
         while (rook_board != 0L) {
             int square = Long.numberOfTrailingZeros(rook_board);
             int index = (int) (((
@@ -645,7 +639,7 @@ public class MoveGenerator {
                 int target = Long.numberOfTrailingZeros(moves);
                 
                 move_list.add(
-                    encodeMove(square, target, BitBoard.WHITE_ROOK | color)
+                    encodeMove(square, target, BitBoard.ROOK | color)
                 );
 
                 moves &= moves - 1;
@@ -655,7 +649,7 @@ public class MoveGenerator {
         }
 
         // Queen
-        long queen_board = BitBoard.piece_bitboards[BitBoard.WHITE_QUEEN | color];
+        long queen_board = BitBoard.piece_bitboards[BitBoard.QUEEN | color];
         while (queen_board != 0L) {
             int square = Long.numberOfTrailingZeros(queen_board);
 
@@ -679,7 +673,7 @@ public class MoveGenerator {
                 int target = Long.numberOfTrailingZeros(moves);
                 
                 move_list.add(
-                    encodeMove(square, target, BitBoard.WHITE_QUEEN | color)
+                    encodeMove(square, target, BitBoard.QUEEN | color)
                 );
 
                 moves &= moves - 1;
@@ -695,78 +689,38 @@ public class MoveGenerator {
         int mobility = 0;
 
         // Pawn
-        long pawn_board = BitBoard.piece_bitboards[BitBoard.WHITE_PAWN | color];
+        long pawn_board = BitBoard.piece_bitboards[BitBoard.PAWN | color];
 
-        // long single_push = 0L;
-        // long double_push = 0L;
         long left_capture = 0L;
         long right_capture = 0L;
 
         if (color == BitBoard.WHITE) {
-            // single_push = (pawn_board << 8) & ~BitBoard.occupancy_bitboard;
-            // double_push = ((single_push & BitBoard.ROW_3) << 8) & ~BitBoard.occupancy_bitboard;
-
             left_capture = 
-                (pawn_board << 7) 
+                (pawn_board << BitBoard.NW_SHIFT) 
                 & BitBoard.color_bitboards[BitBoard.BLACK] 
                 & ~BitBoard.COL_H;
 
             right_capture = 
-                (pawn_board << 9)
+                (pawn_board << BitBoard.NE_SHIFT)
                 & BitBoard.color_bitboards[BitBoard.BLACK] 
-                & ~BitBoard.COL_A;
-
-            // // // FIXME: Could be changed to range check SQUARE_A5 to SQUARE_H5
-            // if (BitBoard.passant_rights != BitBoard.NO_PASSANT) {
-            //     long left_passant = 
-            //         (pawn_board << 7)
-            //         & (1L << BitBoard.passant_rights)
-            //         & ~BitBoard.COL_H;
-
-            //     long right_passant =
-            //         (pawn_board << 9)
-            //         & (1L << BitBoard.passant_rights)
-            //         & ~BitBoard.COL_A;
-
-            //     mobility += Long.bitCount(left_passant);
-            //     mobility += Long.bitCount(right_passant);
-            // }
-                
+                & ~BitBoard.COL_A;    
         } else {
-            // single_push = (pawn_board >>> 8) & ~BitBoard.occupancy_bitboard;
-            // double_push = ((single_push & BitBoard.ROW_6) >>> 8) & ~BitBoard.occupancy_bitboard;
-            
             left_capture = 
-                (pawn_board >>> 9) 
+                (pawn_board >>> BitBoard.SW_SHIFT) 
                 & BitBoard.color_bitboards[BitBoard.WHITE] 
                 & ~BitBoard.COL_H;
 
             right_capture = 
-                (pawn_board >>> 7) 
+                (pawn_board >>> BitBoard.SE_SHIFT) 
                 & BitBoard.color_bitboards[BitBoard.WHITE] 
                 & ~BitBoard.COL_A;
-
-            // if (BitBoard.passant_rights != BitBoard.NO_PASSANT) {
-            //     long left_passant =
-            //         (pawn_board >>> 9)
-            //         & (1L << BitBoard.passant_rights)
-            //         & ~BitBoard.COL_H;
-                
-            //     long right_passant =
-            //         (pawn_board >>> 7)
-            //         & (1L << BitBoard.passant_rights)
-            //         & ~BitBoard.COL_A;
-
-            //     mobility += Long.bitCount(left_passant);
-            //     mobility += Long.bitCount(right_passant);
-            // }
         }
         
         mobility += Long.bitCount(left_capture);
         mobility += Long.bitCount(right_capture);
 
         // Knight
-        long knight_board = BitBoard.piece_bitboards[BitBoard.WHITE_KNIGHT | color];
+        long knight_board = BitBoard.piece_bitboards[BitBoard.KNIGHT | color];
         while (knight_board != 0L) {
             int square = Long.numberOfTrailingZeros(knight_board);
             long moves = Precomputer.KNIGHT_MOVE_TABLE[square] & ~BitBoard.color_bitboards[color];
@@ -777,7 +731,7 @@ public class MoveGenerator {
         }
 
         // King
-        long king_board = BitBoard.piece_bitboards[BitBoard.WHITE_KING | color];
+        long king_board = BitBoard.piece_bitboards[BitBoard.KING | color];
 
         while (king_board != 0L) {
             int square = Long.numberOfTrailingZeros(king_board);
@@ -789,7 +743,7 @@ public class MoveGenerator {
         }
 
         // Bishop
-        long bishop_board = BitBoard.piece_bitboards[BitBoard.WHITE_BISHOP | color];
+        long bishop_board = BitBoard.piece_bitboards[BitBoard.BISHOP | color];
         while (bishop_board != 0L) {
             int square = Long.numberOfTrailingZeros(bishop_board);
             int index = (int) (((
@@ -805,7 +759,7 @@ public class MoveGenerator {
         }
 
         // Rook
-        long rook_board = BitBoard.piece_bitboards[BitBoard.WHITE_ROOK | color];
+        long rook_board = BitBoard.piece_bitboards[BitBoard.ROOK | color];
         while (rook_board != 0L) {
             int square = Long.numberOfTrailingZeros(rook_board);
             int index = (int) (((
@@ -821,7 +775,7 @@ public class MoveGenerator {
         }
 
         // Queen
-        long queen_board = BitBoard.piece_bitboards[BitBoard.WHITE_QUEEN | color];
+        long queen_board = BitBoard.piece_bitboards[BitBoard.QUEEN | color];
         while (queen_board != 0L) {
             int square = Long.numberOfTrailingZeros(queen_board);
 
@@ -849,16 +803,14 @@ public class MoveGenerator {
         return mobility;
     }
 
-    // FIXME: Return both black and white attackers
     public static long getAttackers(int square) {
         long attackers = 0L;
 
         // Pawn Attacks
-        // Double check this
-        long white_pawns = (((1L << square) >>> 7) & ~BitBoard.COL_A) 
-                        | (((1L << square) >>> 9) & ~BitBoard.COL_H);
-        long black_pawns = (((1L << square) << 7) & ~BitBoard.COL_H) 
-                        | (((1L << square) << 9) & ~BitBoard.COL_A);
+        long white_pawns = (((1L << square) >>> BitBoard.SE_SHIFT) & ~BitBoard.COL_A) 
+                        | (((1L << square) >>> BitBoard.SW_SHIFT) & ~BitBoard.COL_H);
+        long black_pawns = (((1L << square) << BitBoard.NW_SHIFT) & ~BitBoard.COL_H) 
+                        | (((1L << square) << BitBoard.NE_SHIFT) & ~BitBoard.COL_A);
 
         attackers |= white_pawns & BitBoard.piece_bitboards[BitBoard.WHITE_PAWN];
         attackers |= black_pawns & BitBoard.piece_bitboards[BitBoard.BLACK_PAWN];
