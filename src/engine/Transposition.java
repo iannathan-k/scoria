@@ -3,9 +3,10 @@ package src.engine;
 import java.util.Arrays;
 
 public class Transposition {
-    public static final byte EXACT_NODE = 0;
-    public static final byte ALPHA_NODE = 1;
-    public static final byte BETA_NODE = 2;
+    public static final byte NULL_NODE  = 0b00;
+    public static final byte ALPHA_NODE = 0b01; // Upper Bound
+    public static final byte BETA_NODE  = 0b10; // Lower Bound
+    public static final byte EXACT_NODE = 0b11; // Exact Bound
 
     private static final long ENTRY_SIZE = 16L;
     private static final long MB_CONVERSION = 1024L * 1024L;
@@ -69,6 +70,7 @@ public class Transposition {
         return count;
     }
 
+    // FIXME: Check if hash was already in one of the buckets!
     public static void addTransposition(long hash, int depth, int score, byte type, int best_move, int ply) {
         int i = (int) (hash & tt_mask) * BUCKET_SIZE;
 
@@ -113,7 +115,6 @@ public class Transposition {
         return (tt_hash[i] == hash) ? tt_depth[i] : tt_depth[i + 1];
     }
 
-    // FIXME: DOUBLE CHECK MATE BOUNDS
     public static int getScore(long hash, int ply) {
         int i = (int) (hash & tt_mask) * BUCKET_SIZE;
 
@@ -132,24 +133,15 @@ public class Transposition {
         return (tt_hash[i] == hash) ? tt_move[i] : tt_move[i + 1];
     }
 
-    public static boolean isExact(long hash) {
+    public static int getNodeType(long hash) {
         int i = (int) (hash & tt_mask) * BUCKET_SIZE;
-        return (tt_hash[i] == hash) ? 
-            (tt_info[i] & TYPE_MASK) == EXACT_NODE : 
-            (tt_info[i + 1] & TYPE_MASK) == EXACT_NODE;
+        return (tt_hash[i] == hash) 
+            ? tt_info[i] & TYPE_MASK
+            : tt_info[i + 1] & TYPE_MASK;
     }
 
-    public static boolean isAlpha(long hash) {
-        int i = (int) (hash & tt_mask) * BUCKET_SIZE;
-        return (tt_hash[i] == hash) ? 
-            (tt_info[i] & TYPE_MASK) == ALPHA_NODE : 
-            (tt_info[i + 1] & TYPE_MASK) == ALPHA_NODE;
-    }
-
-    public static boolean isBeta(long hash) {
-        int i = (int) (hash & tt_mask) * BUCKET_SIZE;
-        return (tt_hash[i] == hash) ? 
-            (tt_info[i] & TYPE_MASK) == BETA_NODE : 
-            (tt_info[i + 1] & TYPE_MASK) == BETA_NODE;
+    public static boolean isInformative(int bound, int tt_score, int eval) {
+        int r_bound = (tt_score >= eval) ? BETA_NODE : ALPHA_NODE;
+        return (bound & r_bound) != 0;
     }
 }

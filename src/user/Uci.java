@@ -95,7 +95,7 @@ public class Uci {
         String uci = "";
 
         for (int i = 0; i < move_list.size(); i++) {
-            uci += moveToUci(move_list.get(i)) + " ";
+            uci += moveToUci(move_list.getMove(i)) + " ";
         }
 
         return uci;

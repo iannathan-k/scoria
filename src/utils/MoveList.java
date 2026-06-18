@@ -1,32 +1,28 @@
 package src.utils;
 
-import java.util.Arrays;
-
 public class MoveList {
-    private int[] data;
+    private long[] data;
     private int size;
 
-    public MoveList(int initial_capacity) {
-        data = new int[initial_capacity];
+    public MoveList() {
+        data = new long[256];
         size = 0;
     }
 
-    private void grow(int increase) {
-        data = Arrays.copyOf(data, size + increase);
-    }
-
-    private void grow() {
-        int capacity = data.length + (data.length >> 1);
-        data = Arrays.copyOf(data, capacity);
-    }
-
     public void add(int move) {
-        if (size >= data.length) grow();
         data[size++] = move;
     }
 
-    public int get(int index) {
-        return data[index];
+    public void scoreMove(int index, long score) {
+        data[index] = (score << 32) | (data[index] & 0xFFFFFFFFL);
+    }
+
+    public int getMove(int index) {
+        return (int) data[index];
+    }
+
+    public int getScore(int index) {
+        return (int) (data[index] >> 32);
     }
 
     public int size() {
@@ -41,11 +37,13 @@ public class MoveList {
         return size == 0;
     }
 
-    public void addAll(MoveList move_list) {
-        if (size + move_list.size >= data.length) {
-            grow(move_list.size);
-        }
+    public void swap(int i, int j) {
+        long temp = data[i];
+        data[i] = data[j];
+        data[j] = temp;
+    }
 
+    public void addAll(MoveList move_list) {
         System.arraycopy(move_list.data, 0, data, size, move_list.size);
         size += move_list.size;
     }

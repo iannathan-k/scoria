@@ -1,6 +1,10 @@
 package src.utils;
 
+import src.game.MoveHandler;
+
 public class GameStack {
+    public static final int CMH_INDEX = 0;
+    public static final int FMH_INDEX = 1;
 
     private static final int MAX_DEPTH = 512;
 
@@ -114,6 +118,14 @@ public class GameStack {
 
     public static int getPhaseAt(int index) {
         return PHASE_STACK[index];
+    }
+
+    public static boolean hasContinuation(int from_back) {
+        return top_pointer > from_back && MOVE_STACK[top_pointer - 1 - from_back] != MoveHandler.NULL_MOVE;
+    }
+
+    public static int getMoveFromBack(int from_back) {
+        return MOVE_STACK[top_pointer - 1 - from_back];
     }
     
     public static int size() {

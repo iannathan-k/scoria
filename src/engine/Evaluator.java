@@ -54,120 +54,172 @@ public class Evaluator {
 
     // Texel's Tuning Method
 
-    public static int MISSING_PAWN      = -25;
-    public static int UNCASTLED_KING    = -40;
-    public static int BISHOP_MG         =  38;
-    public static int BISHOP_EG         =  50;
-    public static int ROOK_OPEN         =  34;
-    public static int ROOK_SEMI         =  20;
-    public static int ISOLATED_PAWN     = -17;
-    public static int DOUBLED_PAWN      = -12;
-    public static int[] PASSED_MG       = {0, -15, -17, -6, 7, 23, 41, 0};
-    public static int[] PASSED_EG       = {0, 39, 37, 49, 71, 114, 154, 0};
+    public static int MISSING_PAWN = -30;
+    public static int UNCASTLED_KING = -47;
+    public static int BISHOP_MG = 47;
+    public static int BISHOP_EG = 61;
+    public static int ROOK_OPEN = 46;
+    public static int ROOK_SEMI = 27;
+    public static int ISOLATED_PAWN = -15;
+    public static int DOUBLED_PAWN = -24;
+
+    public static int[] PASSED_MG = {0, -21, -31, -16, -6, 27, 10, 0};
+    public static int[] PASSED_EG = {0, 17, 24, 44, 68, 111, 128, 0};
 
     public static final int[] PIECE_VALUES = {
-            0,      -0,
-          342,    -342,
-          347,    -347,
-          534,    -534,
-         1059,   -1059,
-        20000,  -20000
+        65,    -65,
+        391,   -391,
+        398,   -398,
+        605,   -605,
+        1225,  -1225,
+        20000, -20000
     };
 
-    public static final int[][] POSITIONAL_WEIGHTS = {
-        // Pawns
+    public static final int[][] PSQT_MG = {
         {
-              0,    0,    0,    0,    0,    0,    0,    0, 
-            169,  134,  131,  122,  124,  146,  107,  106, 
-            130,  119,  126,  101,  108,  134,  123,  109, 
-            103,   92,   98,   93,  106,  102,   95,   93, 
-             88,   80,   83,   95,   96,   91,   84,   86, 
-             85,   78,   82,   79,   91,   81,   85,   78, 
-             83,   75,   74,   66,   80,   86,   84,   72, 
-              0,    0,    0,    0,    0,    0,    0,    0, 
-        },
-        
-        // Knights
-        {
-            -102,   14,   17,    2,  -12,  -17,   -3, -113, 
-             -31,   -1,   29,   26,   11,   29,  -25,  -16, 
-             -11,   34,   37,   56,   72,   75,   37,   11, 
-              11,   29,   43,   60,   51,   64,   31,   28, 
-               3,   10,   31,   30,   43,   36,   23,    0, 
-             -22,    3,   17,   27,   28,   21,   17,  -19, 
-             -44,  -21,   -6,    8,    3,    3,  -10,  -14, 
-             -37,  -32,  -40,  -26,  -17,   -5,  -31,  -50, 
+            0,    0,    0,    0,    0,    0,    0,    0, 
+            161,  151,  178,  125,  168,  151,   79,   78, 
+            86,   77,  125,  104,  109,  154,  139,   78, 
+            48,   59,   72,   76,   98,   88,   70,   66, 
+            42,   43,   52,   73,   75,   70,   67,   51, 
+            43,   37,   45,   41,   63,   47,   65,   37, 
+            37,   33,   31,   21,   48,   57,   70,   25, 
+            0,    0,    0,    0,    0,    0,    0,    0, 
         },
 
-        // Bishops
         {
-            -13,   21,    2,   22,    2,  -10,  -12,   -4, 
-             12,   14,   25,    3,   24,   32,   21,    6, 
-             21,   36,   37,   33,   33,   50,   39,   37, 
-             12,   34,   31,   56,   43,   34,   32,   32, 
-              4,   13,   30,   35,   37,   29,   19,    6, 
-              7,   25,   27,   34,   30,   28,   26,   18, 
-             15,   14,   26,   10,   19,   25,   28,   13, 
-             -5,   27,   -5,    8,    1,   -6,    6,   -9, 
+            -129,   -3,  -25,  -49,  -18,  -46,  -50,  -64, 
+            -34,    4,   46,   53,   42,   98,   -7,    9, 
+            12,   46,   64,   95,  124,  163,   66,   42, 
+            14,   37,   76,  113,   90,  112,   51,   50, 
+            1,   20,   43,   42,   66,   60,   63,   10, 
+            -35,    6,   29,   35,   46,   34,   37,  -11, 
+            -44,    6,    7,   21,   10,   25,   -5,  -12, 
+            -71,  -37,  -33,  -26,  -21,   16,  -21,  -81, 
         },
 
-        // Rooks
         {
-            41,   43,   50,   51,   43,   29,   30,   63, 
-            41,   51,   42,   36,   29,   50,   43,   59, 
-            40,   42,   34,   27,   45,   49,   54,   33, 
-            23,   34,   31,   23,   27,   16,   27,   35, 
-            19,    5,   24,    7,    9,    3,   17,   20, 
-            13,    3,   -6,    8,    9,   12,   21,    9, 
-            10,   10,   13,   12,   11,   13,   12,    5, 
-            13,   13,   15,   15,   17,   22,   17,   16, 
+            -29,    5,   31,   17,   14,   47,   10,  -16, 
+            27,   24,   22,   12,   52,   54,   13,   38, 
+            18,   49,   88,  102,   69,   87,   77,   83, 
+            17,   52,   55,   76,   74,   60,   43,   13, 
+            12,   24,   53,   56,   77,   58,   37,   29, 
+            42,   50,   48,   55,   49,   43,   44,   43, 
+            26,   33,   57,   23,   33,   54,   53,   39, 
+            2,   31,    6,    5,    9,   -2,    2,  -22, 
         },
 
-        // Queens
         {
-            62,   52,   87,   72,   70,  124,   90,   82, 
-            32,   44,   63,   79,   68,   97,   90,   97, 
-            45,   60,   65,  101,  102,  115,  120,  104, 
-            51,   64,   80,   77,   80,   82,   81,   79, 
-            50,   61,   70,   72,   70,   68,   77,   77, 
-            41,   59,   52,   62,   59,   65,   76,   68, 
-            42,   59,   61,   64,   61,   59,   43,   56, 
-            47,   33,   52,   51,   45,   48,   18,   45, 
+            33,   23,   43,   59,   46,   40,   19,   63, 
+            24,  -12,   12,   66,   24,   10,   22,  116, 
+            23,   29,   15,    0,   39,   52,  125,   52, 
+            21,  -15,  -10,  -32,   13,    8,   37,   19, 
+            4,  -42,    9,   -4,  -20,  -45,   26,   21, 
+            -12,  -11,  -45,  -34,   -1,   -8,   37,    5, 
+            -18,  -28,  -34,   -6,  -14,    5,   18,  -16, 
+            -16,  -18,   -8,    3,    4,    4,   10,  -10, 
         },
 
-        // Kings MG
         {
-             -82,   48,    9,   17,  -35,    3, -152,  -42, 
-             -40,    8,   70,  -17,    9,  -22,  -45, -122, 
-            -146, -118,    7,  -73,  -14,  -15,  -29, -181, 
-            -128, -129, -126,  -14,  -27, -104, -178,  -87, 
-             -33,  -73,  -97,  -55, -112,  -70,  -99, -130, 
-             -62,  -57,  -74,  -26,  -26,  -77,  -51,  -71, 
-              21,   -6,   15,    6,  -21,  -23,    1,   40, 
-              11,   41,   33,  -23,   42,  -46,   34,   48, 
+            59,   95,  119,  100,   88,  116,  155,   68, 
+            69,   23,   61,   88,   36,   74,   44,  125, 
+            80,   74,   95,  134,  130,  101,  141,  154, 
+            52,   53,   74,   63,   64,  106,   73,   93, 
+            57,   55,   68,   69,   57,   65,   62,   81, 
+            43,   65,   50,   74,   54,   71,   84,  101, 
+            57,   79,   72,   75,   69,   73,   71,   89, 
+            74,   19,   42,   61,   61,   55,   41,   32, 
+        },
+
+        {
+            -91,   54,   48,   88,  -13,   80, -144,  -10, 
+            -168,   54,   91,  -31,  -10,  -61,  -95, -211, 
+            -198,  -91,  -65,  -96,  -90,  -38,  -29, -144, 
+            -177, -184,  -68,  -10,  -57, -107, -218, -140, 
+            -53, -123,  -77,  -88, -103,  -96, -112, -193, 
+            -25,  -66,  -91,  -27,   -9,  -72,  -66,  -68, 
+            42,  -15,   -3,   -7,  -24,  -20,    6,   40, 
+            23,   48,   30,  -28,   42,  -54,   40,   69, 
         }
     };
 
-    public static final int[] KINGWEIGHTS_EG = {
-        -62,  -33,   10,  -30,  -10,  -50,  -38,  -80, 
-         -2,   56,   40,   60,   32,   36,   37,  -10, 
-         17,   60,   66,   57,   59,   45,   58,   31, 
-          6,   59,   50,   53,   59,   63,   54,    5, 
-        -34,   23,   56,   59,   46,   35,   23,   16, 
-        -39,   -5,   36,   28,   30,   18,    5,  -14, 
-        -29,    3,  -12,   20,   28,    5,  -17,  -49, 
-        -65,  -58,  -43,    2,  -50,  -18,  -56,  -80, 
-    };
+    public static final int[][] PSQT_EG = {
+        {
+            0,    0,    0,    0,    0,    0,    0,    0, 
+            219,  160,  185,  138,   92,  161,  171,  122, 
+            120,  111,   83,   51,   57,   77,   89,   91, 
+            85,   75,   67,   50,   44,   59,   73,   72, 
+            65,   58,   50,   43,   46,   55,   53,   54, 
+            57,   57,   49,   54,   52,   55,   51,   52, 
+            63,   56,   58,   45,   51,   54,   46,   51, 
+            0,    0,    0,    0,    0,    0,    0,    0, 
+        },
 
-    // FIXME: Implement fifty move rule
-    // FIXME: Recheck threefold repetition
+        {
+            -96,   37,   38,   48,  -14,  -53,  -11, -171, 
+            -37,    7,   26,   31,  -22,    8,   -4,  -63, 
+            -28,   34,   51,   60,   40,   16,   37,   27, 
+            33,   43,   49,   45,   49,   43,   36,  -11, 
+            13,   47,   65,   69,   46,   41,   -5,   10, 
+            -3,   29,   31,   42,   38,   37,   21,    7, 
+            17,  -13,   13,   24,   26,   31,   25,   35, 
+            -7,  -13,   18,    0,   14,    7,  -21,   19, 
+        },
+
+        {
+            18,   41,    3,   15,   25,  -15,  -13,   21, 
+            -9,   17,   43,   33,   31,   15,   32,  -11, 
+            26,   17,   32,   13,   32,   48,    1,    9, 
+            24,   56,   51,   67,   42,   54,   49,   64, 
+            35,   32,   59,   64,   34,   30,   51,   19, 
+            -7,   33,   38,   48,   51,   39,   40,   -1, 
+            30,   12,   10,   25,   47,   14,   24,  -11, 
+            -13,   40,  -12,   17,   19,   33,   33,   46, 
+        },
+
+        {
+            105,  104,   85,   80,   77,  100,   55,   85, 
+            96,  118,  111,   75,   92,  123,  117,   70, 
+            89,  105,   95,   82,   63,   66,   59,   55, 
+            78,   92,   86,   93,   53,   70,   70,   63, 
+            91,   88,   65,   73,   79,   81,   41,   71, 
+            61,   69,   81,   71,   61,   73,   42,   48, 
+            65,   77,   80,   61,   70,   52,   71,   51, 
+            86,   84,   80,   58,   66,   80,   71,   72, 
+        },
+
+        {
+            59,   75,  110,  123,  118,  202,  118,  104, 
+            37,  125,  144,  126,  202,  202,  155,  106, 
+            53,  102,   90,   95,  101,  187,  111,   48, 
+            116,  158,  143,  175,  181,  143,  167,  123, 
+            102,  148,   95,  137,  154,  123,  161,  112, 
+            128,   78,  126,   77,  118,  127,  120,   47, 
+            70,   61,   71,   78,   74,   84,   58,   68, 
+            14,  140,  153,   59,   84,   79,   12,   33, 
+        },
+
+        {
+            -82,  -50,  -13,  -56,  -21,  -53,  -36, -117, 
+            -19,   47,   45,   95,   53,   48,   69,   12, 
+            -1,   72,   75,   93,   78,   62,   82,   46, 
+            -11,   65,   68,   69,   77,   80,   73,   20, 
+            -4,   44,   59,   71,   69,   50,   34,    2, 
+            -57,    6,   39,   40,   36,   19,   10,  -12, 
+            -34,  -17,    5,   16,   24,    1,  -27,  -62, 
+            -61,  -74,  -52,  -17,  -59,  -20,  -74, -109, 
+        }
+    };
+    
     public static boolean isThreeFoldRepetition(long hash) {
         int count = 1;
         for (int i = GameStack.size() - 2; i >= 0; i--) {
             if (GameStack.getHashAt(i) == hash) {
                 count++;
 
-                if (count >= 3) return true;
+                if (count >= 3) {
+                    return true;
+                }
             }
 
             if (GameStack.getCapturedAt(i) != BitBoard.NO_PIECE) {
@@ -175,7 +227,28 @@ public class Evaluator {
             }
 
             int piece = (GameStack.getMoveAt(i) >> 12) & MoveHandler.PIECE_MASK;
-            if ((piece & BitBoard.PIECE_MASK) == BitBoard.PAWN) {
+            if (piece == BitBoard.PAWN) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean isCycle(long hash, int ply) {
+        int root = GameStack.size() - ply;
+
+        for (int i = GameStack.size() - 2; i >= root; i--) {
+            if (GameStack.getHashAt(i) == hash) {
+                return true;
+            }
+
+            if (GameStack.getCapturedAt(i) != BitBoard.NO_PIECE) {
+                return false;
+            }
+
+            int piece = (GameStack.getMoveAt(i) >> 12) & MoveHandler.PIECE_MASK;
+            if (piece == BitBoard.PAWN) {
                 return false;
             }
         }
@@ -196,23 +269,17 @@ public class Evaluator {
 
     public static int getMGWeights(int piece, int square) {
         if ((piece & BitBoard.COLOR_MASK) == BitBoard.WHITE) {
-            return POSITIONAL_WEIGHTS[(piece & BitBoard.PIECE_MASK) >> 1][square ^ 56];
+            return PSQT_MG[(piece & BitBoard.PIECE_MASK) >> 1][square ^ 56];
         } else {
-            return -POSITIONAL_WEIGHTS[(piece & BitBoard.PIECE_MASK) >> 1][square];
+            return -PSQT_MG[(piece & BitBoard.PIECE_MASK) >> 1][square];
         }
     }
 
     private static int getEGWeights(int piece, int square) {
-        if (piece == BitBoard.WHITE_KING) {
-            return KINGWEIGHTS_EG[square ^ 56];
-        } else if (piece == BitBoard.BLACK_KING) {
-            return -KINGWEIGHTS_EG[square];
-        }
-
         if ((piece & BitBoard.COLOR_MASK) == BitBoard.WHITE) {
-            return POSITIONAL_WEIGHTS[(piece & BitBoard.PIECE_MASK) >> 1][square ^ 56];
+            return PSQT_EG[(piece & BitBoard.PIECE_MASK) >> 1][square ^ 56];
         } else {
-            return -POSITIONAL_WEIGHTS[(piece & BitBoard.PIECE_MASK) >> 1][square];
+            return -PSQT_EG[(piece & BitBoard.PIECE_MASK) >> 1][square];
         }
     }
 
@@ -227,8 +294,6 @@ public class Evaluator {
         }
     }
 
-    // FIXME: Weights based on game phase
-    // FIXME: King shield, Passed Pawn, Doubled Pawns
     public static void manualEvaluation() {
         mg_eval = 0;
         eg_eval = 0;
@@ -447,6 +512,10 @@ public class Evaluator {
         eval -= MoveGenerator.getMobility(BitBoard.BLACK);
 
         return (side == BitBoard.WHITE) ? eval : -eval;
+    }
+
+    public static int getDrawScore(long nodes) {
+        return Evaluator.DRAW_SCORE - 1 + (int) (nodes & 2);
     }
 
     public static int getMGEval() {

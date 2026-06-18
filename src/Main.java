@@ -3,6 +3,7 @@ package src;
 import java.util.Scanner;
 
 import src.user.Command;
+import src.engine.Search;
 import src.game.BitBoard;
 import src.game.Precomputer;
 import src.game.Zobrist;
@@ -12,8 +13,9 @@ public class Main {
         BitBoard.initBoardByFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"); 
         Precomputer.initAllMoveTables();
         Zobrist.initZobristTable();
+        Search.initSearchTables();
 
-        System.out.println("Scoria v4.4.5");
+        System.out.println("Scoria v4.4.6");
 
         Scanner scanner = new Scanner(System.in);
 

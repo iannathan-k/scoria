@@ -1,6 +1,6 @@
 # Overview
 
-Introducing Scoria, an open source uci engine programmed completely in Java, with an estimated rating of approximately ~2200 elo.
+Introducing Scoria, an open source uci engine programmed completely in Java, with an estimated rating of approximately ~2500 elo.
 
 ## Compiling
 
@@ -38,18 +38,16 @@ Static evaluation of board positions are done using an [HCE](https://www.chesspr
 
 ## Changelog
 
-Scoria v4.4.5
+Scoria v4.4.6
 
-1. Counter Move Heuristic
-2. History Gravity Maluses
-3. Follow-Up Move Heuristic
-4. Late Move Reduction
-5. Tapered Evaluation
-6. Reworked Max History and Bonus
-7. History Pruning
-8. Fixed Castling and Zobrist Bug
-9. Check Extensions
-10. Improved Evaluation Function
-11. Tuned Evaluation Weights
+1. Endgame PSQT For All Pieces
+2. Preallocated Arrays
+3. Partial Move Picking
+4. ProbCut
+5. Fixed Invalid PVs
+6. Capture History Heuristic
+7. Move Picker
+8. Protect PV Nodes
+9. Fixed Delta Pruning
 
 ##### Ian Nathan Kusmiantoro, 2026

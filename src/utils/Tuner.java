@@ -23,17 +23,17 @@ public class Tuner {
     private static final double BETA_1 = 0.9;
     private static final double BETA_2 = 0.999;
     private static final double EPSILON = 1e-8;
-    private static final int MAX_EPOCHS = 5000;
+    private static final int MAX_EPOCHS = 10000;
     private static final int THREAD_COUNT = Runtime.getRuntime().availableProcessors();
 
     // Paramter Map
-    private static final int PIECEVAL_FRONT = 0;
-    private static final int PSQT_FRONT = 5;
-    private static final int KINGEG_FRONT = 389;
-    private static final int SCALAR_FRONT = 453;
-    private static final int PASSEDMG_FRONT = 461;
-    private static final int PASSEDEG_FRONT = 469;
-    private static final int PARAM_COUNT = 477;
+    private static final int PIECEVAL_FRONT = 1;
+    private static final int PSQTMG_FRONT = 6;
+    private static final int PSQTEG_FRONT = 390;
+    private static final int SCALAR_FRONT = 774;
+    private static final int PASSEDMG_FRONT = 782;
+    private static final int PASSEDEG_FRONT = 790;
+    private static final int PARAM_COUNT = 778;
 
     private static final int MISSING_INDEX = 0;
     private static final int CENTER_INDEX = 1;
@@ -109,16 +109,18 @@ public class Tuner {
             weights[PIECEVAL_FRONT + i] = Evaluator.PIECE_VALUES[i << 1];
         }
 
-        // PSQT
+        // PSQT MG
         for (int i = 0; i <= CKING_TYPE; i++) {
             for (int j = 0; j < 64; j++) {
-                weights[PSQT_FRONT + i * 64 + j] = Evaluator.POSITIONAL_WEIGHTS[i][j];
+                weights[PSQTMG_FRONT + i * 64 + j] = Evaluator.PSQT_MG[i][j];
             }
         }
 
-        // PSQT King EG
-        for (int i = 0; i < 64; i++) {
-            weights[KINGEG_FRONT + i] = Evaluator.KINGWEIGHTS_EG[i];
+        // PSQT EG
+        for (int i = 0; i <= CKING_TYPE; i++) {
+            for (int j = 0; j < 64; j++) {
+                weights[PSQTEG_FRONT + i * 64 + j] = Evaluator.PSQT_EG[i][j];
+            }
         }
 
         // Scalars
@@ -176,19 +178,15 @@ public class Tuner {
                 int square = Long.numberOfTrailingZeros(board);
                 int sq_index = (sign == CWHITE) ? square ^ 56 : square;
 
-                // Exclude Kings
+                // PieceVal w/o Kings
                 if (type < CKING_TYPE) {
                     mg.add((PIECEVAL_FRONT + type) * sign);
                     eg.add((PIECEVAL_FRONT + type) * sign);
                 }
 
-                mg.add((PSQT_FRONT + type * 64 + sq_index) * sign);
-
-                if (type == CKING_TYPE) {
-                    eg.add((KINGEG_FRONT + sq_index) * sign);
-                } else {
-                    eg.add((PSQT_FRONT + type * 64 + sq_index) * sign);
-                }
+                // PSQT
+                mg.add((PSQTMG_FRONT + type * 64 + sq_index) * sign);
+                eg.add((PSQTEG_FRONT + type * 64 + sq_index) * sign);
 
                 board &= board - 1;
             }
@@ -331,14 +329,14 @@ public class Tuner {
         System.out.println("\n// Texel's Tuning Method\n");
 
         // Scalars
-        System.out.println("public static int MISSING_PAWN = " + (int) Math.round(weights[SCALAR_FRONT + MISSING_INDEX]));
-        System.out.println("public static int UNCASTLED_KING = " + (int) Math.round(weights[SCALAR_FRONT + CENTER_INDEX]));
-        System.out.println("public static int BISHOP_MG = " + (int) Math.round(weights[SCALAR_FRONT + BISHOPMG_INDEX]));
-        System.out.println("public static int BISHOP_EG = " + (int) Math.round(weights[SCALAR_FRONT + BISHOPEG_INDEX]));
-        System.out.println("public static int ROOK_OPEN = " + (int) Math.round(weights[SCALAR_FRONT + FULLOPEN_INDEX]));
-        System.out.println("public static int ROOK_SEMI = " + (int) Math.round(weights[SCALAR_FRONT + SEMIOPEN_INDEX]));
-        System.out.println("public static int ISOLATED_PAWN = " + (int) Math.round(weights[SCALAR_FRONT + ISOLATED_INDEX]));
-        System.out.println("public static int DOUBLED_PAWN = " + (int) Math.round(weights[SCALAR_FRONT + DOUBLED_INDEX]));
+        System.out.println("public static int MISSING_PAWN = " + (int) Math.round(weights[SCALAR_FRONT + MISSING_INDEX]) + ";");
+        System.out.println("public static int UNCASTLED_KING = " + (int) Math.round(weights[SCALAR_FRONT + CENTER_INDEX]) + ";");
+        System.out.println("public static int BISHOP_MG = " + (int) Math.round(weights[SCALAR_FRONT + BISHOPMG_INDEX]) + ";");
+        System.out.println("public static int BISHOP_EG = " + (int) Math.round(weights[SCALAR_FRONT + BISHOPEG_INDEX]) + ";");
+        System.out.println("public static int ROOK_OPEN = " + (int) Math.round(weights[SCALAR_FRONT + FULLOPEN_INDEX]) + ";");
+        System.out.println("public static int ROOK_SEMI = " + (int) Math.round(weights[SCALAR_FRONT + SEMIOPEN_INDEX]) + ";");
+        System.out.println("public static int ISOLATED_PAWN = " + (int) Math.round(weights[SCALAR_FRONT + ISOLATED_INDEX]) + ";");
+        System.out.println("public static int DOUBLED_PAWN = " + (int) Math.round(weights[SCALAR_FRONT + DOUBLED_INDEX]) + ";");
         System.out.println();
 
         System.out.print("public static int[] PASSED_MG = {");
@@ -359,13 +357,13 @@ public class Tuner {
         System.out.println("public static final int[] PIECE_VALUES = {");
         for (int i = 0; i < CKING_TYPE; i++) {
             int value = (int) Math.round(weights[PIECEVAL_FRONT + i]);
-            System.out.printf("%s%5d, %6d\n", TAB, value, -value);
+            System.out.printf("%s%5d, %6d,\n", TAB, value, -value);
         }
         System.out.println(TAB + "20000, -20000");
         System.out.println("};\n");
 
-        // PSQT
-        System.out.println("public static final int[][] POSITIONAL_WEIGHTS = {");
+        // PSQT MG
+        System.out.println("public static final int[][] PSQT_MG = {");
         for (int i = 0; i <= CKING_TYPE; i++) {
             System.out.println(TAB + "{");
 
@@ -374,7 +372,7 @@ public class Tuner {
                     System.out.print(TAB + TAB);
                 }
 
-                System.out.printf("%4d, ", (int) Math.round(weights[PSQT_FRONT + i * 64 + j]));
+                System.out.printf("%4d, ", (int) Math.round(weights[PSQTMG_FRONT + i * 64 + j]));
 
                 if (j % 8 == 7) {
                     System.out.println();
@@ -389,19 +387,28 @@ public class Tuner {
         }
         System.out.println("};\n");
 
-        // PSQT King EG
-        System.out.println("public static final int[] KINGWEIGHTS_EG = {");
-        for (int i = 0; i < 64; i++) {
-            if (i % 8 == 0) {
-                System.out.print(TAB);
+        // PSQT EG
+        System.out.println("public static final int[][] PSQT_EG = {");
+        for (int i = 0; i <= CKING_TYPE; i++) {
+            System.out.println(TAB + "{");
+
+            for (int j = 0; j < 64; j++) {
+                if (j % 8 == 0) {
+                    System.out.print(TAB + TAB);
+                }
+
+                System.out.printf("%4d, ", (int) Math.round(weights[PSQTEG_FRONT + i * 64 + j]));
+
+                if (j % 8 == 7) {
+                    System.out.println();
+                };
             }
 
-            System.out.printf("%4d, ", (int) Math.round(weights[KINGEG_FRONT + i]));
-
-            if (i % 8 == 7) {
-                System.out.println();
+            if (i == CKING_TYPE) {
+                System.out.println(TAB + "}");
+            } else {
+                System.out.println(TAB + "},\n");
             }
-            
         }
         System.out.println("};");
     }
@@ -453,7 +460,7 @@ public class Tuner {
                         // Mean Squared Error
                         error += diff * diff;
 
-                        double error_term = diff * sigmoid * (1.0 - sigmoid);
+                        double error_term = diff * sigmoid * (1.0 - sigmoid) * K;
                         double mg_term = error_term * e.phase;
                         double eg_term = error_term * (1.0 - e.phase);
                         for (int idx : e.mg_feats) {
@@ -485,6 +492,7 @@ public class Tuner {
                 break;
             }
 
+            // Logistic Regression
             for (int i = 0; i < PARAM_COUNT; i++) {
                 double g = 0;
                 for (int t = 0; t < THREAD_COUNT; t++) {

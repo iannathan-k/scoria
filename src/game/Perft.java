@@ -15,7 +15,7 @@ public class Perft {
         // if (depth == 1) return move_list.size();
 
         for (int i = 0; i < move_list.size(); i++) {
-            int move = move_list.get(i);
+            int move = move_list.getMove(i);
 
             MoveHandler.doMove(move);
 
@@ -35,10 +35,11 @@ public class Perft {
     public static void runPerftTest(int side, int depth) {
         long start_time = System.currentTimeMillis();
         long nodes = 0L;
+
         MoveList move_list = MoveGenerator.generateAllMoves(side);
 
         for (int i = 0; i < move_list.size(); i++) {
-            int move = move_list.get(i);
+            int move = move_list.getMove(i);
 
             MoveHandler.doMove(move);
 
