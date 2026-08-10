@@ -7,7 +7,10 @@ public class Transposition {
     public static final byte ALPHA_NODE = 0b01; // Upper Bound
     public static final byte BETA_NODE  = 0b10; // Lower Bound
     public static final byte EXACT_NODE = 0b11; // Exact Bound
+    private static final int TYPE_MASK  = 0b11;
 
+    public static final int NULL_ENTRY = -1;
+    private static final int BUCKET_SIZE = 2;
     private static final long ENTRY_SIZE = 16L;
     private static final long MB_CONVERSION = 1024L * 1024L;
 
@@ -17,10 +20,6 @@ public class Transposition {
 
     private static final int MAX_GENERATION = 63;
     private static final int GENERATION_BOUND = 24;
-    
-    private static final int TYPE_MASK = 0b11;
-
-    private static final int BUCKET_SIZE = 2;
 
     private static long[] tt_hash   = new long[tt_size * BUCKET_SIZE];
     private static byte[] tt_depth  = new byte[tt_size * BUCKET_SIZE];
@@ -29,7 +28,7 @@ public class Transposition {
     private static int[] tt_move    = new int[tt_size * BUCKET_SIZE];
 
     /* tt_info
-     * 111111 11
+     * 000000 00
      * gen    type
      */
 
@@ -70,7 +69,6 @@ public class Transposition {
         return count;
     }
 
-    // FIXME: Check if hash was already in one of the buckets!
     public static void addTransposition(long hash, int depth, int score, byte type, int best_move, int ply) {
         int i = (int) (hash & tt_mask) * BUCKET_SIZE;
 
@@ -105,20 +103,26 @@ public class Transposition {
         Arrays.fill(tt_move, 0);
     }
 
-    public static boolean doesExist(long hash) {
+    public static int probe(long hash) {
         int i = (int) (hash & tt_mask) * BUCKET_SIZE;
-        return tt_hash[i] == hash || tt_hash[i + 1] == hash;
+
+        if (tt_hash[i] == hash) {
+            return i;
+        }
+
+        if (tt_hash[i + 1] == hash) {
+            return i + 1;
+        }
+
+        return NULL_ENTRY;
     }
 
-    public static int getDepth(long hash) {
-        int i = (int) (hash & tt_mask) * BUCKET_SIZE;
-        return (tt_hash[i] == hash) ? tt_depth[i] : tt_depth[i + 1];
+    public static int getDepth(int index) {
+        return tt_depth[index];
     }
 
-    public static int getScore(long hash, int ply) {
-        int i = (int) (hash & tt_mask) * BUCKET_SIZE;
-
-        int score = (tt_hash[i] == hash) ? tt_score[i] : tt_score[i + 1];
+    public static int getScore(int index, int ply) {
+        int score = tt_score[index];
         if (score < -Evaluator.MATE_BOUND) {
             score += ply;
         } else if (score > Evaluator.MATE_BOUND) {
@@ -128,16 +132,12 @@ public class Transposition {
         return score;
     }
 
-    public static int getBestMove(long hash) {
-        int i = (int) (hash & tt_mask) * BUCKET_SIZE;
-        return (tt_hash[i] == hash) ? tt_move[i] : tt_move[i + 1];
+    public static int getBestMove(int index) {
+        return tt_move[index];
     }
 
-    public static int getNodeType(long hash) {
-        int i = (int) (hash & tt_mask) * BUCKET_SIZE;
-        return (tt_hash[i] == hash) 
-            ? tt_info[i] & TYPE_MASK
-            : tt_info[i + 1] & TYPE_MASK;
+    public static int getNodeType(int index) {
+        return tt_info[index] & TYPE_MASK;
     }
 
     public static boolean isInformative(int bound, int tt_score, int eval) {

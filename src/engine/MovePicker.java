@@ -45,12 +45,24 @@ public class MovePicker {
             int target = move & MoveHandler.POSITION_MASK;
             int piece = (move >> 12) & MoveHandler.PIECE_MASK;
             int captured = BitBoard.getPieceAt(target);
+            int score = 0;
+
+            if ((move & MoveHandler.PROMOTED_MASK) != 0) {
+                int p_piece = (move & MoveHandler.PROMOTED_MASK) >> 16;
+                if ((p_piece & BitBoard.PIECE_MASK) == BitBoard.QUEEN) {
+                    score = 11600;
+                }
+                if (captured == BitBoard.NO_PIECE) {
+                    noisy_list.scoreMove(i, score);
+                    continue;
+                }
+            }
 
             if ((move & MoveHandler.PASSANT_FLAG) != 0) {
                 captured = BitBoard.PAWN;
             }
 
-            int score = Search.CAPTURE_TABLE[piece >> 1][captured >> 1][target];
+            score += Search.CAPTURE_TABLE[piece >> 1][captured >> 1][target];
             score += 5 * Evaluator.PIECE_VALUES[captured & BitBoard.PIECE_MASK];
             score -= Evaluator.PIECE_VALUES[piece & BitBoard.PIECE_MASK];
 
@@ -110,10 +122,11 @@ public class MovePicker {
             switch(STAGE_TABLE[ply]) {
                 case QS_HASHMOVE:
                     STAGE_TABLE[ply] = QS_GENNOISY;
-
+                
                     long hash = Zobrist.getZobristHash();
-                    if (Transposition.doesExist(hash)) {
-                        int move = Transposition.getBestMove(hash);
+                    int tt_index = Transposition.probe(hash);
+                    if (tt_index != Transposition.NULL_ENTRY) {
+                        int move = Transposition.getBestMove(tt_index);
                         long target_mask = 1L << (move & MoveHandler.POSITION_MASK);
 
                         HASH_TABLE[ply] = move;
@@ -160,18 +173,15 @@ public class MovePicker {
     }
 
     public static int nextMove(MoveList move_list, int ply, int turn) {
-
-        // int excluded_move = Search.EXCLUDED_TABLE[ply];
-        // int k_ply = (excluded_move == MoveHandler.NULL_MOVE) ? ply : ply - 1;
-
         while (true) {
             switch (STAGE_TABLE[ply]) {
                 case HASHMOVE:
                     STAGE_TABLE[ply] = GENNOISY;
                 
                     long hash = Zobrist.getZobristHash();
-                    if (Transposition.doesExist(hash)) {
-                        HASH_TABLE[ply] = Transposition.getBestMove(hash);
+                    int tt_index = Transposition.probe(hash);
+                    if (tt_index != Transposition.NULL_ENTRY) {
+                        HASH_TABLE[ply] = Transposition.getBestMove(tt_index);
 
                         return HASH_TABLE[ply];
                     }
@@ -201,7 +211,6 @@ public class MovePicker {
                     } else {
                         STAGE_TABLE[ply] = KILLER1;
                     }
-
                     break;
 
                 case KILLER1:
@@ -210,7 +219,6 @@ public class MovePicker {
                     int first_killer = Search.KILLER_TABLE[ply][Search.FIRST_KILLER];
                     if (first_killer != MoveHandler.NULL_MOVE
                         && first_killer != HASH_TABLE[ply]
-                        // && first_killer != excluded_move
                         && MoveGenerator.verifyPseudoKiller(first_killer, turn)) {
 
                         return first_killer;
@@ -223,7 +231,6 @@ public class MovePicker {
                     int second_killer = Search.KILLER_TABLE[ply][Search.SECOND_KILLER];
                     if (second_killer != MoveHandler.NULL_MOVE
                         && second_killer != HASH_TABLE[ply]
-                        // && second_killer != excluded_move
                         && second_killer != Search.KILLER_TABLE[ply][Search.FIRST_KILLER]
                         && MoveGenerator.verifyPseudoKiller(second_killer, turn)) {
 
@@ -247,15 +254,9 @@ public class MovePicker {
                             continue;
                         }
 
-                        // Revisit Killers deffered by verifyPseudoKiller
-                        if (move == Search.KILLER_TABLE[ply][Search.FIRST_KILLER] 
-                            && MoveGenerator.verifyPseudoKiller(move, turn)) {
-
-                            continue;
-                        }
-
-                        if (move == Search.KILLER_TABLE[ply][Search.SECOND_KILLER]
-                            && MoveGenerator.verifyPseudoKiller(move, turn)) {
+                        // Skip Killers Moves
+                        if (move == Search.KILLER_TABLE[ply][Search.FIRST_KILLER]
+                            || move == Search.KILLER_TABLE[ply][Search.SECOND_KILLER]) {
 
                             continue;
                         }

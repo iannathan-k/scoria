@@ -129,10 +129,10 @@ public class Zobrist {
             castle &= ~BitBoard.BLACK_QUEEN_ROOK_MASK;
         }
         if (origin == MoveGenerator.SQUARE_E1) {
-            castle &= ~BitBoard.WHITE_KING_CASTLE_MASK;
+            castle &= ~BitBoard.WHITE_CASTLE_MASK;
         }
         if (origin == MoveGenerator.SQUARE_E8) {
-            castle &= ~BitBoard.BLACK_KING_CASTLE_MASK;
+            castle &= ~BitBoard.BLACK_CASTLE_MASK;
         }
 
         zobrist_hash ^= CASTLE_TABLE[BitBoard.castle_rights];

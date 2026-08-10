@@ -2,17 +2,13 @@ package src.game;
 
 import src.user.Uci;
 import src.utils.MoveList;
+import src.utils.Logger;
 
 public class Perft {
 
-    // FIXME: Needs to be fixed to not generate illegal moves in the first place
-    private static long perft(int side, int depth) {
-        if (depth == 0) return 1;
-        
+    private static long perft(int side, int depth) {        
         long nodes = 0L;
         MoveList move_list = MoveGenerator.generateAllMoves(side);
-
-        // if (depth == 1) return move_list.size();
 
         for (int i = 0; i < move_list.size(); i++) {
             int move = move_list.getMove(i);
@@ -25,7 +21,7 @@ public class Perft {
                 continue;
             }
 
-            nodes += perft(side ^ 1, depth - 1);
+            nodes += (depth == 1) ? 1 : perft(side ^ 1, depth - 1);
             MoveHandler.undoMove();
         }
 
@@ -49,15 +45,15 @@ public class Perft {
                 continue;
             }
 
-            long child_nodes = perft(side ^ 1, depth - 1);
+            long child_nodes = (depth == 1) ? 1 : perft(side ^ 1, depth - 1);
             MoveHandler.undoMove();
 
-            System.out.println(Uci.moveToUci(move) + ": " + child_nodes);
+            Logger.outln(Uci.moveToUci(move) + ": " + child_nodes);
 
             nodes += child_nodes;
         }
 
-        System.out.println("total nodes: " + nodes);
-        System.out.println("total time: " + (System.currentTimeMillis() - start_time) + "ms");
+        Logger.outln("total nodes: " + nodes);
+        Logger.outln("total time: " + (System.currentTimeMillis() - start_time) + "ms");
     }
 }

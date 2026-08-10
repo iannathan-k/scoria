@@ -53,8 +53,8 @@ public class BitBoard {
     public static final int WHITE_QUEEN_ROOK_MASK   = 0b0100;
     public static final int BLACK_KING_ROOK_MASK    = 0b0010;
     public static final int BLACK_QUEEN_ROOK_MASK   = 0b0001;
-    public static final int WHITE_KING_CASTLE_MASK  = 0b1100;
-    public static final int BLACK_KING_CASTLE_MASK  = 0b0011;
+    public static final int WHITE_CASTLE_MASK       = 0b1100;
+    public static final int BLACK_CASTLE_MASK       = 0b0011;
 
     public static final int NO_PASSANT = -1;
 
@@ -75,6 +75,9 @@ public class BitBoard {
     public static final int SE_SHIFT    = 7;
     public static final int SW_SHIFT    = 9;
 
+    public static final long LIGHT_SQUARES = 0x55AA55AA55AA55AAL;
+    public static final long DARK_SQUARES  = 0xAA55AA55AA55AA55L;
+
     /* Current Bitboard
      * P N B R Q K p n b r q k
      * 
@@ -90,8 +93,10 @@ public class BitBoard {
     public static long occupancy_bitboard;
     
     public static int moving_side = WHITE;
-    public static int castle_rights = WHITE_KING_CASTLE_MASK | BLACK_KING_CASTLE_MASK;
+    public static int castle_rights = WHITE_CASTLE_MASK | BLACK_CASTLE_MASK;
     public static int passant_rights = NO_PASSANT;
+    public static int halfmoves = 0;
+    public static int fullmoves = 1;
 
     public static boolean isEmpty(int square) {
         long mask = 1L << square;
@@ -121,7 +126,6 @@ public class BitBoard {
                 != 0;
     }
 
-    // FIXME: Handle half and full moves
     public static void initBoardByFen(String fen) {
         String[] fen_array = fen.split("\\s");
 
@@ -172,11 +176,15 @@ public class BitBoard {
         passant_rights = BitBoard.NO_PASSANT;
         castle_rights = 0;
         moving_side = BLACK;
+        halfmoves = 0;
+        fullmoves = 1;
 
+        // Moving Side
         if (fen_array.length > 1 && fen_array[1].equals("w")) {
             moving_side = WHITE;
         }
 
+        // Castle Rights
         if (fen_array.length > 2) {
             if (fen_array[2].contains("K")) castle_rights |= WHITE_KING_ROOK_MASK;
             if (fen_array[2].contains("Q")) castle_rights |= WHITE_QUEEN_ROOK_MASK;
@@ -184,8 +192,18 @@ public class BitBoard {
             if (fen_array[2].contains("q")) castle_rights |= BLACK_QUEEN_ROOK_MASK;
         }
 
+        // Passant Rights
         if (fen_array.length > 3 && !fen_array[3].equals("-")) {
             passant_rights = Uci.algebraicToSquare(fen_array[3]);
+        }
+
+        // Halfmoves
+        if (fen_array.length > 4) {
+            halfmoves = Integer.parseInt(fen_array[4]);
+        }
+
+        if (fen_array.length > 5) {
+            fullmoves = Integer.parseInt(fen_array[5]);
         }
     }
 }

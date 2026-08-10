@@ -5,6 +5,7 @@ import src.game.MoveGenerator;
 import src.game.MoveHandler;
 import src.game.Zobrist;
 import src.utils.MoveList;
+import src.utils.Logger;
 
 public class Uci {
     
@@ -154,75 +155,80 @@ public class Uci {
         }
 
         // Passant Rights
-
         if (BitBoard.passant_rights != BitBoard.NO_PASSANT) {
             fen += " " + squareToAlgebraic(BitBoard.passant_rights) + " ";
         } else {
             fen += " - ";
         }
 
+        // Halfmove Clock
+        fen += BitBoard.halfmoves + " ";
+        
+        // Fullmove Clock
+        fen += BitBoard.fullmoves;
+
         return fen;
     }
 
     public static void printBitBoard(long bitboard) {
-        System.out.println("    a b c d e f g h");
-        System.out.println();
+        Logger.outln("    a b c d e f g h");
+        Logger.outln();
 
         for (int i = 7; i >= 0; i--) {
-            System.out.print(i + 1 + "   ");
+            Logger.out(i + 1 + "   ");
 
             for (int j = 0; j < 8; j++) {
                 int square = (i << 3) | j;
                 if ((bitboard & (1L << square)) != 0) {
-                    System.out.print("1 ");
+                    Logger.out("1 ");
                 } else {
-                    System.out.print(". ");
+                    Logger.out(". ");
                 }
             }
 
-            System.out.println();
+            Logger.outln();
         }
     }
 
     public static void printBoard() {
-        System.out.println("    a b c d e f g h");
-        System.out.println();
+        Logger.outln("    a b c d e f g h");
+        Logger.outln();
 
         for (int i = 7; i >= 0; i--) {
-            System.out.print(i + 1 + "   ");
+            Logger.out(i + 1 + "   ");
 
             for (int j = 0; j < 8; j++) {
                 int piece_index = BitBoard.getPieceAt(i << 3 | j);
                 char piece_char = (piece_index != BitBoard.NO_PIECE) ? PIECE_CHARS[piece_index] : '.';
                 
-                System.out.print(piece_char + " ");
+                Logger.out(piece_char + " ");
             }
 
-            System.out.println();
+            Logger.outln();
         }
 
-        System.out.println();
-        System.out.println("hash: " + Long.toHexString(Zobrist.getZobristHash()));
-        System.out.println("fen: " + getCurrentFen());
+        Logger.outln();
+        Logger.outln("hash: " + Long.toHexString(Zobrist.getZobristHash()));
+        Logger.outln("fen: " + getCurrentFen());
     }
 
     public static void printBoardIndexes() {
-        System.out.println("    a  b  c  d  e  f  g  h");
-        System.out.println();
+        Logger.outln("    a  b  c  d  e  f  g  h");
+        Logger.outln();
 
         for (int i = 7; i >= 0; i--) {
-            System.out.print(i + 1 + "   ");
+            Logger.out(i + 1 + "   ");
 
             for (int j = 0; j < 8; j++) {
                 int square = (i << 3) | j;
                 if (square < 10) {
-                    System.out.print(" ");
+                    Logger.out(" ");
                 }
 
-                System.out.print(square + " ");
+                Logger.out(square + " ");
             }
 
-            System.out.println();
+            Logger.outln();
         }
     }
 }

@@ -1,8 +1,7 @@
 package src;
 
-import java.util.Scanner;
-
 import src.user.Command;
+import src.utils.Logger;
 import src.engine.Search;
 import src.game.BitBoard;
 import src.game.Precomputer;
@@ -15,16 +14,15 @@ public class Main {
         Zobrist.initZobristTable();
         Search.initSearchTables();
 
-        System.out.println("Scoria v4.4.6");
-
-        Scanner scanner = new Scanner(System.in);
-
+        Logger.outln("Scoria v4.4.7");
+        
         String input_command = "";
         while (!input_command.equals("quit")) {
-            input_command = scanner.nextLine();
+            input_command = Logger.in();
             Command.parseCommand(input_command);
         }
 
-        scanner.close();
+        Logger.close();
     }
 }
+

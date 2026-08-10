@@ -52,7 +52,8 @@ public class MoveHandler {
             BitBoard.color_bitboards[turn ^ 1] &= ~ep_mask;
             BitBoard.occupancy_bitboard &= ~ep_mask;
         }
-
+        
+        // Update Stack
         GameStack.push(
             move, 
             turn, 
@@ -62,8 +63,16 @@ public class MoveHandler {
             old_hash,
             Evaluator.getMGEval(),
             Evaluator.getEGEval(),
-            Evaluator.getPhase()
+            Evaluator.getPhase(),
+            BitBoard.halfmoves
         );
+
+        // Advance Halfmove Clock
+        if (capture == BitBoard.NO_PIECE && (piece & BitBoard.PIECE_MASK) != BitBoard.PAWN) {
+            BitBoard.halfmoves++;
+        } else {
+            BitBoard.halfmoves = 0;
+        }
 
         // Update Evaluation
         Evaluator.updateEvaluation(move);
@@ -148,10 +157,10 @@ public class MoveHandler {
             BitBoard.castle_rights &= ~BitBoard.BLACK_QUEEN_ROOK_MASK;
         }
         if (origin == MoveGenerator.SQUARE_E1) {
-            BitBoard.castle_rights &= ~BitBoard.WHITE_KING_CASTLE_MASK;
+            BitBoard.castle_rights &= ~BitBoard.WHITE_CASTLE_MASK;
         }
         if (origin == MoveGenerator.SQUARE_E8) {
-            BitBoard.castle_rights &= ~BitBoard.BLACK_KING_CASTLE_MASK;
+            BitBoard.castle_rights &= ~BitBoard.BLACK_CASTLE_MASK;
         }
 
         // Flip Turn
@@ -235,13 +244,14 @@ public class MoveHandler {
 
         BitBoard.castle_rights = GameStack.peekCastlingRights();
         BitBoard.passant_rights = GameStack.peekPassantRights();
+        BitBoard.halfmoves = GameStack.peekHalfmoves();
 
         Zobrist.setZobristHash(GameStack.peekHash());
         Evaluator.setMGEval(GameStack.peekMGEval());
         Evaluator.setEGEval(GameStack.peekEGEval());
         Evaluator.setPhase(GameStack.peekPhase());
         GameStack.pop();
-
+        
         // Flip Turn
         BitBoard.moving_side ^= 1;
     }
@@ -256,7 +266,8 @@ public class MoveHandler {
             Zobrist.getZobristHash(),
             Evaluator.NULL_EVAL,
             Evaluator.NULL_EVAL,
-            Evaluator.NULL_PHASE
+            Evaluator.NULL_PHASE,
+            BitBoard.halfmoves
         );
 
         Zobrist.updateZobristHashNull();
@@ -267,7 +278,6 @@ public class MoveHandler {
 
     public static void undoNullMove() {
         BitBoard.passant_rights = GameStack.peekPassantRights();
-
         Zobrist.setZobristHash(GameStack.peekHash());
         GameStack.pop();
         BitBoard.moving_side ^= 1;

@@ -6,8 +6,8 @@ import src.game.MoveHandler;
 import src.utils.GameStack;
 
 public class Evaluator {
-    public static final int MATE_SCORE = 10000;
-    public static final int MATE_BOUND = 9000;
+    public static final int MATE_SCORE = 100000;
+    public static final int MATE_BOUND = 99000;
     public static final int DRAW_SCORE = 0;
     public static final int NULL_EVAL = -1;
     public static final int NULL_PHASE = -1;
@@ -18,8 +18,6 @@ public class Evaluator {
     private static final int QUEEN_PHASE = 4;
     private static final int TOTAL_PHASE = 24;
 
-    private static final int MG_INDEX = 0;
-    private static final int EG_INDEX = 1;
     private static final int FILE_E = 4;
     private static final int FILE_D = 3;
 
@@ -48,23 +46,27 @@ public class Evaluator {
         BitBoard.COL_H
     };
 
+    private static final int[] PHASE_TABLE = {
+        0, KNIGHT_PHASE, BISHOP_PHASE, ROOK_PHASE, QUEEN_PHASE, 0
+    };
+
     private static int mg_eval;
     private static int eg_eval;
     private static int phase;
 
     // Texel's Tuning Method
 
-    public static int MISSING_PAWN = -30;
-    public static int UNCASTLED_KING = -47;
-    public static int BISHOP_MG = 47;
-    public static int BISHOP_EG = 61;
-    public static int ROOK_OPEN = 46;
-    public static int ROOK_SEMI = 27;
-    public static int ISOLATED_PAWN = -15;
-    public static int DOUBLED_PAWN = -24;
+    public static final int MISSING_PAWN = -30;
+    public static final int UNCASTLED_KING = -47;
+    public static final int BISHOP_MG = 47;
+    public static final int BISHOP_EG = 61;
+    public static final int ROOK_OPEN = 46;
+    public static final int ROOK_SEMI = 27;
+    public static final int ISOLATED_PAWN = -15;
+    public static final int DOUBLED_PAWN = -24;
 
-    public static int[] PASSED_MG = {0, -21, -31, -16, -6, 27, 10, 0};
-    public static int[] PASSED_EG = {0, 17, 24, 44, 68, 111, 128, 0};
+    public static final int[] PASSED_MG = {0, -21, -31, -16, -6, 27, 10, 0};
+    public static final int[] PASSED_EG = {0, 17, 24, 44, 68, 111, 128, 0};
 
     public static final int[] PIECE_VALUES = {
         65,    -65,
@@ -212,8 +214,13 @@ public class Evaluator {
     };
     
     public static boolean isThreeFoldRepetition(long hash) {
+        if (BitBoard.halfmoves < 4) {
+            return false;
+        }
+
         int count = 1;
-        for (int i = GameStack.size() - 2; i >= 0; i--) {
+        int limit = Math.max(0, GameStack.size() - BitBoard.halfmoves);
+        for (int i = GameStack.size() - 2; i >= limit; i -= 2) {
             if (GameStack.getHashAt(i) == hash) {
                 count++;
 
@@ -221,50 +228,57 @@ public class Evaluator {
                     return true;
                 }
             }
-
-            if (GameStack.getCapturedAt(i) != BitBoard.NO_PIECE) {
-                return false;
-            }
-
-            int piece = (GameStack.getMoveAt(i) >> 12) & MoveHandler.PIECE_MASK;
-            if (piece == BitBoard.PAWN) {
-                return false;
-            }
         }
 
         return false;
     }
 
-    public static boolean isCycle(long hash, int ply) {
-        int root = GameStack.size() - ply;
-
-        for (int i = GameStack.size() - 2; i >= root; i--) {
-            if (GameStack.getHashAt(i) == hash) {
-                return true;
-            }
-
-            if (GameStack.getCapturedAt(i) != BitBoard.NO_PIECE) {
-                return false;
-            }
-
-            int piece = (GameStack.getMoveAt(i) >> 12) & MoveHandler.PIECE_MASK;
-            if (piece == BitBoard.PAWN) {
-                return false;
-            }
-        }
-
-        return false;
+    public static boolean isFiftyMoves() {
+        return BitBoard.halfmoves >= 100;
     }
 
-    public static int getMateScore(int turn, int ply) {
-        int square = Long.numberOfTrailingZeros(
-            BitBoard.piece_bitboards[BitBoard.KING | turn]
-        );
-
-        if (MoveGenerator.isUnderAttack(square, turn)) {
-            return -MATE_SCORE + ply;
+    public static boolean isInsufficientMaterial() {
+        // General Material
+        if (BitBoard.piece_bitboards[BitBoard.WHITE_PAWN] != 0
+            || BitBoard.piece_bitboards[BitBoard.WHITE_ROOK] != 0
+            || BitBoard.piece_bitboards[BitBoard.WHITE_QUEEN] != 0
+            || BitBoard.piece_bitboards[BitBoard.BLACK_PAWN] != 0
+            || BitBoard.piece_bitboards[BitBoard.BLACK_ROOK] != 0
+            || BitBoard.piece_bitboards[BitBoard.BLACK_QUEEN] != 0) {
+            return false;
         }
-        return DRAW_SCORE;
+
+        // Bishop Pair
+        boolean whitePair = (BitBoard.piece_bitboards[BitBoard.WHITE_BISHOP] & BitBoard.LIGHT_SQUARES) != 0
+            && (BitBoard.piece_bitboards[BitBoard.WHITE_BISHOP] & BitBoard.DARK_SQUARES) != 0;
+        boolean blackPair = (BitBoard.piece_bitboards[BitBoard.BLACK_BISHOP] & BitBoard.LIGHT_SQUARES) != 0
+            && (BitBoard.piece_bitboards[BitBoard.BLACK_BISHOP] & BitBoard.DARK_SQUARES) != 0;
+
+        if (whitePair || blackPair) {
+            return false;
+        }
+
+        int w_knights = Long.bitCount(BitBoard.piece_bitboards[BitBoard.WHITE_KNIGHT]);
+        int b_knights = Long.bitCount(BitBoard.piece_bitboards[BitBoard.BLACK_KNIGHT]);
+        int w_bishops = Long.bitCount(BitBoard.piece_bitboards[BitBoard.WHITE_BISHOP]);
+        int b_bishops = Long.bitCount(BitBoard.piece_bitboards[BitBoard.BLACK_BISHOP]);
+
+        // 3 Minor Pieces
+        if (w_knights + w_bishops >= 3 || b_knights + b_bishops >= 3) {
+            return false;
+        }
+
+        // Knight Bishop
+        if (w_bishops >= 1 && w_knights >= 1
+            || b_bishops >= 1 && b_knights >= 1) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public static int getMateScore(int ply) {
+        return -MATE_SCORE + ply;
     }
 
     public static int getMGWeights(int piece, int square) {
@@ -283,17 +297,6 @@ public class Evaluator {
         }
     }
 
-    // FIXME: Could use an array instead
-    private static int getPiecePhase(int piece) {
-        switch (piece & BitBoard.PIECE_MASK) {
-            case BitBoard.KNIGHT -> { return KNIGHT_PHASE; }
-            case BitBoard.BISHOP -> { return BISHOP_PHASE; }
-            case BitBoard.ROOK   -> { return ROOK_PHASE; }
-            case BitBoard.QUEEN  -> { return QUEEN_PHASE; }
-            default -> { return 0; }
-        }
-    }
-
     public static void manualEvaluation() {
         mg_eval = 0;
         eg_eval = 0;
@@ -307,7 +310,7 @@ public class Evaluator {
 
                 mg_eval += PIECE_VALUES[i] + getMGWeights(i, square);
                 eg_eval += PIECE_VALUES[i] + getEGWeights(i, square);
-                phase += getPiecePhase(i);
+                phase += PHASE_TABLE[(i & BitBoard.PIECE_MASK) >> 1];
 
                 bitboard &= bitboard - 1;
             }
@@ -328,7 +331,7 @@ public class Evaluator {
         if (capture != BitBoard.NO_PIECE) {
             mg_eval -= PIECE_VALUES[capture] + getMGWeights(capture, target);
             eg_eval -= PIECE_VALUES[capture] + getEGWeights(capture, target);
-            phase -= getPiecePhase(capture);
+            phase -= PHASE_TABLE[(capture & BitBoard.PIECE_MASK) >> 1];
         }
 
         // Passant
@@ -347,7 +350,7 @@ public class Evaluator {
             mg_eval += PIECE_VALUES[p_piece] + getMGWeights(p_piece, target);
             eg_eval += PIECE_VALUES[p_piece] + getEGWeights(p_piece, target);
 
-            phase += getPiecePhase(p_piece);
+            phase += PHASE_TABLE[(p_piece & BitBoard.PIECE_MASK) >> 1];
         }
 
         // Castling
@@ -375,7 +378,7 @@ public class Evaluator {
         }
     }
 
-    private static int[] getPawnEval(int side) {
+    private static long getPawnEval(int side) {
         long m_pawns = BitBoard.piece_bitboards[BitBoard.PAWN | side];
         long pawns = m_pawns;
         int mg = 0;
@@ -418,10 +421,10 @@ public class Evaluator {
             pawns &= pawns - 1;
         }
 
-        return new int[] {mg, eg};
+        return (long) mg << 32| (eg & 0xFFFFFFFFL);
     }
 
-    private static int[] getBasicPieceEval(int side) {
+    private static long getBasicPieceEval(int side) {
         int mg = 0;
         int eg = 0;
 
@@ -453,7 +456,7 @@ public class Evaluator {
             eg += BISHOP_EG;
         }
 
-        return new int[] {mg, eg};
+        return (long) mg << 32 | (eg & 0xFFFFFFFFL);
     }
 
     private static int getKingSafetyMG(int side) {
@@ -489,16 +492,16 @@ public class Evaluator {
         int eg = eg_eval;
 
         // Pawn Scoring
-        int[] wp_eval = getPawnEval(BitBoard.WHITE);
-        int[] bp_eval = getPawnEval(BitBoard.BLACK);
-        mg += wp_eval[MG_INDEX] - bp_eval[MG_INDEX];
-        eg += wp_eval[EG_INDEX] - bp_eval[EG_INDEX];
+        long wp_eval = getPawnEval(BitBoard.WHITE);
+        long bp_eval = getPawnEval(BitBoard.BLACK);
+        mg += (int) (wp_eval >>> 32) - (int) (bp_eval >>> 32);
+        eg += (int) wp_eval - (int) bp_eval;
 
         // Rooks and Bishops
-        int[] w_eval = getBasicPieceEval(BitBoard.WHITE);
-        int[] b_eval = getBasicPieceEval(BitBoard.BLACK);
-        mg += w_eval[MG_INDEX] - b_eval[MG_INDEX];
-        eg += w_eval[EG_INDEX] - b_eval[EG_INDEX];
+        long w_eval = getBasicPieceEval(BitBoard.WHITE);
+        long b_eval = getBasicPieceEval(BitBoard.BLACK);
+        mg += (int) (w_eval >>> 32) - (int) (b_eval >>> 32);
+        eg += (int) w_eval - (int) b_eval;
 
         // King Pawn Shield
         mg += getKingSafetyMG(BitBoard.WHITE);
@@ -510,6 +513,11 @@ public class Evaluator {
         // Mobility
         eval += MoveGenerator.getMobility(BitBoard.WHITE);
         eval -= MoveGenerator.getMobility(BitBoard.BLACK);
+
+        // Fifty Move Tapering
+        if (Math.abs(eval) < MATE_BOUND && BitBoard.halfmoves > 80) {
+            eval = eval * (100 - BitBoard.halfmoves) / 20;
+        }
 
         return (side == BitBoard.WHITE) ? eval : -eval;
     }

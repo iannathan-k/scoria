@@ -1,92 +1,100 @@
 package src.engine;
 
+import java.util.Arrays;
+
 import src.game.BitBoard;
 import src.game.MoveGenerator;
 import src.game.MoveHandler;
-import src.game.Precomputer;
 import src.game.Zobrist;
 import src.user.Uci;
 import src.utils.GameStack;
 import src.utils.MoveList;
+import src.utils.Logger;
 
 public class Search {
-
-    public static final int MAX_TIME = Integer.MAX_VALUE;
-    public static final int MAX_DEPTH = Integer.MAX_VALUE;
     public static final int NULL_SCORE = Integer.MIN_VALUE;
+    public static final int MAX_TIME = Integer.MAX_VALUE;
+    public static final int MAX_DEPTH = 245;
+    public static final int MAX_PLY = 256;
 
     public static final int FIRST_KILLER = 0;
     public static final int SECOND_KILLER = 1;
+    public static final int TOFROM_MASK = 0xFFF;
+    public static final int MAX_LEGALINDEX = 63;
 
     private static final int INFINITY = 1 << 30;
-    public static final int TOFROM_MASK = 0xFFF;
     private static final int MAX_HISTORY = 16384;
     private static final int CONT_SIZE = 768;
-    public static final int MAX_PLY = 64;
+    private static final int ROOT_PLY = 0;
 
     public static final int[][] HISTORY_TABLE = new int[2][TOFROM_MASK];
     public static final int[][] KILLER_TABLE = new int[MAX_PLY][2];
     public static final int[][] CMH_TABLE = new int[CONT_SIZE][CONT_SIZE];
     public static final int[][] FMH_TABLE = new int[CONT_SIZE][CONT_SIZE];
-    // public static final int[] EXCLUDED_TABLE = new int[MAX_PLY];
     public static final int[][][] CAPTURE_TABLE = new int[6][6][64];
+    public static final int[][] LMR_TABLE = new int[MAX_PLY][MAX_LEGALINDEX + 1];
 
     private static final MoveList[] MOVE_LISTS = new MoveList[MAX_PLY];
     private static final int[][] SEARCHED_QUIETS = new int[MAX_PLY][256];
     private static final int[][] SEARCHED_CAPTURES = new int[MAX_PLY][256];
     private static final int[] SEE_GAIN = new int[32];
 
-    private static long cancel_time;
-    private static long node_count;
+    private static long nodes;
 
-    // FIXME: Lazily implemented
-    // FIXME: Add can return, to break when finding mate or using book in actual games
-    // FIXME: Only break when we are giving checkmate, as opponent may miss it, which we want to keep playing in
-    public static void iterativeDeepener(int max_depth, int max_time) {
+    public static void iterativeDeepener() {
         int start_alpha = -INFINITY;
         int start_beta = INFINITY;
         
-        int current_depth = 0;
-        long start = System.currentTimeMillis();
+        int current_depth = 1;
+        nodes = 0;
 
-        cancel_time = start + max_time;
-        node_count = 0;
+        while (!Timer.hitSoftLimit(current_depth)) {
+            int eval = negascout(current_depth, ROOT_PLY, start_alpha, start_beta, BitBoard.moving_side);
 
-        while (current_depth < max_depth && System.currentTimeMillis() < cancel_time) {
-            current_depth++;
-            int eval = negascout(current_depth, 0, start_alpha, start_beta, BitBoard.moving_side);
-
+            // Hard Time Limit Hit
             if (eval == NULL_SCORE) {
                 break;
             }
 
-            // Finish Aspiration Windows
-            if (eval <= start_alpha || eval >= start_beta) {
-                // FIXME: Remove Later
-                System.out.println("RESTART");
+            if (eval <= start_alpha) {
                 start_alpha = -INFINITY;
+                continue;
+            }
+            if (eval >= start_beta) {
                 start_beta = INFINITY;
-                current_depth--;
                 continue;
             }
 
             start_alpha = eval - 70;
             start_beta = eval + 70;
 
-            System.out.println(
+            String score_str = 
+                (eval > Evaluator.MATE_BOUND) ? "mate " + (Evaluator.MATE_SCORE - eval + 1) / 2
+                : (eval < -Evaluator.MATE_BOUND) ? "mate " + (-Evaluator.MATE_SCORE - eval) / 2
+                : "cp " + eval;
+
+            Logger.outln(
                 "info depth " + current_depth +
-                " score cp " + eval +
-                " nodes " + node_count +
-                " nps " + (node_count * 1000 / (System.currentTimeMillis() - start + 1)) +
+                " score " + score_str +
+                " nodes " + nodes +
+                " nps " + (nodes * 1000 / (Timer.elapsed() + 1)) +
                 " hashfull " + Transposition.countHashFull() +
-                " time " + (System.currentTimeMillis() - start) +
+                " time " + Timer.elapsed() +
                 " pv " + Uci.moveListToUciString(collectPV(current_depth))
             );
 
             Transposition.nextGeneration();
+            current_depth++;
         }
 
-        System.out.println("bestmove " + Uci.moveListToUciString(collectPV(1)));
+        MoveList pv = collectPV(2);
+        Logger.out("bestmove " + Uci.moveToUci(pv.getMove(0)));
+
+        String ponder_str = (Timer.doPonder() && pv.size() > 1) 
+            ? " ponder " + Uci.moveToUci(pv.getMove(1)) 
+            : "";
+            
+        Logger.outlnn(ponder_str);
     }
 
     private static MoveList collectPV(int depth) {
@@ -96,7 +104,8 @@ public class Search {
         for (int i = 0; i < depth; i++) {
             long hash = Zobrist.getZobristHash();
 
-            if (!Transposition.doesExist(hash)) {
+            int tt_index = Transposition.probe(hash);
+            if (tt_index == Transposition.NULL_ENTRY) {
                 break;
             }
 
@@ -112,11 +121,21 @@ public class Search {
                 break;
             }
 
-            if (i > 0 && Evaluator.isThreeFoldRepetition(hash)) {
-                break;
+            if (i > 0) {
+                if (Evaluator.isThreeFoldRepetition(hash)) {
+                    break;
+                }
+
+                if (Evaluator.isFiftyMoves()) {
+                    break;
+                }
+
+                if (Evaluator.isInsufficientMaterial()) {
+                    break;
+                }
             }
 
-            int move = Transposition.getBestMove(hash);
+            int move = Transposition.getBestMove(tt_index);
             pv.add(move);
 
             seen[i] = hash;
@@ -134,14 +153,50 @@ public class Search {
     public static void initSearchTables() {
         for (int i = 0; i < MAX_PLY; i++) {
             MOVE_LISTS[i] = new MoveList();
-            // EXCLUDED_TABLE[i] = MoveHandler.NULL_MOVE;
             KILLER_TABLE[i][FIRST_KILLER] = MoveHandler.NULL_MOVE;
             KILLER_TABLE[i][SECOND_KILLER] = MoveHandler.NULL_MOVE;
             MovePicker.BADNOISY_LISTS[i] = new MoveList();
         }
+
+        for (int depth = 1; depth < 64; depth++) {
+            for (int legal_count = 1; legal_count < 64; legal_count++) {
+
+                double r = 0.93 + Math.log(depth) * Math.log(legal_count) / 2.7;
+                int reduction = (int) r;
+                
+                reduction = Math.max(0, reduction);
+                reduction = Math.min(reduction, depth - 2);
+
+                LMR_TABLE[depth][legal_count] = reduction;
+            }
+        }
     }
 
-    public static int see(int move) {
+    public static void clearHeuristics() {
+        for (int[] arr : HISTORY_TABLE) {
+            Arrays.fill(arr, 0);
+        }
+
+        for (int[] arr : KILLER_TABLE) {
+            Arrays.fill(arr, MoveHandler.NULL_MOVE);
+        }
+
+        for (int[] arr : CMH_TABLE) {
+            Arrays.fill(arr, 0);
+        }
+
+        for (int[] arr : FMH_TABLE) {
+            Arrays.fill(arr, 0);
+        }
+
+        for (int[][] row : CAPTURE_TABLE) {
+            for (int[] col : row) {
+                Arrays.fill(col, 0);
+            }
+        }
+    }
+
+    public static int see(int move) { 
         int origin = (move >> 6) & MoveHandler.POSITION_MASK;
         int target = move & MoveHandler.POSITION_MASK;
         int piece = (move >> 12) & MoveHandler.PIECE_MASK;
@@ -153,16 +208,21 @@ public class Search {
         long occupancy = BitBoard.occupancy_bitboard;
         int turn = piece & BitBoard.COLOR_MASK;
 
-        int captured_value;
+        int captured_value = 0;
         if ((move & MoveHandler.PASSANT_FLAG) != 0) {
-            captured_value = Evaluator.PIECE_VALUES[BitBoard.WHITE_PAWN];
+            captured_value = 65;
 
             int ep_square = (turn == BitBoard.WHITE)
                 ? target + BitBoard.SOUTH : target + BitBoard.NORTH;
 
             occupancy &= ~(1L << ep_square);
-        } else {
+        } else if (captured != BitBoard.NO_PIECE) {
             captured_value = Evaluator.PIECE_VALUES[captured & BitBoard.PIECE_MASK];
+        }
+
+        if ((move & MoveHandler.PROMOTED_MASK) != 0) {
+            int promoted_piece = (move & MoveHandler.PROMOTED_MASK) >> 16;
+            captured_value += Evaluator.PIECE_VALUES[promoted_piece & BitBoard.PIECE_MASK] - 65;
         }
         
         SEE_GAIN[0] = captured_value;
@@ -209,6 +269,10 @@ public class Search {
     private static int quiescence(int alpha, int beta, int ply, int turn) {
         int static_eval = Evaluator.getRelativeEvaluation(turn);
 
+        if (ply >= MAX_PLY) {
+            return static_eval;
+        }
+
         if (static_eval >= beta) {
             return static_eval;
         }
@@ -231,8 +295,15 @@ public class Search {
                 captured = BitBoard.PAWN;
             }
 
-            // FIXME: Tune Margin
-            if (static_eval + Evaluator.PIECE_VALUES[captured & BitBoard.PIECE_MASK] + 201 < alpha) {
+            int delta = 0;
+            if ((move & MoveHandler.PROMOTED_MASK) != 0) {
+                int promoted = (move & MoveHandler.PROMOTED_MASK) >> 16;
+                delta += Evaluator.PIECE_VALUES[promoted & BitBoard.PIECE_MASK] - 65;
+            }
+            if (captured != BitBoard.NO_PIECE) {
+                delta += Evaluator.PIECE_VALUES[captured & BitBoard.PIECE_MASK];
+            }
+            if (static_eval + delta + 201 < alpha) {
                 continue;
             }
 
@@ -243,6 +314,7 @@ public class Search {
                 MoveHandler.undoMove();
                 continue;
             }
+            nodes++;
 
             int eval = -quiescence(-beta, -alpha, ply + 1, turn ^ 1);
 
@@ -262,111 +334,110 @@ public class Search {
     private static int negascout(int depth, int ply, int alpha, int beta, int turn) {
         long board_hash = Zobrist.getZobristHash();
 
-        // FIXME: Implement fifty move rule
-        // FIXME: Implement insufficient material
-        if (ply > 0) {
-            // if (alpha < Evaluator.DRAW_SCORE && Evaluator.isCycle(board_hash, ply)) {
-            //     alpha = Evaluator.getDrawScore(node_count);
-
-            //     if (alpha >= beta) {
-            //         return alpha;
-            //     }
-            // } 
-
-            if (Evaluator.isThreeFoldRepetition(board_hash)) {
-                return Evaluator.getDrawScore(node_count);
+        if (ply > ROOT_PLY) {
+            if (ply >= MAX_PLY) {
+                return Evaluator.getRelativeEvaluation(turn);
             }
 
-            // Mate Distance Pruning
-            // alpha = Math.max(alpha, -Evaluator.MATE_SCORE + ply);
-            // beta = Math.min(beta, Evaluator.MATE_SCORE - ply - 1);
-            // if (alpha >= beta) {
-            //     return alpha;
-            // }
+            // Fifty Move Rule
+            if (Evaluator.isFiftyMoves()) {
+                if (!MoveGenerator.isKingInCheck(turn)) {
+                    return Evaluator.getDrawScore(nodes);
+                }
+
+                // Checkmate Edgecase
+                boolean has_move = false;
+                MovePicker.initNode(ply);
+                int move;
+                while ((move = MovePicker.nextMove(MOVE_LISTS[ply], ply, turn)) != MoveHandler.NULL_MOVE) {
+                    MoveHandler.doMove(move);
+                    has_move = !MoveGenerator.isKingInCheck(turn);
+                    MoveHandler.undoMove();
+
+                    if (has_move) {
+                        break;
+                    }
+                }
+
+                return has_move ? Evaluator.getDrawScore(nodes) : Evaluator.getMateScore(ply);
+            }
+            
+            // Threefold Repetition
+            if (Evaluator.isThreeFoldRepetition(board_hash)) {
+                return Evaluator.getDrawScore(nodes);
+            }
+
+            // Insufficient Material
+            if (Evaluator.isInsufficientMaterial() && !MoveGenerator.isKingInCheck(turn)) {
+                return Evaluator.getDrawScore(nodes);
+            }
         }
 
-        // boolean is_singular = EXCLUDED_TABLE[ply] != MoveHandler.NULL_MOVE;
         boolean is_pv = beta - alpha > 1;
         
         // Transposition Probe
-        boolean tt_hit = Transposition.doesExist(board_hash);
-        int tt_node = tt_hit ? Transposition.getNodeType(board_hash) : Transposition.NULL_NODE;
-        int tt_score = tt_hit ? Transposition.getScore(board_hash, ply) : NULL_SCORE;
+        int tt_index = Transposition.probe(board_hash);
+        boolean tt_hit = tt_index != Transposition.NULL_ENTRY;
+        int tt_node = tt_hit ? Transposition.getNodeType(tt_index) : Transposition.NULL_NODE;
+        int tt_score = tt_hit ? Transposition.getScore(tt_index, ply) : NULL_SCORE;
 
         // Transposition Prune
         if (tt_hit 
             && !is_pv 
-            && Transposition.getDepth(board_hash) >= depth
+            && Transposition.getDepth(tt_index) >= depth
             && Transposition.isInformative(tt_node, tt_score, beta)) {
 
             return tt_score;
         }
 
-        if (depth == 0) {
-            node_count++;
+        if (depth <= 0) {
             return quiescence(alpha, beta, ply, turn);
         }
         
         boolean in_check = MoveGenerator.isKingInCheck(turn);
         int static_eval = Evaluator.getRelativeEvaluation(turn);
 
-        // Correct Static Evaluation
-        // if (tt_hit 
-        //     && !in_check 
-        //     && Math.abs(tt_score) < Evaluator.MATE_BOUND
-        //     && Transposition.isInformative(tt_node, tt_score, static_eval)) {
-            
-        //     corr_eval = tt_score;
-        // }
-
-        // Internal Iterative Reduction
-        // if (depth > 5
-        //     && is_pv
-        //     && !Transposition.doesExist(board_hash)) {
-            
-        //     depth--;
-        // }
-
-        // // Razoring & Deep Razoring
+        // Razoring & Deep Razoring
         if (depth < 3
             && !in_check
             && !is_pv
-            && static_eval < alpha - 203 - 207 * depth * depth) {
+            && static_eval < alpha - 203 - 207 * depth * depth
+            && Math.abs(alpha) < Evaluator.MATE_BOUND) {
 
-            node_count++;
             return quiescence(alpha, beta, ply, turn);
         }
 
         // Reverse Futility Pruning
-        // FIXME: Maybe return static eval because we are already winning so much
         if (depth < 7
             && !in_check
             && !is_pv
-            && static_eval >= beta + 126 + 113 * depth) {
+            && static_eval >= beta + 126 + 113 * depth
+            && Math.abs(beta) < Evaluator.MATE_BOUND) {
 
-            node_count++;
             return quiescence(alpha, beta, ply, turn);
         }
 
         // Futility Pruning
         boolean is_futile = false;
         if (depth < 7
+            && !in_check
             && static_eval < alpha - 221 - 187 * depth
-            && !in_check) {
+            && Math.abs(beta) < Evaluator.MATE_BOUND
+            && Math.abs(alpha) < Evaluator.MATE_BOUND) {
 
             is_futile = true;
         }
         
         // Null Move Pruning
-        // FIXME: Takes longer to find mates
-        // FIXME: Maybe eval can come from the TT
         if (depth >= 3 
             && static_eval >= beta
             && !in_check
             && !is_pv
+            && Math.abs(beta) < Evaluator.MATE_BOUND
             && BitBoard.hasNonPawnPiece(turn)) {
 
-            int r = 4 + depth / 6;
+            int r = 3 + depth / 6;
+
             r = Math.min(r, depth);
                 
             MoveHandler.doNullMove();
@@ -376,7 +447,6 @@ public class Search {
             MoveHandler.undoNullMove();
             
             if (null_eval >= beta) {
-                node_count++;
                 return beta;
             }
         }
@@ -387,7 +457,7 @@ public class Search {
             && depth > 4
             && Math.abs(beta) < Evaluator.MATE_BOUND) {
 
-            int prob_beta = beta + 200;
+            int prob_beta = beta + 203;
 
             MovePicker.initQSNode(ply);
             int move;
@@ -398,6 +468,7 @@ public class Search {
                     MoveHandler.undoMove();
                     continue;
                 }
+                nodes++;
 
                 int prob_eval = -quiescence(-prob_beta, -prob_beta + 1, ply + 1, turn ^ 1);
 
@@ -408,7 +479,7 @@ public class Search {
                 MoveHandler.undoMove();
 
                 if (prob_eval >= prob_beta) {
-                    int score = (prob_eval > Evaluator.MATE_BOUND) ? prob_eval : prob_eval - 200;
+                    int score = (prob_eval > Evaluator.MATE_BOUND) ? prob_eval : prob_eval - 203;
 
                     Transposition.addTransposition(
                         board_hash,
@@ -423,14 +494,6 @@ public class Search {
                 }
             }
         }
-
-        // Internal Iterative Deepening
-        // if (depth > 5
-        //     && is_pv
-        //     && !Transposition.doesExist(board_hash)) {
-
-        //     negascout(depth - 2, ply, alpha, beta, turn);
-        // }
 
         int parent_alpha = alpha;
         int best_score = NULL_SCORE;
@@ -462,7 +525,8 @@ public class Search {
             if (depth <= 3
                 && is_quiet
                 && !in_check
-                && legal_count > 1) {
+                && legal_count > 1
+                && Math.abs(alpha) < Evaluator.MATE_BOUND) {
 
                 int history_score = HISTORY_TABLE[turn][move & TOFROM_MASK];
 
@@ -491,48 +555,6 @@ public class Search {
                 }
             }
 
-            // Late Move Pruning
-            // if (depth <= 3
-            //     && !in_check
-            //     && is_quiet
-            //     && legal_count > 3 + 2 * depth * depth) {
-                    
-            //     continue;
-            // }
-
-            // Singular Extensions
-            int extension = 0;
-            // if (depth > 5
-            //     && ply < 2 * depth
-            //     && move == Transposition.getBestMove(board_hash)
-            //     && EXCLUDED_TABLE[ply] == MoveHandler.NULL_MOVE
-            //     && Transposition.getDepth(board_hash) >= depth - 3
-            //     && !Transposition.isAlpha(board_hash)
-            //     && Math.abs(Transposition.getScore(board_hash, ply)) < Evaluator.MATE_BOUND) {
-
-            //     int singular_beta = Transposition.getScore(board_hash, ply) - 4 * depth;
-
-            //     EXCLUDED_TABLE[ply + 1] = move;
-
-            //     int singular_eval = negascout(depth / 2, ply + 1, singular_beta - 1, singular_beta, turn);
-
-            //     EXCLUDED_TABLE[ply + 1] = MoveHandler.NULL_MOVE;
-
-            //     if (singular_eval < singular_beta) {
-            //         extension = 1;
-            //     } 
-                
-            //     // else if (singular_beta >= beta) {
-
-            //     //     // Multicut
-            //     //     return singular_beta;
-            //     // } else if (Transposition.getScore(board_hash, ply) >= beta) {
-
-            //     //     // Negative Extensions
-            //     //     extension = -1;
-            //     // }
-            // }
-
             MoveHandler.doMove(move);
 
             // Verify Pseudo Legality
@@ -540,31 +562,25 @@ public class Search {
                 MoveHandler.undoMove();
                 continue;
             }
+            nodes++;
 
-            // Check Extenstions
-            // FIXME: Test whether this actually improves performance
-            // FIXME: Consider only extending when ply < depth or 2 * ply
-            boolean gives_check = MoveGenerator.isKingInCheck(turn ^ 1);
-            if (gives_check && ply < 2 * depth) {
+            int extension = 0;
+            if (in_check 
+                && ply > ROOT_PLY 
+                && ply < 2 * depth) {
+
                 extension = 1;
             }
-            
+
             // Late Move Reduction
-            // FIXME: Consider Precalculating the Logs
-            // FIXME: Don't reduce killers, captures, etc.
             int reduction = 0;
             if (depth > 2
                 && legal_count > 3
                 && is_quiet
                 && !in_check
-                && !gives_check) {
+                && Math.abs(alpha) < Evaluator.MATE_BOUND) {
 
-                double r = 0.8 + Math.log(depth) * Math.log(legal_count) / 4.0;
-
-                reduction = (int) r;
-
-                reduction = Math.max(0, reduction);
-                reduction = Math.min(reduction, depth - 2);
+                reduction = LMR_TABLE[depth][Math.min(legal_count, MAX_LEGALINDEX)];
             }
 
             // Null Window Search
@@ -587,7 +603,7 @@ public class Search {
             MoveHandler.undoMove();
             legal_count++;
 
-            if ((node_count & 2047) == 0 && System.currentTimeMillis() > cancel_time) {
+            if ((nodes & 2047) == 0 && Timer.hitHardLimit()) {
                 return NULL_SCORE;
             }
 
@@ -599,10 +615,6 @@ public class Search {
             alpha = Math.max(alpha, eval);
 
             if (alpha >= beta) {
-                // if (is_singular) {
-                //     break;
-                // }
-
                 if (is_quiet) {
                     int current = HISTORY_TABLE[turn][move & TOFROM_MASK];
                     int bonus = 300 * depth - 250;
@@ -708,14 +720,9 @@ public class Search {
         }
 
         // Checkmate & Stalemate Condition
-        // FIXME: Return draw score from here
         if (legal_count == 0) {
-            return Evaluator.getMateScore(turn, ply);
+            return in_check ? Evaluator.getMateScore(ply) : Evaluator.DRAW_SCORE;
         }
-
-        // if (is_singular) {
-        //     return best_score;
-        // }
 
         byte node_type = (best_score >= beta) ? Transposition.BETA_NODE
             : (best_score <= parent_alpha) ? Transposition.ALPHA_NODE
@@ -731,25 +738,5 @@ public class Search {
         );
 
         return best_score;
-    }
-
-    public static void main(String[] args) {
-
-        // BitBoard.initBoardByFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-        // BitBoard.initBoardByFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - ");
-        // BitBoard.initBoardByFen("8/7k/8/8/8/Q7/K7/8 w - - 0 1");
-        // BitBoard.initBoardByFen("8/7k/8/8/2K5/6Q1/8/8 b - - 5 3");
-        // BitBoard.initBoardByFen("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1");
-        // BitBoard.initBoardByFen("2r2rk1/1ppq2b1/1n6/1N1Ppp2/p7/Pn2BP2/1PQ1BP2/3RK2R w K - 0 23");
-        // BitBoard.initBoardByFen("6k1/b7/8/2q4R/8/8/8/K1Q5 w - - 0 1");
-        BitBoard.initBoardByFen("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10");
-        // BitBoard.initBoardByFen("8/6k1/8/4p3/Q2b4/2P5/1K6/3R4 w - - 0 1");
-
-        // BitBoard.initBoardByFen("4r3/6k1/6b1/3p4/4R3/3P4/1K3N2/8 w - - 0 1");
-        Precomputer.initAllMoveTables();
-        Zobrist.initZobristTable(); 
-        initSearchTables();
-
-        iterativeDeepener(Integer.MAX_VALUE, Integer.MAX_VALUE);
     }
 }

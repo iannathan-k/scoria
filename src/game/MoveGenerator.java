@@ -178,8 +178,6 @@ public class MoveGenerator {
         return noisy_list;
     }
 
-    // FIXME: Consider Promotion Moves
-    // FIXME: Consider Castling Moves
     public static void generateNoisyMoves(int color, MoveList move_list) {
         move_list.clear();
         
@@ -188,8 +186,16 @@ public class MoveGenerator {
 
         long left_capture = 0L;
         long right_capture = 0L;
+        long promo_push = 0L;
 
         if (color == BitBoard.WHITE) {
+            // Promotions
+            promo_push = 
+                (pawn_board << BitBoard.N_SHIFT) 
+                & ~BitBoard.occupancy_bitboard 
+                & BitBoard.ROW_8;
+
+
             left_capture = 
                 (pawn_board << BitBoard.NW_SHIFT) 
                 & BitBoard.color_bitboards[BitBoard.BLACK] 
@@ -230,6 +236,12 @@ public class MoveGenerator {
             }
                 
         } else {
+            // Promotion
+            promo_push = 
+                (pawn_board >>> BitBoard.S_SHIFT) 
+                & ~BitBoard.occupancy_bitboard 
+                & BitBoard.ROW_1;
+
             left_capture = 
                 (pawn_board >>> BitBoard.SW_SHIFT) 
                 & BitBoard.color_bitboards[BitBoard.WHITE] 
@@ -268,6 +280,17 @@ public class MoveGenerator {
                     );
                 }
             }
+        }
+
+        while (promo_push != 0L) {
+            int target = Long.numberOfTrailingZeros(promo_push);
+            int origin = (color == BitBoard.WHITE) ? target + BitBoard.SOUTH : target + BitBoard.NORTH;
+
+            int move = encodeMove(origin, target, BitBoard.PAWN | color);
+            move_list.add(move | (BitBoard.QUEEN + color << 16));
+            // Underpromotions are quiet moves
+
+            promo_push &= promo_push - 1;
         }
 
         while (left_capture != 0L) {
@@ -452,7 +475,7 @@ public class MoveGenerator {
 
             if (target >= SQUARE_A8 || target <= SQUARE_H1) {
                 int move = encodeMove(origin, target, BitBoard.PAWN | color);
-                move_list.add(move | (BitBoard.QUEEN + color << 16));
+                // Queens are noisy moves
                 move_list.add(move | (BitBoard.ROOK + color << 16));
                 move_list.add(move | (BitBoard.BISHOP + color << 16));
                 move_list.add(move | (BitBoard.KNIGHT + color << 16));
@@ -516,15 +539,16 @@ public class MoveGenerator {
         }
 
         // Castling
-        // FIXME: Could Remove more checks
         if (color == BitBoard.WHITE) {
-            if (!isUnderAttack(SQUARE_E1, BitBoard.WHITE)) {
+            if ((BitBoard.castle_rights & BitBoard.WHITE_CASTLE_MASK) != 0
+                && !isUnderAttack(SQUARE_E1, BitBoard.WHITE)) {
+                
                 if ((BitBoard.castle_rights & BitBoard.WHITE_KING_ROOK_MASK) != 0
                     && BitBoard.isEmpty(SQUARE_F1)
                     && BitBoard.isEmpty(SQUARE_G1)
                     && !isUnderAttack(SQUARE_F1, BitBoard.WHITE)
                     && !isUnderAttack(SQUARE_G1, BitBoard.WHITE)) {
-
+ 
                     int move = encodeMove(SQUARE_E1, SQUARE_G1, BitBoard.WHITE_KING, MoveHandler.CASTLE_FLAG);
                     move_list.add(move);
                 }
@@ -540,7 +564,9 @@ public class MoveGenerator {
                 }
             }
         } else {
-            if (!isUnderAttack(SQUARE_E8, BitBoard.BLACK)) {
+            if ((BitBoard.castle_rights & BitBoard.BLACK_CASTLE_MASK) != 0
+                && !isUnderAttack(SQUARE_E8, BitBoard.BLACK)) {
+                
                 if ((BitBoard.castle_rights & BitBoard.BLACK_KING_ROOK_MASK) != 0
                     && BitBoard.isEmpty(SQUARE_F8)
                     && BitBoard.isEmpty(SQUARE_G8)
