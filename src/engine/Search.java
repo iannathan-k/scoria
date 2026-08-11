@@ -39,9 +39,11 @@ public class Search {
     private static final int[][] SEARCHED_CAPTURES = new int[MAX_PLY][256];
     private static final int[] SEE_GAIN = new int[32];
 
+    public static volatile boolean is_searching;
     private static long nodes;
 
     public static void iterativeDeepener() {
+        is_searching = true;
         int start_alpha = -INFINITY;
         int start_beta = INFINITY;
         
@@ -95,6 +97,8 @@ public class Search {
             : "";
             
         Logger.outlnn(ponder_str);
+
+        is_searching = false;
     }
 
     private static MoveList collectPV(int depth) {

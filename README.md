@@ -56,15 +56,7 @@ Thank you to the team at [CCRL](https://computerchess.org.uk/) for testing engin
 
 ## Changelog
 
-Scoria v4.4.7
-1. Improved LMR Formula
-2. Improved Aspiration Windows
-3. Noisy Queen Promotions
-4. Protect Mate Scores
-5. Fifty Move Rule
-6. Insufficient Material
-7. Half And Full Moves
-8. Full UCI Support
-9. Advanced Time Management
+Scoria v4.4.8
+1. Thread Bug Fixes
 
 ##### Ian Nathan Kusmiantoro, 2026

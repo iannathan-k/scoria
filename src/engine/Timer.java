@@ -1,12 +1,12 @@
 package src.engine;
 
 public class Timer {
-    private static long start_time;
-    private static long hardstop_time;
-    private static long softstop_time;
-    private static int max_depth;
-    private static boolean abort_search;
+    private static volatile long start_time;
+    private static volatile long hardstop_time;
+    private static volatile long softstop_time;
+    private static volatile boolean abort_search;
 
+    private static int max_depth;
     private static boolean ponder =  false;
     private static int overhead = 0;
 
@@ -59,6 +59,10 @@ public class Timer {
 
     public static void abort() {
         abort_search = true;
+
+        while (Search.is_searching) {
+            Thread.onSpinWait();
+        }
     }
 
     public static boolean hitSoftLimit(int depth) {

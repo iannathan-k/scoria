@@ -15,6 +15,7 @@ public class Command {
     private static String[] p_args;
 
     private static void positionCommand(String args[]) {
+        Timer.abort();
         GameStack.clear();
         
         if (args[1].equals("startpos")) {
@@ -163,7 +164,7 @@ public class Command {
     }
 
     private static void uciCommand() {
-        Logger.outln("id name Scoria_v4.4.7");
+        Logger.outln("id name Scoria_v4.4.8");
         Logger.outln("id author iannathan-k (Ian Kusmiantoro)");
         Logger.outln();
         Logger.outln("option name Debug Log File type string default <empty>");
@@ -204,9 +205,10 @@ public class Command {
     }
 
     public static void newGameCommand() {
+        Timer.abort();
         Transposition.clearTranspositionTable();
-        GameStack.clear();
         Search.clearHeuristics();
+        GameStack.clear();
     }
 
     public static void parseCommand(String command) {
