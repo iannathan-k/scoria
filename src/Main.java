@@ -14,7 +14,7 @@ public class Main {
         Zobrist.initZobristTable();
         Search.initSearchTables();
 
-        Logger.outln("Scoria v4.4.8");
+        Logger.outln("Scoria v4.4.9");
         
         String input_command = "";
         while (!input_command.equals("quit")) {

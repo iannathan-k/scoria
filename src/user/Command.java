@@ -164,7 +164,7 @@ public class Command {
     }
 
     private static void uciCommand() {
-        Logger.outln("id name Scoria_v4.4.8");
+        Logger.outln("id name Scoria_v4.4.9");
         Logger.outln("id author iannathan-k (Ian Kusmiantoro)");
         Logger.outln();
         Logger.outln("option name Debug Log File type string default <empty>");

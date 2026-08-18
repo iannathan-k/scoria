@@ -40,8 +40,8 @@ public class Timer {
         int r_time = m_time + m_inc * mtg - overhead * mtg;
         r_time = Math.max(0, r_time);
 
-        // Optimal time is 2.5% Remaining time or 20% my time.
-        int soft = Math.min(r_time / 40, m_time / 5);
+        // Optimal time is 2.13% Remaining time or 20% my time.
+        int soft = Math.min(r_time / 47, m_time / 5);
 
         // Max time is 4x Optimal or 75% my time
         int hard = Math.min(4 * soft, m_time * 3 / 4);
